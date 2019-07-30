@@ -1,4 +1,3 @@
-var AuthnApiError = require('../errors/AuthnApiError');
 var ResultData = require('../ResultData');
 
 function doRequest(baseUrl, method, flowId, contentType, body) {
@@ -16,16 +15,7 @@ function doRequest(baseUrl, method, flowId, contentType, body) {
     credentials: 'include'
   }
   var url = baseUrl + FLOWS_ENDPOINT + flowId;
-  var jsonPromise = fetch(url, options);
-  var jsonData = jsonPromise.then(function (response) {
-    return response;
-  });
-  return Promise.all([jsonPromise, jsonData]).then(function (values) {
-    var response = values[0];
-    return Promise.resolve(new ResultData(response.status, values[1]));
-  }).catch(function (err) {
-    throw new AuthnApiError(err);
-  });
+  return fetch(url, options);
 }
 
 export function getFlow(baseUrl, flowId) {

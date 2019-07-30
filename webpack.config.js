@@ -12,8 +12,9 @@ const PATHS = {
 
 module.exports = {
   entry: {
-    entry: ['whatwg-fetch', path.join(PATHS.src, 'index')],
+    entry: ['@babel/polyfill','whatwg-fetch', path.join(PATHS.src, 'index')],
   } ,
+
   output: {
     path: PATHS.dist,
     filename: 'pf.authn-widget.js',
@@ -23,6 +24,7 @@ module.exports = {
     libraryTarget: 'umd'
   },
   devtool: isDevelopment && "source-map",
+  mode: !isDevelopment ? "production" : "development",
   devServer: {
     publicPath: '/',
     port: 3000,
