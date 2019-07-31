@@ -5,8 +5,8 @@
   "main": "./src/index.js",
   "scripts": {
     "start": "webpack-dev-server --config webpack.dev.js",
-    "build": "webpack --mode production --env.NODE_ENV=production --progress --profile --colors",
-    "build:dev": "webpack --env.NODE_ENV=dev --progress --profile --colors",
+    "build": "webpack --mode production  --progress --profile --colors",
+    "dev": "webpack --mode development --progress --profile --colors",
     "clean": "rimraf dist",
     "lint": "eslint ./src/**.js",
     "coverage": "jest --coverage --config=jest.config.js",
