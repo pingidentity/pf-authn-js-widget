@@ -1,8 +1,6 @@
 const path = require('path');
 const webpack = require('webpack');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
-const autoprefixer = require('autoprefixer');
 const isDevelopment = process.env.NODE_ENV !== 'production';
 // const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 const PATHS = {
@@ -25,7 +23,6 @@ module.exports = {
     libraryTarget: 'umd'
   },
   devtool: isDevelopment && "source-map",
-  mode: !isDevelopment ? "production" : "development",
   module: {
     rules: [
       { test: /\.handlebars$/, loader: "handlebars-loader" },
@@ -57,15 +54,6 @@ module.exports = {
           },
           {
             loader: "postcss-loader",
-            options: {
-              autoprefixer: {
-                browsers: ["last 2 versions"]
-              },
-              sourceMap: isDevelopment,
-              plugins: () => [
-                autoprefixer
-              ]
-            },
           },
           {
             loader: "sass-loader",
@@ -84,28 +72,6 @@ module.exports = {
               name: '[name].[ext]',
               outputPath: 'static/',
               useRelativePath: true,
-            }
-          },
-          {
-            loader: 'image-webpack-loader',
-            options: {
-              mozjpeg: {
-                progressive: true,
-                quality: 65
-              },
-              optipng: {
-                enabled: true,
-              },
-              pngquant: {
-                quality: '65-90',
-                speed: 4
-              },
-              gifsicle: {
-                interlaced: false,
-              },
-              webp: {
-                quality: 75
-              }
             }
           }
         ]
