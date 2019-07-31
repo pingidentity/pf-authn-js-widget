@@ -4,6 +4,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const autoprefixer = require('autoprefixer');
 const isDevelopment = process.env.NODE_ENV !== 'production';
+// const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 const PATHS = {
   dist: path.join(__dirname, 'dist'),
   node_modules: path.join(__dirname, 'node_modules'),
@@ -25,16 +26,6 @@ module.exports = {
   },
   devtool: isDevelopment && "source-map",
   mode: !isDevelopment ? "production" : "development",
-  devServer: {
-    publicPath: '/',
-    port: 3000,
-    contentBase: path.join(process.cwd(), 'dist'), // static file location
-    host: 'localhost',
-    historyApiFallback: true, // true for index.html upon 404, object for multiple paths
-    noInfo: false,
-    stats: 'minimal',
-    hot: true  // hot module replacement. Depends on HotModuleReplacementPlugin
-  },
   module: {
     rules: [
       { test: /\.handlebars$/, loader: "handlebars-loader" },
@@ -131,17 +122,6 @@ module.exports = {
       filename: "[name]-styles.css",
       chunkFilename: "[id].css"
     }),
-
-    new HtmlWebpackPlugin({
-      title: 'My awesome service',
-      template: './src/index.handlebars',
-      minify: !isDevelopment && {
-        html5: true,
-        collapseWhitespace: true,
-        caseSensitive: true,
-        removeComments: true,
-        removeEmptyElements: true
-      },
-    })
+    // new BundleAnalyzerPlugin(),
   ]
 };

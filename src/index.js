@@ -10,8 +10,9 @@ class AuthnWidget {
    * @param {string} baseUrl Required: PingFederate Base Url
    * @param {string} flowId initial flow ID
    */
-  constructor(baseUrl, flowId) {
+  constructor(baseUrl, divId, flowId) {
     this.baseUrl = baseUrl;
+    this.divId = divId;
     this.flowId = flowId || this.getBrowserFlowId();
     if (!baseUrl) {
       throw new Error('Must provide base Url for PingFederate in the constructor');
