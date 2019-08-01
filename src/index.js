@@ -1,7 +1,8 @@
 const AuthnApiError = require('./errors/AuthnApiError');
 const fetchUtil = require('./utils/fetchUtil');
 const queryString = require('query-string');
-require('regenerator-runtime/runtime');
+require('regenerator-runtime/runtime'); //for async await
+const Handlebars = require('handlebars/runtime');
 
 class AuthnWidget {
 
@@ -18,6 +19,10 @@ class AuthnWidget {
     if (!baseUrl) {
       throw new Error('Must provide base Url for PingFederate in the constructor');
     }
+
+    Handlebars.registerHelper("checkedIf", function (condition) {
+      return (condition) ? "checked" : "";
+    });
   }
 
   async init() {
@@ -30,8 +35,8 @@ class AuthnWidget {
         try {
           let json = await result.json();
           console.log(json);
-          const template = require('./partials/header.handlebars');
-          document.getElementById(this.divId).innerHTML = template;
+          const template = require('./partials/username_password_required.handlebars');
+          document.getElementById(this.divId).innerHTML =  template(json);
         }
         catch (e) {
           throw e;//new AuthnApiError(e);

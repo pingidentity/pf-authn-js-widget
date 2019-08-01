@@ -48,9 +48,6 @@ module.exports = (env, argv) => {
               }
             },
             {
-              loader: "postcss-loader",
-            },
-            {
               loader: "sass-loader",
               options: {
                 sourceMap: isDevelopment
