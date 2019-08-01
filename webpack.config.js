@@ -11,7 +11,7 @@ const PATHS = {
 module.exports = (env, argv) => {
   const isDevelopment = argv.mode === 'development';
   return {
-    entry: ['@babel/polyfill','whatwg-fetch', path.join(PATHS.src, 'index')],
+    entry: ['whatwg-fetch', path.join(PATHS.src, 'index')],
     output: {
       path: PATHS.dist,
         filename: 'pf.authn-widget.js',
@@ -20,7 +20,7 @@ module.exports = (env, argv) => {
         sourceMapFilename: 'pf.authn-widget.map',
         libraryTarget: 'umd'
     },
-    devtool: isDevelopment && "source-map",
+    devtool: "source-map",
     module: {
       rules: [
         { test: /\.handlebars$/, loader: "handlebars-loader" },
@@ -28,11 +28,8 @@ module.exports = (env, argv) => {
           test: /\.js$/,
           exclude: /(node_modules|bower_components)/,
           use: {
-            loader: 'babel-loader',
-            options: {
-              presets: ['@babel/preset-env']
-            }
-          }
+            loader: 'babel-loader'
+          },
         },
         {
           test: /\.js$/,

@@ -1,7 +1,7 @@
 const AuthnApiError = require('./errors/AuthnApiError');
 const fetchUtil = require('./utils/fetchUtil');
 const queryString = require('query-string');
-
+require('regenerator-runtime/runtime');
 
 class AuthnWidget {
 
@@ -13,6 +13,7 @@ class AuthnWidget {
   constructor(baseUrl, divId, flowId) {
     this.baseUrl = baseUrl;
     this.divId = divId;
+    this.stateTemplatesMap = new Map();
     this.flowId = flowId || this.getBrowserFlowId();
     if (!baseUrl) {
       throw new Error('Must provide base Url for PingFederate in the constructor');
@@ -25,11 +26,12 @@ class AuthnWidget {
         throw new Error('Must provide flowId as a query string parameter');
       }
       let result = await fetchUtil.getFlow(this.baseUrl, this.flowId);
-      console.log(result);
       if (result.ok) {
         try {
           let json = await result.json();
           console.log(json);
+          const template = require('./partials/header.handlebars');
+          document.getElementById(this.divId).innerHTML = template;
         }
         catch (e) {
           throw e;//new AuthnApiError(e);
@@ -42,6 +44,14 @@ class AuthnWidget {
     catch(err) {
       throw err; //new AuthnApiError(err);
     }
+  }
+
+  registerState(state, templateName) {
+    this.stateTemplatesMap.set(state, templateName);
+  }
+
+  renderState(state) {
+    const templateName = this.stateTemplatesMap.get(state);
   }
 
   getBrowserFlowId() {

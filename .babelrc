@@ -1,15 +1,30 @@
 {
   "env": {
     "development": {
-      "presets": ["@babel/preset-env"],
+      "presets": [
+        ["@babel/preset-env",
+        {
+          "modules": "commonjs"
+        }]
+      ],
       "plugins": [
         "add-module-exports"
       ]
     },
     "production": {
-      "presets": ["env", "minify"],
+      "presets": [
+        ["@babel/preset-env"
+        ],
+        "minify"
+      ],
       "plugins": [
-        "add-module-exports"
+        "add-module-exports",
+        [
+          [ "@babel/runtime",
+            {
+              "corejs": 3
+            }]
+        ]
       ]
     }
   }
