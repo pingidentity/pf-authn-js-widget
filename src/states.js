@@ -1,0 +1,2 @@
+export const USERNAME_PASSWORD_REQUIRED = 'USERNAME_PASSWORD_REQUIRED';
+export const AUTH_ERROR = 'auth_error';

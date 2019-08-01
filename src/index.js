@@ -4,7 +4,12 @@ const queryString = require('query-string');
 require('regenerator-runtime/runtime'); //for async await
 const Handlebars = require('handlebars/runtime');
 
+
 class AuthnWidget {
+
+  loadStandardTemplates() {
+    this.stateTemplatesMap.set('USERNAME_PASSWORD_REQUIRED', require('./partials/username_password_required.handlebars'));
+  }
 
   /**
    * Constructs a new AuthnWidget object
@@ -19,7 +24,7 @@ class AuthnWidget {
     if (!baseUrl) {
       throw new Error('Must provide base Url for PingFederate in the constructor');
     }
-
+    this.loadStandardTemplates();
     Handlebars.registerHelper("checkedIf", function (condition) {
       return (condition) ? "checked" : "";
     });
@@ -30,13 +35,13 @@ class AuthnWidget {
       if(!this.flowId) {
         throw new Error('Must provide flowId as a query string parameter');
       }
+
       let result = await fetchUtil.getFlow(this.baseUrl, this.flowId);
       if (result.ok) {
         try {
           let json = await result.json();
           console.log(json);
-          const template = require('./partials/username_password_required.handlebars');
-          document.getElementById(this.divId).innerHTML =  template(json);
+          this.renderState('USERNAME_PASSWORD_REQUIRED', json);
         }
         catch (e) {
           throw e;//new AuthnApiError(e);
@@ -51,12 +56,21 @@ class AuthnWidget {
     }
   }
 
+
+  dispatch(event) {
+    console.log(event);
+    event.preventDefault();
+    document.getElementById("authn-widget-submit").removeEventListener("click", this.dispatch);
+  }
+
   registerState(state, templateName) {
     this.stateTemplatesMap.set(state, templateName);
   }
 
-  renderState(state) {
-    const templateName = this.stateTemplatesMap.get(state);
+  renderState(state, data) {
+    const template = this.stateTemplatesMap.get(state);
+    document.getElementById(this.divId).innerHTML =  template(data);
+    document.getElementById("authn-widget-submit").addEventListener("click", this.dispatch);
   }
 
   getBrowserFlowId() {
