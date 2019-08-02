@@ -21,6 +21,7 @@ export default class AuthnWidget {
     this.stateTemplatesMap = new Map();
     this.flowId = flowId || this.getBrowserFlowId();
     this.fetchUtil = new FetchUtil(baseUrl);
+    this.currentState = undefined;
     if (!baseUrl) {
       throw new Error('Must provide base Url for PingFederate in the constructor');
     }
@@ -28,34 +29,33 @@ export default class AuthnWidget {
     this.registerHelpers();
   }
 
-  init = async() => {
+  init = async () => {
     try {
-      if(!this.flowId) {
+      if (!this.flowId) {
         throw new Error('Must provide flowId as a query string parameter');
       }
 
       let result = await this.fetchUtil.getFlow(this.flowId);
+      let json = await result.json();
       if (result.ok) {
         try {
-          let json = await result.json();
           console.log(json);
-          if(json.status === 'RESUME') {
+          if (json.status === 'RESUME') {
             window.location.replace(json.resumeUrl);
 
-          }
-          else if(json.status !== undefined) {
+          } else if (json.status === 'FAILED') {
+            this.renderState(this._getErrorDetails(json));
+          } else if (json.status !== undefined) {
             this.renderState(json);
           }
-        }
-        catch (e) {
+        } catch (e) {
           throw e;//new AuthnApiError(e);
         }
-      }
-      else {
+      } else {
         console.log(result.statusText);
+        this.renderState(this._getErrorDetails(json));
       }
-    }
-    catch(err) {
+    } catch (err) {
       throw err; //new AuthnApiError(err);
     }
   };
@@ -66,22 +66,35 @@ export default class AuthnWidget {
     });
   }
 
+  _getFormData = () => new FormData(document.getElementById('AuthnWidgetForm'));
+
+  _getErrorDetails = result => {
+      //TODO handle 404
+      return {
+        error: result.userMessage,
+        errorDetails: result.details && result.details[0] ? result.details[0].userMessage : ''  //TODO show better errors
+      }
+  }
+
   dispatch = async(event) => {
     console.log(event);
     if(event) {
       event.preventDefault();
     }
-    let formData = new FormData(document.getElementById('AuthnWidgetForm'));
+    let formData = this._getFormData();
 
 
     let result = await this.fetchUtil.postFlow(this.flowId, 'checkUsernamePassword', JSON.stringify(Object.fromEntries(formData)));
+    let json = await result.json();
     if (result.ok) {
       try {
-        let json = await result.json();
         console.log(json);
         if(json.status === 'RESUME') {
           window.location.replace(json.resumeUrl);
-
+          document.getElementById("authn-widget-submit").removeEventListener("click", this.dispatch);
+        }
+        else if(json.status === 'FAILED') {
+          this.renderState(this._getErrorDetails(json));
         }
         else if(json.status !== undefined) {
           this.renderState(json);
@@ -93,21 +106,31 @@ export default class AuthnWidget {
     }
     else {
       console.log(result.statusText); //TODO parse validation error and display
+      this.renderState(this._getErrorDetails(json));
     }
-    document.getElementById("authn-widget-submit").removeEventListener("click", this.dispatch);
 
     //post to PF with the data
 
   }
 
+
+
   registerState = (state, templateName) => {
     this.stateTemplatesMap.set(state, templateName);
+    //TODO
   }
 
   renderState = data => {
-    const template = this.stateTemplatesMap.get(data.status);
-    document.getElementById(this.divId).innerHTML =  template(data);
-    document.getElementById("authn-widget-submit").addEventListener("click", this.dispatch);
+    let template = this.currentState;
+    if(data.status) {
+      template = this.stateTemplatesMap.get(data.status); //TODO what if no state in data
+      this.currentState = template;
+    }
+    if(template) {
+      document.getElementById(this.divId).innerHTML = template(data);
+      document.getElementById("authn-widget-submit").addEventListener("click", this.dispatch);
+    }
+
   }
 
   getBrowserFlowId = () => {
