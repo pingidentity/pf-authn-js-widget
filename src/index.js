@@ -3,6 +3,7 @@ import FetchUtil from './utils/fetchUtil';
 import queryString from 'query-string';
 import 'regenerator-runtime/runtime'; //for async await
 import Handlebars from 'handlebars/runtime';
+import State from './state';
 import * as States from "./stateTemplates";
 
 
