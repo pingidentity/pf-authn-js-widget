@@ -32,4 +32,5 @@ export default class fetchUtil {
     var customContentType = 'application/vnd.pingidentity.' + actionId + '+json';
     return this.doRequest('POST', flowId, customContentType, body);
   }
+
 }

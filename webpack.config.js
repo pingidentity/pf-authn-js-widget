@@ -23,7 +23,17 @@ module.exports = (env, argv) => {
     devtool: "source-map",
     module: {
       rules: [
-        { test: /\.handlebars$/, loader: "handlebars-loader" },
+        {
+          test: /\.handlebars$/,
+          loader: "handlebars-loader",
+          options: {
+            helperDirs: path.join(__dirname, 'helpers'),
+            precompileOptions: {
+              knownHelpersOnly: false,
+            },
+          },
+          exclude: /node_modules/
+        },
         {
           test: /\.js$/,
           exclude: /(node_modules|bower_components)/,
