@@ -3,14 +3,13 @@ import FetchUtil from './utils/fetchUtil';
 import queryString from 'query-string';
 import 'regenerator-runtime/runtime'; //for async await
 import Handlebars from 'handlebars/runtime';
-import {USERNAME_PASSWORD_REQUIRED} from './states';
-import State from './state/state';
+import * as States from "./stateTemplates";
 
 
 export default class AuthnWidget {
 
   loadStandardTemplates() {
-    this.stateTemplatesMap.set(USERNAME_PASSWORD_REQUIRED, require('./partials/username_password_required.handlebars'));
+    this.stateTemplatesMap.set(States.USERNAME_PASSWORD_REQUIRED, require(States.stateTemplates.get(States.USERNAME_PASSWORD_REQUIRED)));
   }
 
   /**
@@ -32,7 +31,7 @@ export default class AuthnWidget {
     this.registerHelpers();
   }
 
-  init = async () => {
+  async init() {
     try {
       if (!this.flowId) {
         throw new Error('Must provide flowId as a query string parameter');
@@ -44,16 +43,16 @@ export default class AuthnWidget {
     } catch (err) {
       throw err; //new AuthnApiError(err);
     }
-  };
+  }
 
-  registerHelpers = () => {
+  registerHelpers() {
     Handlebars.registerHelper("checkedIf", function (condition) {
       return (condition) ? "checked" : "";
     });
   }
 
 
-  getBrowserFlowId = () => {
+  getBrowserFlowId() {
     const searchParams = queryString.parse(location.search);
     return searchParams.flowId || '';
   }

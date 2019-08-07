@@ -1,4 +1,4 @@
-import * as States from "../states";
+import * as States from "./stateTemplates";
 
 export default class State {
 
@@ -9,9 +9,12 @@ export default class State {
     this.state = {};
   }
 
-  _getFormData = () => new FormData(document.getElementById('AuthnWidgetForm'));
+  getFormData(){
+    let formData = new FormData(document.getElementById('AuthnWidgetForm'));
+    return JSON.stringify(Object.fromEntries(formData));
+  }
 
-  renderState = async (data) => {
+  async renderState(data) {
     let combinedData = data;
     if (data.status) {
       this.state = data;
@@ -32,10 +35,11 @@ export default class State {
     document.getElementById("authn-widget-submit").addEventListener("click", this.dispatch);
   }
 
-  renderError = data => {
+  renderError(data) {
     console.log('rendering error page: ' + data);
   }
-  dispatch = async(event) => {
+
+  async dispatch (event) {
     console.log(event);
     if(event) {
       event.preventDefault();
@@ -43,7 +47,7 @@ export default class State {
     let source = event.target || event.srcElement
     console.log('source: ' + source.dataset['actionid']);
     document.getElementById("authn-widget-submit").removeEventListener("click", this.dispatch);
-    let result = await this.fetchUtil.postFlow(this.flowId, source.dataset['actionid'], JSON.stringify(Object.fromEntries(this._getFormData())));
+    let result = await this.fetchUtil.postFlow(this.flowId, source.dataset['actionid'],this.getFormData());
     let json = await result.json();
     this.renderPage(result, json);
 
@@ -52,12 +56,11 @@ export default class State {
   }
 
 
-  getAvailableActions = (json) => {
-    return Object.keys(json)
-      .filter(key => 'self' !== key);
+  getAvailableActions(json) {
+    return Object.keys(json).filter(key => 'self' !== key);
   }
 
-  renderPage = (result, json) => {
+  renderPage(result, json) {
     if (result.ok) {
       try {
         console.log(json);
