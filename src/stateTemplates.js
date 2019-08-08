@@ -5,3 +5,6 @@ export const AUTH_ERROR = 'auth_error';
 export const stateTemplates = new Map()
   .set(USERNAME_PASSWORD_REQUIRED, require('./partials/username_password_required.handlebars'));
 
+export function getTemplate(key) {
+  return stateTemplates.get(key);
+}

@@ -4,14 +4,11 @@ import queryString from 'query-string';
 import 'regenerator-runtime/runtime'; //for async await
 import Handlebars from 'handlebars/runtime';
 import State from './state';
+import Store from './store';
 import * as States from "./stateTemplates";
 
 
 export default class AuthnWidget {
-
-  loadStandardTemplates() {
-    this.stateTemplatesMap.set(States.USERNAME_PASSWORD_REQUIRED, require(States.stateTemplates.get(States.USERNAME_PASSWORD_REQUIRED)));
-  }
 
   /**
    * Constructs a new AuthnWidget object
@@ -20,29 +17,40 @@ export default class AuthnWidget {
    * @param {string} flowId initial flow ID
    */
   constructor(baseUrl, divId, flowId) {
-    this.stateTemplatesMap = new Map();
     this.flowId = flowId || this.getBrowserFlowId();
+    this.divId = divId;
     this.fetchUtil = new FetchUtil(baseUrl);
     if (!baseUrl) {
       throw new Error('Must provide base Url for PingFederate in the constructor');
     }
-
-    this.state = new State(divId, this.flowId, this.fetchUtil);
-    this.loadStandardTemplates();
-    this.registerHelpers();
+    this.registerHelpers(); //TODO do it as part of webpack helper
+    this.store = new Store(this.flowId, this.fetchUtil);
+    this.store.registerListener(this.render);
   }
 
-  async init() {
+  init() {
     try {
       if (!this.flowId) {
         throw new Error('Must provide flowId as a query string parameter');
       }
-
-      let result = await this.fetchUtil.getFlow(this.flowId);
-      let json = await result.json();
-      this.state.renderPage(result, json);
+      this.store.dispatch('GET_FLOW');
     } catch (err) {
       throw err; //new AuthnApiError(err);
+    }
+  }
+
+  dispatch = evt => {
+    if(evt) {
+      evt.preventDefault();
+    }
+    this.store.dispatch('POST_FLOW', this.getFormData());
+  }
+
+  getFormData(){
+    let formElement = document.getElementById('AuthnWidgetForm');
+    if(formElement) {
+      let formData = new FormData(formElement);
+      return JSON.stringify(Object.fromEntries(formData));
     }
   }
 
@@ -52,11 +60,54 @@ export default class AuthnWidget {
     });
   }
 
+  render = (prevState, state) => {
+    console.log('called render');
+    let combinedData = state;
+    if (state.status === 'RESUME') {
+      window.location.replace(state.resumeUrl);
+    }
+    let template = States.stateTemplates.get(state.status);
+
+    document.getElementById(this.divId).innerHTML = template(combinedData);
+    document.getElementById("authn-widget-submit").addEventListener("click", this.dispatch);
+  }
 
   getBrowserFlowId() {
     const searchParams = queryString.parse(location.search);
     return searchParams.flowId || '';
   }
+
+  renderPage(result, json) {
+    if (result.ok) {
+      try {
+        console.log(json);
+        if(json.status === 'RESUME') {
+          window.location.replace(json.resumeUrl);
+        }
+        else {
+          // this.renderState(this._getErrorDetails(json));
+          this.renderState(json);
+        }
+
+      }
+      catch (e) {
+        throw e;//new AuthnApiError(e);
+      }
+    }
+    else {
+      console.log(result.statusText); //TODO parse validation error and display
+      if(json.code === 'VALIDATION_ERROR') {
+        this.renderState(json);
+      }
+      else {  //TODO render general error page code it against the errors in com.pingidentity.sdk.api.authn.common.CommonErrorSpec
+        console.log(json.message);
+        this.renderError(json); //{"code":"RESOURCE_NOT_FOUND","message":"The requested resource was not found."}
+
+      }
+    }
+  }
+
+
 }
 
 
