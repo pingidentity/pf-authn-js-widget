@@ -12,9 +12,9 @@ export default class Store {
     return this.state;
   }
 
-  async dispatch(actionId, payload) {
+  async dispatch(method, actionId, payload) {
     this.prevState = this.state;
-    this.state = await this.reduce(actionId, payload);
+    this.state = await this.reduce(method, actionId, payload);
     console.log(this.state);
     this.notifyListeners();
   }
@@ -27,10 +27,10 @@ export default class Store {
    * @param payload
    * @returns {Promise<void>}
    */
-  async reduce(actionid, payload) {
+  async reduce(method, actionid, payload) {
     this.prevState = this.state;
     let result;
-    switch (actionid) {
+    switch (method) {
       case 'GET_FLOW':
         result = await this.fetchUtil.getFlow(this.flowId);
         break;

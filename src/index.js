@@ -1,9 +1,7 @@
-import AuthnApiError from './errors/AuthnApiError';
 import FetchUtil from './utils/fetchUtil';
 import queryString from 'query-string';
 import 'regenerator-runtime/runtime'; //for async await
 import Handlebars from 'handlebars/runtime';
-import State from './state';
 import Store from './store';
 import * as States from "./stateTemplates";
 
@@ -43,7 +41,10 @@ export default class AuthnWidget {
     if(evt) {
       evt.preventDefault();
     }
-    this.store.dispatch('POST_FLOW', this.getFormData());
+    let source = evt.target || evt.srcElement
+    console.log('source: ' + source.dataset['actionid']);
+    let actionId = source.dataset['actionid'];
+    this.store.dispatch('POST_FLOW', actionId, this.getFormData());
   }
 
   getFormData(){
@@ -69,6 +70,7 @@ export default class AuthnWidget {
     let template = States.stateTemplates.get(state.status);
 
     document.getElementById(this.divId).innerHTML = template(combinedData);
+    //add all event listeners for this state
     document.getElementById("authn-widget-submit").addEventListener("click", this.dispatch);
   }
 
