@@ -3,7 +3,7 @@ import queryString from 'query-string';
 import 'regenerator-runtime/runtime'; //for async await
 import Handlebars from 'handlebars/runtime';
 import Store from './store';
-import * as States from "./stateTemplates";
+import * as templates from "./stateTemplates";
 
 
 export default class AuthnWidget {
@@ -24,6 +24,8 @@ export default class AuthnWidget {
     this.registerHelpers(); //TODO do it as part of webpack helper
     this.store = new Store(this.flowId, this.fetchUtil);
     this.store.registerListener(this.render);
+    this.eventHandler = this.makeEventHandlers();
+
   }
 
   init() {
@@ -64,19 +66,29 @@ export default class AuthnWidget {
   render = (prevState, state) => {
     console.log('called render');
     let combinedData = state;
-    if (state.status === 'RESUME') {
+    let currentState = state.status;
+    if (currentState === 'RESUME') {
       window.location.replace(state.resumeUrl);
     }
-    let template = States.stateTemplates.get(state.status);
+    let template = templates.getTemplate(currentState);
+    //TODO show error page if no template found
+    let widgetDiv = document.getElementById(this.divId);
+    widgetDiv.innerHTML = template(combinedData);
+    this.registerEventListeners(widgetDiv, currentState);
 
-    document.getElementById(this.divId).innerHTML = template(combinedData);
-    //add all event listeners for this state
-    document.getElementById("authn-widget-submit").addEventListener("click", this.dispatch);
   }
 
   getBrowserFlowId() {
     const searchParams = queryString.parse(location.search);
     return searchParams.flowId || '';
+  }
+
+  registerEventListeners(div, stateName) {
+    console.log('registering events for: ' + stateName);
+    if(stateName) {
+      console.log('found fn for events: ' + this.eventHandler[stateName]);
+      this.eventHandler[stateName]();
+    }
   }
 
   renderPage(result, json) {
@@ -106,6 +118,55 @@ export default class AuthnWidget {
         this.renderError(json); //{"code":"RESOURCE_NOT_FOUND","message":"The requested resource was not found."}
 
       }
+    }
+  }
+
+  makeEventHandlers() {
+    return {
+      'USERNAME_PASSWORD_REQUIRED': () => {
+        console.log('invoking fn');
+        document.getElementById("authn-widget-submit").addEventListener("click", this.dispatch);
+      },
+      'MUST_CHANGE_PASSWORD': () => {
+
+      },
+      'NEW_PASSWORD_RECOMMENDED': () => {
+
+      },
+      'NEW_PASSWORD_REQUIRED': () => {
+
+      },
+      'SUCCESSFUL_PASSWORD_CHANGE': () => {
+
+      },
+      'ACCOUNT_RECOVERY_USERNAME_REQUIRED': () => {
+
+      },
+      'ACCOUNT_RECOVERY_OTL_VERIFICATION_REQUIRED': () => {
+
+      },
+      'RECOVERY_CODE_REQUIRED': () => {
+
+      },
+      'PASSWORD_RESET_REQUIRED': () => {
+
+      },
+      'SUCCESSFUL_PASSWORD_RESET': () => {
+
+      },
+      'USERNAME_RECOVERY_EMAIL_REQUIRED': () => {
+
+      },
+      'USERNAME_RECOVERY_EMAIL_SENT': () => {
+
+      },
+      'SUCCESSFUL_ACCOUNT_UNLOCK': () => {
+
+      },
+      'IDENTIFIER_REQUIRED': () => {
+
+      }
+
     }
   }
 
