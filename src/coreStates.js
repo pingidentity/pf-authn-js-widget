@@ -1,7 +1,6 @@
 export function getCoreStates(dispatch) {
   return {
     'USERNAME_PASSWORD_REQUIRED': function() {
-      console.log('invoking fn');
       document.getElementById("authn-widget-submit").addEventListener("click", dispatch);
     },
     'MUST_CHANGE_PASSWORD': () => {

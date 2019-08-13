@@ -48,16 +48,9 @@ export default class Store {
     } else {
       combinedData = {...json, ...this.state};
     }
-    if (json && json._links) {
-      let actions = this.getAvailableActions(json._links);
-      combinedData = {...combinedData, ...actions};  //make actions available to template
-    }
     return combinedData;
   }
 
-  getAvailableActions(json) {
-    return Object.keys(json).filter(key => 'self' !== key);
-  }
 
   notifyListeners() {
     console.log('notifying # of listeners: ' + this.listeners.length);
