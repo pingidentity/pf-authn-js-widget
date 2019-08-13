@@ -9,7 +9,10 @@ import { getCustomStates } from './customStates';
 
 export default class AuthnWidget {
 
-  /**
+  static get FORM_ID(){
+    return "AuthnWidgetForm";  //name of the form ID used in all handlebar templates
+  }
+  /*
    * Constructs a new AuthnWidget object
    * @param {string} baseUrl Required: PingFederate Base Url
    * @param {string} divId Required: the div Id where the widget will display the UI html associated per state
@@ -49,11 +52,13 @@ export default class AuthnWidget {
     let source = evt.target || evt.srcElement
     console.log('source: ' + source.dataset['actionid']);
     let actionId = source.dataset['actionid'];
+    this.eventHandler[this.store.state.status](this.store);
+    //TODO run mapping of data to model and throw validation
     this.store.dispatch('POST_FLOW', actionId, this.getFormData());
   }
 
   getFormData(){
-    let formElement = document.getElementById('AuthnWidgetForm');
+    let formElement = document.getElementById(AuthnWidget.FORM_ID);
     if(formElement) {
       let formData = new FormData(formElement);
       return JSON.stringify(Object.fromEntries(formData));
@@ -91,42 +96,12 @@ export default class AuthnWidget {
   }
 
   registerEventListeners(div, stateName) {
+    Array.from(div.querySelectorAll("[data-actionId]")).forEach(element => element.addEventListener("click", this.dispatch));
     console.log('registering events for: ' + stateName);
     if(stateName) {
       this.eventHandler[stateName]();
     }
   }
-
-  renderPage(result, json) {
-    if (result.ok) {
-      try {
-        console.log(json);
-        if(json.status === 'RESUME') {
-          window.location.replace(json.resumeUrl);
-        }
-        else {
-          // this.renderState(this._getErrorDetails(json));
-          this.renderState(json);
-        }
-
-      }
-      catch (e) {
-        throw e;//new AuthnApiError(e);
-      }
-    }
-    else {
-      console.log(result.statusText); //TODO parse validation error and display
-      if(json.code === 'VALIDATION_ERROR') {
-        this.renderState(json);
-      }
-      else {  //TODO render general error page code it against the errors in com.pingidentity.sdk.api.authn.common.CommonErrorSpec
-        console.log(json.message);
-        this.renderError(json); //{"code":"RESOURCE_NOT_FOUND","message":"The requested resource was not found."}
-
-      }
-    }
-  }
-
 
   /**
    * get the corresponding template for the state.
