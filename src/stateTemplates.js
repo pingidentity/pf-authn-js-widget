@@ -1,16 +1,11 @@
 
-export const USERNAME_PASSWORD_REQUIRED = 'USERNAME_PASSWORD_REQUIRED';
-export const USERNAME_RECOVERY_EMAIL_REQUIRED = 'USERNAME_RECOVERY_EMAIL_REQUIRED';
-
-export const AUTH_ERROR = 'auth_error';
-
 let stateTemplates = new Map();
 
 /**
  * get the corresponding template for the state.
  * By convention, the template should be the same name as the state but in lower case with a handlebars extension
- * @param key
- * @returns {any}
+ * @param key name of the state in lower case
+ * @returns {template} template content
  */
 export function getTemplate(key) {
   key = key.toLowerCase();

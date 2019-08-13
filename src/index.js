@@ -4,6 +4,8 @@ import 'regenerator-runtime/runtime'; //for async await
 import Handlebars from 'handlebars/runtime';
 import Store from './store';
 import * as templates from "./stateTemplates";
+import { getCoreStates } from './coreStates';
+import { getCustomStates } from './customStates';
 
 
 export default class AuthnWidget {
@@ -21,10 +23,12 @@ export default class AuthnWidget {
     if (!baseUrl) {
       throw new Error('Must provide base Url for PingFederate in the constructor');
     }
+    this.dispatch = this.dispatch.bind(this);
+    this.render = this.render.bind(this);
     this.registerHelpers(); //TODO do it as part of webpack helper
     this.store = new Store(this.flowId, this.fetchUtil);
     this.store.registerListener(this.render);
-    this.eventHandler = this.makeEventHandlers();
+    this.eventHandler = {...getCoreStates(this.dispatch), ...getCustomStates(this.dispatch)};
 
   }
 
@@ -39,7 +43,7 @@ export default class AuthnWidget {
     }
   }
 
-  dispatch = evt => {
+  dispatch(evt){
     if(evt) {
       evt.preventDefault();
     }
@@ -63,7 +67,7 @@ export default class AuthnWidget {
     });
   }
 
-  render = (prevState, state) => {
+  render(prevState, state) {
     console.log('called render');
     let combinedData = state;
     let currentState = state.status;
@@ -121,54 +125,6 @@ export default class AuthnWidget {
     }
   }
 
-  makeEventHandlers() {
-    return {
-      'USERNAME_PASSWORD_REQUIRED': () => {
-        console.log('invoking fn');
-        document.getElementById("authn-widget-submit").addEventListener("click", this.dispatch);
-      },
-      'MUST_CHANGE_PASSWORD': () => {
-
-      },
-      'NEW_PASSWORD_RECOMMENDED': () => {
-
-      },
-      'NEW_PASSWORD_REQUIRED': () => {
-
-      },
-      'SUCCESSFUL_PASSWORD_CHANGE': () => {
-
-      },
-      'ACCOUNT_RECOVERY_USERNAME_REQUIRED': () => {
-
-      },
-      'ACCOUNT_RECOVERY_OTL_VERIFICATION_REQUIRED': () => {
-
-      },
-      'RECOVERY_CODE_REQUIRED': () => {
-
-      },
-      'PASSWORD_RESET_REQUIRED': () => {
-
-      },
-      'SUCCESSFUL_PASSWORD_RESET': () => {
-
-      },
-      'USERNAME_RECOVERY_EMAIL_REQUIRED': () => {
-
-      },
-      'USERNAME_RECOVERY_EMAIL_SENT': () => {
-
-      },
-      'SUCCESSFUL_ACCOUNT_UNLOCK': () => {
-
-      },
-      'IDENTIFIER_REQUIRED': () => {
-
-      }
-
-    }
-  }
 
 
 }
