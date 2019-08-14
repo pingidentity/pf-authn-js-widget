@@ -3,14 +3,19 @@ import queryString from 'query-string';
 import 'regenerator-runtime/runtime'; //for async await
 import Handlebars from 'handlebars/runtime';
 import Store from './store';
-import { getCoreStates } from './coreStates';
-import { getCustomStates } from './customStates';
-
 
 export default class AuthnWidget {
 
-  static get FORM_ID() {
+  static get FORM_ID(){
     return "AuthnWidgetForm";  //name of the form ID used in all handlebar templates
+  }
+
+  static get CORE_STATES() {
+    return ['USERNAME_PASSWORD_REQUIRED', 'MUST_CHANGE_PASSWORD', 'NEW_PASSWORD_RECOMMENDED',  'NEW_PASSWORD_REQUIRED', 'SUCCESSFUL_PASSWORD_CHANGE',
+      'ACCOUNT_RECOVERY_USERNAME_REQUIRED','ACCOUNT_RECOVERY_OTL_VERIFICATION_REQUIRED','RECOVERY_CODE_REQUIRED', 'PASSWORD_RESET_REQUIRED',
+      'SUCCESSFUL_PASSWORD_RESET',  'USERNAME_RECOVERY_EMAIL_REQUIRED', 'USERNAME_RECOVERY_EMAIL_SENT', 'SUCCESSFUL_ACCOUNT_UNLOCK',
+      'IDENTIFIER_REQUIRED'
+    ];
   }
   /*
    * Constructs a new AuthnWidget object
@@ -27,13 +32,19 @@ export default class AuthnWidget {
     this.fetchUtil = new FetchUtil(baseUrl);
     this.dispatch = this.dispatch.bind(this);
     this.render = this.render.bind(this);
+    this.defaultEventHandler = this.defaultEventHandler.bind(this);
     this.stateTemplates = new Map();
+    this.eventHandler = new Map();
+    this.actionModels = new Map();
     this.registerHelpers(); //TODO do it as part of webpack helper
-
     this.store = new Store(this.flowId, this.fetchUtil);
     this.store.registerListener(this.render);
-    this.eventHandler = { ...getCoreStates(this.dispatch), ...getCustomStates(this.dispatch) };
-
+    AuthnWidget.CORE_STATES.forEach(state => this.registerState(state));
+    this.actionModels.set('checkUsernamePassword', {required: ['username', 'password'], properties: ['username', 'password', 'rememberMyUsername', 'thisIsMyDevice', 'captchaResponse']});
+    this.actionModels.set('initiateAccountRecovery', undefined);
+    this.actionModels.set('recoverUsername', undefined);
+    this.actionModels.set('initiatePasswordChange', undefined);
+    this.actionModels.set('useAlternativeAuthenticationSource', {required: ['authenticationSource'], properties: ['authenticationSource']});
   }
 
   init() {
@@ -47,19 +58,39 @@ export default class AuthnWidget {
     }
   }
 
-  dispatch(evt) {
+  defaultEventHandler() {
+    Array.from(document.querySelector(`#${this.divId}`)
+                       .querySelectorAll("[data-actionId]")).forEach(element => element.addEventListener("click", this.dispatch));
+  }
+
+  validateActionModel(action, data) {
+    const model = this.actionModels.get(action);
+    if(model === undefined) {
+      return '';
+    }
+    if(model.required) {
+
+    }
+    if(model.properties) {
+
+    }
+    return true;
+  }
+
+  dispatch(evt){
     evt.preventDefault();
     let source = evt.target || evt.srcElement
     console.log('source: ' + source.dataset['actionid']);
     let actionId = source.dataset['actionid'];
-    this.eventHandler[this.store.state.status](this.store);
     //TODO run mapping of data to model and throw validation
-    this.store.dispatch('POST_FLOW', actionId, this.getFormData());
+    let formData = this.getFormData()
+    formData = this.validateActionModel(actionId, formData);
+    this.store.dispatch('POST_FLOW', actionId, formData);
   }
 
-  getFormData() {
+  getFormData(){
     let formElement = document.getElementById(AuthnWidget.FORM_ID);
-    if (formElement) {
+    if(formElement) {
       let formData = new FormData(formElement);
       return JSON.stringify(Object.fromEntries(formData));
     }
@@ -72,21 +103,21 @@ export default class AuthnWidget {
   }
 
   render(prevState, state) {
-    let combinedData = state;
     let currentState = state.status;
     if (currentState === 'RESUME') {
       window.location.replace(state.resumeUrl);
     }
 
     let template = this.getTemplate(currentState);
-    if (!template) {
+    if(!template) {
       //TODO show error page if no template found
       console.log(`Failed to load template: ${currentState}.`);
       template = this.getTemplate('general_error');
     }
     let widgetDiv = document.getElementById(this.divId);
-    widgetDiv.innerHTML = template(combinedData);
-    this.registerEventListeners(widgetDiv, currentState);
+    widgetDiv.innerHTML = template(state);
+    this.registerEventListeners(currentState);
+
 
   }
 
@@ -95,11 +126,10 @@ export default class AuthnWidget {
     return searchParams.flowId || '';
   }
 
-  registerEventListeners(div, stateName) {
-    Array.from(div.querySelectorAll("[data-actionId]")).forEach(element => element.addEventListener("click", this.dispatch));
+  registerEventListeners(stateName) {
     console.log('registering events for: ' + stateName);
-    if (stateName) {
-      this.eventHandler[stateName]();
+    if(stateName) {
+      this.eventHandler.get(stateName)();
     }
   }
 
@@ -112,10 +142,23 @@ export default class AuthnWidget {
   getTemplate(key) {
     key = key.toLowerCase();
     let template = this.stateTemplates.get(key);
-    if (template === undefined) {
+    if(template === undefined) {
       template = require(`./partials/${key}.handlebars`);
       this.stateTemplates.set(key, template);
     }
     return template;
   }
+
+  registerState(stateName, eventHandlerFn = this.defaultEventHandler) {
+    this.eventHandler.set(stateName, eventHandlerFn);
+  }
+
+  registerActionModel(action, model) {
+    this.actionModels.set(action, model);
+  }
+
+
 }
+
+
+
