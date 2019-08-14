@@ -46,7 +46,7 @@ export default class Store {
       combinedData = json;
       this.state = json;
     } else {
-      combinedData = {...json, ...this.state};
+      combinedData = { ...json, ...this.state };
     }
     return combinedData;
   }

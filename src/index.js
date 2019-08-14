@@ -9,7 +9,7 @@ import { getCustomStates } from './customStates';
 
 export default class AuthnWidget {
 
-  static get FORM_ID(){
+  static get FORM_ID() {
     return "AuthnWidgetForm";  //name of the form ID used in all handlebar templates
   }
   /*
@@ -32,7 +32,7 @@ export default class AuthnWidget {
 
     this.store = new Store(this.flowId, this.fetchUtil);
     this.store.registerListener(this.render);
-    this.eventHandler = {...getCoreStates(this.dispatch), ...getCustomStates(this.dispatch)};
+    this.eventHandler = { ...getCoreStates(this.dispatch), ...getCustomStates(this.dispatch) };
 
   }
 
@@ -47,7 +47,7 @@ export default class AuthnWidget {
     }
   }
 
-  dispatch(evt){
+  dispatch(evt) {
     evt.preventDefault();
     let source = evt.target || evt.srcElement
     console.log('source: ' + source.dataset['actionid']);
@@ -57,9 +57,9 @@ export default class AuthnWidget {
     this.store.dispatch('POST_FLOW', actionId, this.getFormData());
   }
 
-  getFormData(){
+  getFormData() {
     let formElement = document.getElementById(AuthnWidget.FORM_ID);
-    if(formElement) {
+    if (formElement) {
       let formData = new FormData(formElement);
       return JSON.stringify(Object.fromEntries(formData));
     }
@@ -79,7 +79,7 @@ export default class AuthnWidget {
     }
 
     let template = this.getTemplate(currentState);
-    if(!template) {
+    if (!template) {
       //TODO show error page if no template found
       console.log(`Failed to load template: ${currentState}.`);
       template = this.getTemplate('general_error');
@@ -98,7 +98,7 @@ export default class AuthnWidget {
   registerEventListeners(div, stateName) {
     Array.from(div.querySelectorAll("[data-actionId]")).forEach(element => element.addEventListener("click", this.dispatch));
     console.log('registering events for: ' + stateName);
-    if(stateName) {
+    if (stateName) {
       this.eventHandler[stateName]();
     }
   }
@@ -112,16 +112,10 @@ export default class AuthnWidget {
   getTemplate(key) {
     key = key.toLowerCase();
     let template = this.stateTemplates.get(key);
-    if(template === undefined) {
+    if (template === undefined) {
       template = require(`./partials/${key}.handlebars`);
       this.stateTemplates.set(key, template);
     }
     return template;
   }
-
-
-
 }
-
-
-
