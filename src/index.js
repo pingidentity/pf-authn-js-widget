@@ -41,10 +41,9 @@ export default class AuthnWidget {
     this.store.registerListener(this.render);
     AuthnWidget.CORE_STATES.forEach(state => this.registerState(state));
     this.actionModels.set('checkUsernamePassword', {required: ['username', 'password'], properties: ['username', 'password', 'rememberMyUsername', 'thisIsMyDevice', 'captchaResponse']});
-    this.actionModels.set('initiateAccountRecovery', undefined);
-    this.actionModels.set('recoverUsername', undefined);
-    this.actionModels.set('initiatePasswordChange', undefined);
     this.actionModels.set('useAlternativeAuthenticationSource', {required: ['authenticationSource'], properties: ['authenticationSource']});
+    this.actionModels.set('checkUsernameRecoveryEmail', {required: ['email'], properties: ['email', 'captchaResponse']});
+    this.actionModels.set('checkAccountRecoveryUsername', {required: ['username'], properties: ['username', 'captchaResponse']});
   }
 
   init() {
@@ -63,18 +62,32 @@ export default class AuthnWidget {
                        .querySelectorAll("[data-actionId]")).forEach(element => element.addEventListener("click", this.dispatch));
   }
 
-  validateActionModel(action, data) {
+  /**
+   * validate against the action model.
+   * if the model has no data, return empty post body
+   * if it's missing required attributes, fill the err message
+   * (error handling can also be done by PF but this is a way to do front end validation. e.g. missing password)
+   * @param action
+   * @param data
+   * @param err
+   * @returns {string|*}
+   */
+  validateActionModel(action, data, err) {
     const model = this.actionModels.get(action);
     if(model === undefined) {
       return '';
     }
     if(model.required) {
-
+      let target = Object.keys(data);
+      if(!model.required.every(key => target.includes(key))) {
+        console.log('missing required attributes');
+        err = 'Missing Required Attributes';
+      }
     }
     if(model.properties) {
-
+      //remove unneeded params?
     }
-    return true;
+    return data;
   }
 
   dispatch(evt){
@@ -84,7 +97,11 @@ export default class AuthnWidget {
     let actionId = source.dataset['actionid'];
     //TODO run mapping of data to model and throw validation
     let formData = this.getFormData()
-    formData = this.validateActionModel(actionId, formData);
+    let err;
+    formData = this.validateActionModel(actionId, formData, err);
+    if(err) {
+      //re-render with errors
+    }
     this.store.dispatch('POST_FLOW', actionId, formData);
   }
 
@@ -108,8 +125,11 @@ export default class AuthnWidget {
       window.location.replace(state.resumeUrl);
     }
 
-    let template = this.getTemplate(currentState);
-    if(!template) {
+    let template;
+    if(currentState) {
+      template = this.getTemplate(currentState);
+    }
+    if (!template) {
       //TODO show error page if no template found
       console.log(`Failed to load template: ${currentState}.`);
       template = this.getTemplate('general_error');

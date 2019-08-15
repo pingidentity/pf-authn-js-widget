@@ -1,23 +1,24 @@
 <div class="card">
-  <div class="org-logo">
-    <img class="org-logo__image" src="ping-logo.svg" alt="Company Logo" />
-  </div>
-  <h1 class="heading">Reset Your Password</h1>
-  <div class="text-block">
-    <div class="text-block__text">Enter your username to reset your password or unlock your account.</div>
-  </div>
-  <form class="form form--margin-small">
-    <div class="float-label">
-      <input type="text" class="text-input float-label__input" name="username" placeholder="Username" />
-      <label class="float-label__label" for="username">Username</label>
+    <div class="org-logo">
+        <img class="org-logo__image" src="ping-logo.svg" alt="Company Logo"/>
     </div>
-    <div class="text-block text-block--small-right">
-      <div class="text-block__text">
-        <a href="#">Trouble With Username?</a>
-      </div>
+    <h1 class="heading">Recover User Name</h1>
+    <div class="text-block">
+        <div class="text-block__text">Enter the email associated with the username to be recovered.</div>
     </div>
-    <button data-actionid="checkAccountRecoveryUsername" class="button button--primary  brand-primary-bg">
-      Reset
-    </button>
-  </form>
+    <form class="form form--margin-small" id="AuthnWidgetForm">
+        <div class="float-label">
+            <input type="text" class="text-input float-label__input" name="username" placeholder="UserName"/>
+            <label class="float-label__label" for="username">User Name</label>
+        </div>
+        <div class="text-block text-block--small">
+            <a href="#" data-actionid="recoverUsername">Recover User Name?</a>
+        </div>
+        <div class="button-set">
+            <button data-actionid="checkAccountRecoveryUsername" class="button button--primary brand-primary-bg">
+                Recover
+            </button>
+            <button data-actionId="cancelAccountRecovery" class="button">Cancel</button>
+        </div>
+    </form>
 </div>

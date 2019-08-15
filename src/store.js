@@ -41,6 +41,7 @@ export default class Store {
         break;
     }
     let json = await result.json();
+    console.log(json);
     let combinedData = this.state;
     if (json.status) {
       combinedData = json;
