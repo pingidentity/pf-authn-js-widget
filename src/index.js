@@ -44,6 +44,7 @@ export default class AuthnWidget {
     this.actionModels.set('useAlternativeAuthenticationSource', {required: ['authenticationSource'], properties: ['authenticationSource']});
     this.actionModels.set('checkUsernameRecoveryEmail', {required: ['email'], properties: ['email', 'captchaResponse']});
     this.actionModels.set('checkAccountRecoveryUsername', {required: ['username'], properties: ['username', 'captchaResponse']});
+    this.actionModels.set('checkNewPassword', {required: ['username', 'existingPassword', 'newPassword'], properties:  ['username', 'existingPassword', 'newPassword', 'captchaResponse']})
   }
 
   init() {
@@ -102,14 +103,14 @@ export default class AuthnWidget {
     if(err) {
       //re-render with errors
     }
-    this.store.dispatch('POST_FLOW', actionId, formData);
+    this.store.dispatch('POST_FLOW', actionId, JSON.stringify(formData));
   }
 
   getFormData(){
     let formElement = document.getElementById(AuthnWidget.FORM_ID);
     if(formElement) {
       let formData = new FormData(formElement);
-      return JSON.stringify(Object.fromEntries(formData));
+      return Object.fromEntries(formData);
     }
   }
 
