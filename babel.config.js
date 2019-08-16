@@ -1,6 +1,5 @@
 module.exports = function (api) {
-  api.cache(true);
-
+  // api.cache(true);
   const presets = [
     ["@babel/preset-env",
       {
@@ -8,7 +7,7 @@ module.exports = function (api) {
       }],
     "minify",
   ];
-  const plugins = [
+  let plugins = [
     "add-module-exports",
     ["@babel/plugin-transform-runtime",
       {
@@ -17,9 +16,11 @@ module.exports = function (api) {
     ,
     [
       "@babel/plugin-proposal-class-properties",
-    ],
-    ["transform-remove-console"]
+    ]
   ];
+
+  if(api.env("production"))
+    plugins.push(["transform-remove-console"]);
 
   return {
     presets,

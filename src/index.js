@@ -44,7 +44,12 @@ export default class AuthnWidget {
     this.actionModels.set('useAlternativeAuthenticationSource', {required: ['authenticationSource'], properties: ['authenticationSource']});
     this.actionModels.set('checkUsernameRecoveryEmail', {required: ['email'], properties: ['email', 'captchaResponse']});
     this.actionModels.set('checkAccountRecoveryUsername', {required: ['username'], properties: ['username', 'captchaResponse']});
-    this.actionModels.set('checkNewPassword', {required: ['username', 'existingPassword', 'newPassword'], properties:  ['username', 'existingPassword', 'newPassword', 'captchaResponse']})
+    this.actionModels.set('checkNewPassword', {required: ['username', 'existingPassword', 'newPassword'], properties:  ['username', 'existingPassword', 'newPassword', 'captchaResponse']});
+    this.actionModels.set('checkPasswordReset', {required: ['newPassword'], properties: ['newPassword']});
+    this.actionModels.set('checkRecoveryCode', {required: ['recoveryCode'], properties: ['recoveryCode']});
+    this.actionModels.set('checkChallengeResponse', {required: ['challengeResponse'], properties: ['challengeResponse']});
+
+
   }
 
   init() {
@@ -71,12 +76,12 @@ export default class AuthnWidget {
    * @param action
    * @param data
    * @param err
-   * @returns {string|*}
+   * @returns {string|*} the model to be sent to PingFederate after all required fields are available
    */
   validateActionModel(action, data, err) {
     const model = this.actionModels.get(action);
     if(model === undefined) {
-      return '';
+      return undefined;
     }
     if(model.required) {
       let target = Object.keys(data);
@@ -164,7 +169,7 @@ export default class AuthnWidget {
     key = key.toLowerCase();
     let template = this.stateTemplates.get(key);
     if(template === undefined) {
-      template = require(`./partials/${key}.handlebars`);
+      template = require(`./partials/${key}.hbs`);
       this.stateTemplates.set(key, template);
     }
     return template;

@@ -24,7 +24,7 @@ module.exports = (env, argv) => {
     module: {
       rules: [
         {
-          test: /\.handlebars$/,
+          test: /\.(handlebars|hbs)$/,
           loader: "handlebars-loader",
           options: {
             helperDirs: path.join(__dirname, 'helpers'),
