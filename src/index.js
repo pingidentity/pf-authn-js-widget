@@ -33,8 +33,8 @@ export default class AuthnWidget {
     this.dispatch = this.dispatch.bind(this);
     this.render = this.render.bind(this);
     this.defaultEventHandler = this.defaultEventHandler.bind(this);
-    this.stateTemplates = new Map();
-    this.eventHandler = new Map();
+    this.stateTemplates = new Map();  //state -> handlebar templates
+    this.eventHandler = new Map();  //state -> eventHandlers
     this.actionModels = new Map();
     this.registerHelpers(); //TODO do it as part of webpack helper
     this.store = new Store(this.flowId, this.fetchUtil);
@@ -48,7 +48,8 @@ export default class AuthnWidget {
     this.actionModels.set('checkPasswordReset', {required: ['newPassword'], properties: ['newPassword']});
     this.actionModels.set('checkRecoveryCode', {required: ['recoveryCode'], properties: ['recoveryCode']});
     this.actionModels.set('checkChallengeResponse', {required: ['challengeResponse'], properties: ['challengeResponse']});
-
+    this.actionModels.set('submitIdentifier', {required: ['identifier'], properties: ['identifier']});
+    this.actionModels.set('clearIdentifier', {required: ['identifier'], properties: ['identifier']});
 
   }
 
@@ -98,15 +99,16 @@ export default class AuthnWidget {
 
   dispatch(evt){
     evt.preventDefault();
-    let source = evt.target || evt.srcElement
+    let source = evt.target || evt.srcElement;
     console.log('source: ' + source.dataset['actionid']);
     let actionId = source.dataset['actionid'];
     //TODO run mapping of data to model and throw validation
-    let formData = this.getFormData()
+    let formData = this.getFormData();
     let err;
     formData = this.validateActionModel(actionId, formData, err);
     if(err) {
       //re-render with errors
+
     }
     this.store.dispatch('POST_FLOW', actionId, JSON.stringify(formData));
   }
