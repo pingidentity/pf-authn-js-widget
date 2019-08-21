@@ -24,6 +24,10 @@ pf-authn-widget
 
 # Installation
 
+# Test server
+  Execute `npm run start` in the command line to start the test server. `https://localhost:9031` host name will be used as the base URL. In order to change the base URL use `BASEURL=https://example.com npm run start`.
+  
+  To  access the test server open a browser and goto `https://localhost:8443`.  
 
 # License
 

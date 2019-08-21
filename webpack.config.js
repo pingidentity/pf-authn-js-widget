@@ -1,6 +1,7 @@
 const path = require('path');
 const webpack = require('webpack');
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const devServer = require('./demo-server');
 // const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 const PATHS = {
   dist: path.join(__dirname, 'dist'),
@@ -10,15 +11,30 @@ const PATHS = {
 
 module.exports = (env, argv) => {
   const isDevelopment = argv.mode === 'development';
+
   return {
+    devServer: {
+      hot: true,
+      before: function (app, server) {
+        var options = {
+          baseUrl: argv.baseurl
+        }
+        console.debug(options);
+        devServer(app, server, options);
+      },
+      contentBase: [path.join(__dirname, 'dist')],
+      compress: true,
+      port: 8443,
+      https: true
+    },
     entry: ['whatwg-fetch', path.join(PATHS.src, 'index')],
     output: {
       path: PATHS.dist,
-        filename: 'pf.authn-widget.js',
-        library: 'PfAuthnWidget',
-        publicPath: '/',
-        sourceMapFilename: 'pf.authn-widget.map',
-        libraryTarget: 'umd'
+      filename: 'pf.authn-widget.js',
+      library: 'PfAuthnWidget',
+      publicPath: '/',
+      sourceMapFilename: 'pf.authn-widget.map',
+      libraryTarget: 'umd'
     },
     devtool: "source-map",
     module: {

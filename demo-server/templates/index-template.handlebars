@@ -1,0 +1,28 @@
+<html>
+<title>Authentication API Sample App</title>
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="./pf.authn-widget.js"></script>
+  <script type='application/json' src="./pf.authn-widget.map"></script>
+  <link rel="stylesheet" type="text/css" href="https://uilibrary.ping-eng.com/end-user/end-user.css">
+  <link rel="stylesheet" type="text/css" href="./main.css">
+</head>
+
+<body>
+  <div class="content">
+    <div class="heading">My Authentication Application</div>
+    <div>Sample app using JS Widget which uses PingFederate Authentication APIs.</div>
+    <div id="authnwidget"></div>
+  </div>
+</body>
+<script>
+  $(document).ready(function () {
+    var authnWidget = new PfAuthnWidget("{{baseUrl}}", { divId: 'authnwidget' });
+    authnWidget.init();
+  });
+</script>
+
+</html>
