@@ -50,7 +50,6 @@ export default class AuthnWidget {
     this.actionModels.set('checkChallengeResponse', {required: ['challengeResponse'], properties: ['challengeResponse']});
     this.actionModels.set('submitIdentifier', {required: ['identifier'], properties: ['identifier']});
     this.actionModels.set('clearIdentifier', {required: ['identifier'], properties: ['identifier']});
-
   }
 
   init() {
@@ -145,8 +144,6 @@ export default class AuthnWidget {
     let widgetDiv = document.getElementById(this.divId);
     widgetDiv.innerHTML = template(state);
     this.registerEventListeners(currentState);
-
-
   }
 
   getBrowserFlowId() {
@@ -184,9 +181,4 @@ export default class AuthnWidget {
   registerActionModel(action, model) {
     this.actionModels.set(action, model);
   }
-
-
 }
-
-
-
