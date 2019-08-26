@@ -1,3 +1,4 @@
+import ErrorSvg from './assets/error.svg';
 
 export default class Store {
   constructor(flowId, fetchUtil) {
@@ -47,9 +48,26 @@ export default class Store {
       combinedData = json;
       this.state = json;
     } else {
-      combinedData = { ...json, ...this.state };
+      let errors = this.getErrorDetails(json);
+      combinedData = { ...errors, ...this.state };
     }
     return combinedData;
+  }
+
+  getErrorDetails(json) {
+    let errors = [];
+    if(json.code && json.code == 'VALIDATION_ERROR') {
+      if(json.details) {
+        json.details.forEach(msg => errors.push(msg.userMessage));
+      }
+      else {
+        errors.push(json.userMessage);
+      }
+    }
+    return {
+      userMessage: errors,
+      errorSvg: ErrorSvg,
+    };
   }
 
 

@@ -82,7 +82,11 @@ module.exports = (env, argv) => {
           ]
         },
         {
-          test: /\.(jpg|png|gif)$/,
+          test: /\.svg$/,
+          loader: 'svg-inline-loader'
+        },
+        {
+          test: /\.(jpg|png|gif|svg)$/,
           use: [
             {
               loader: "file-loader",

@@ -1,12 +1,12 @@
-{{#if code}}
+{{#if userMessage}}
 <div class="feedback feedback--error">
-  <img class="feedback__icon" src="error.svg" alt="Error" />
+  <img class="feedback__icon" src="https://uilibrary.ping-eng.com/end-user/error.svg" alt="Error" />
   <div class="feedback__message">
-    {{message}}
 
-    {{userMessage}}
-
-    {{details}}
+      {{#each userMessage}}
+          {{this}}
+      {{/each}}
+    </ul>
   </div>
 </div>
 {{/if}}
