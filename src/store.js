@@ -1,4 +1,3 @@
-import ErrorSvg from './assets/error.svg';
 
 export default class Store {
   constructor(flowId, fetchUtil) {
