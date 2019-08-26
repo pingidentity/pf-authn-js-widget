@@ -65,8 +65,7 @@ export default class Store {
       }
     }
     return {
-      userMessage: errors,
-      errorSvg: ErrorSvg,
+      userMessage: errors
     };
   }
 
