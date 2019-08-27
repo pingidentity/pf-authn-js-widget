@@ -2,19 +2,19 @@
     <div class="org-logo">
         <img class="org-logo__image" src="https://uilibrary.ping-eng.com/end-user/ping-logo.svg" alt="Company Logo"/>
     </div>
-    <h1 class="heading">Recover User Name</h1>
+    <h1 class="heading">Username Recovery</h1>
     <div class="text-block">
-        <div class="text-block__text">The email address of an associated user account is required for username recovery to proceed.</div>
+        <div class="text-block__text">Enter your email address to receive an email with your username.</div>
     </div>
     {{> errors}}
     <form class="form form--margin-small" id="AuthnWidgetForm">
         <div class="float-label">
-            <input type="text" class="text-input float-label__input" name="email" placeholder="Email Address"/>
-            <label class="float-label__label" for="email">Email</label>
+            <input type="text" class="text-input float-label__input" name="email" placeholder="Email Address" required />
+            <label class="float-label__label" for="email">Email Address</label>
         </div>
         <div class="button-set">
             <button data-actionid="checkUsernameRecoveryEmail" class="button button--primary brand-primary-bg">
-                Recover
+                Send Request
             </button>
             <button data-actionId="cancelUsernameRecovery" class="button">Cancel</button>
         </div>

@@ -15,6 +15,7 @@ export default class Store {
   async dispatch(method, actionId, payload) {
     this.prevState = this.state;
     this.state = await this.reduce(method, actionId, payload);
+    console.log('dispatching actionId: ' + actionId)
     console.log(this.state);
     this.notifyListeners();
   }
@@ -41,7 +42,6 @@ export default class Store {
         break;
     }
     let json = await result.json();
-    console.log(json);
     let combinedData = this.state;
     if (json.status) {
       combinedData = json;

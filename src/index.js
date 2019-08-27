@@ -96,6 +96,10 @@ export default class AuthnWidget {
     return data;
   }
 
+  getForm() {
+    return document.querySelector(`#${this.divId}`).querySelector(`#${AuthnWidget.FORM_ID}`);
+  }
+
   dispatch(evt){
     evt.preventDefault();
     let source = evt.target || evt.srcElement;
@@ -107,13 +111,15 @@ export default class AuthnWidget {
     formData = this.validateActionModel(actionId, formData, err);
     if(err) {
       //re-render with errors
-
+      return;
     }
-    this.store.dispatch('POST_FLOW', actionId, JSON.stringify(formData));
+    else {
+      this.store.dispatch('POST_FLOW', actionId, JSON.stringify(formData));
+    }
   }
 
   getFormData(){
-    let formElement = document.getElementById(AuthnWidget.FORM_ID);
+    let formElement = this.getForm();
     if(formElement) {
       let formData = new FormData(formElement);
       return Object.fromEntries(formData);

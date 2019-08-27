@@ -4,13 +4,14 @@
 
 pf-authn-widget
 
+# Installation
+
+Before installing, make sure you have [node.js](https://nodejs.org/en/) installed.
+
 # Features
 
-* **ES6/ESNext** - Write _ES6_ code and _Babel_ will transpile it to ES5 for backwards compatibility
-* **Test** - _Mocha_ with _Istanbul_ coverage
-* **Lint** - Preconfigured _ESlint_ with _Airbnb_ config
-* **CI** - _TravisCI_ configuration setup
-* **Minify** - Built code will be minified for performance
+* **Html Form Adapter** - All functionality of HTML form adapter
+* **Identifier First Adapter** - Identifier First Adapter features
 
 # Commands
 - `npm run clean` - Remove `lib/` directory
@@ -19,8 +20,8 @@ pf-authn-widget
 - `npm test:watch` - You can even re-run tests on file changes!
 - `npm test:prod` - Run tests with minified code.
 - `npm run lint` - Run ESlint with airbnb-config
-- `npm run cover` - Get coverage report for your code.
-- `npm run build` - Babel will transpile ES6 => ES5 and minify the code.
+- `npm run dev` - Development version is built.
+- `npm run build` - Production version is built.
 
 # Installation
 
