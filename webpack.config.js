@@ -19,7 +19,6 @@ module.exports = (env, argv) => {
         var options = {
           baseUrl: argv.baseurl
         }
-        console.debug(options);
         devServer(app, server, options);
       },
       contentBase: [path.join(__dirname, 'dist')],
