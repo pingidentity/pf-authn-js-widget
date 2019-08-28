@@ -143,7 +143,6 @@ export default class AuthnWidget {
       template = this.getTemplate(currentState);
     }
     if (!template) {
-      //TODO show error page if no template found
       console.log(`Failed to load template: ${currentState}.`);
       template = this.getTemplate('general_error');
     }
@@ -159,8 +158,8 @@ export default class AuthnWidget {
 
   registerEventListeners(stateName) {
     console.log('registering events for: ' + stateName);
-    if(stateName) {
-      this.eventHandler.get(stateName)();
+    if(stateName && this.eventHandler.get(stateName)) {
+        this.eventHandler.get(stateName)();
     }
   }
 
