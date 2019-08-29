@@ -106,7 +106,7 @@ export default class AuthnWidget {
       if(missingFields.length > 0) {
         console.log('missing required attributes');
         err.push('Please enter values for the following fields: ' + missingFields);
-        return null;
+        // return null;
       }
     }
     if(model.properties) {
