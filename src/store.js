@@ -31,17 +31,19 @@ export default class Store {
   async reduce(method, actionid, payload) {
     this.prevState = this.state;
     let result;
+    let json;
     switch (method) {
+      case 'ERRORS':
+        return {...this.state, ...payload};
       case 'GET_FLOW':
         result = await this.fetchUtil.getFlow(this.flowId);
         break;
       case 'POST_FLOW':
       default:
-
         result = await this.fetchUtil.postFlow(this.flowId, actionid, payload);
         break;
     }
-    let json = await result.json();
+    json = await result.json();
     let combinedData = this.state;
     if (json.status) {
       combinedData = json;

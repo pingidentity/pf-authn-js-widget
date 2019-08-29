@@ -40,6 +40,8 @@ export default class AuthnWidget {
     this.store = new Store(this.flowId, this.fetchUtil);
     this.store.registerListener(this.render);
     AuthnWidget.CORE_STATES.forEach(state => this.registerState(state));
+
+
     this.actionModels.set('checkUsernamePassword', {required: ['username', 'password'], properties: ['username', 'password', 'rememberMyUsername', 'thisIsMyDevice', 'captchaResponse']});
     this.actionModels.set('useAlternativeAuthenticationSource', {required: ['authenticationSource'], properties: ['authenticationSource']});
     this.actionModels.set('checkUsernameRecoveryEmail', {required: ['email'], properties: ['email', 'captchaResponse']});
@@ -78,16 +80,20 @@ export default class AuthnWidget {
    * @param err
    * @returns {string|*} the model to be sent to PingFederate after all required fields are available
    */
-  validateActionModel(action, data, err) {
+  validateActionModel(action, data, err = []) {
     const model = this.actionModels.get(action);
     if(model === undefined) {
       return undefined;
     }
-    if(model.required) {
-      let target = Object.keys(data);
-      if(!model.required.every(key => target.includes(key))) {
+    let requiredFields = model.required;
+    if(requiredFields) {
+      let noValueFields = Object.keys(data).filter(key => data[key] == "" || data[key] === null);
+      let missingFields = requiredFields.filter(e => noValueFields.includes(e));
+      console.log('missing fields: ' + missingFields);
+      if(missingFields.length > 0) {
         console.log('missing required attributes');
-        err = 'Missing Required Attributes';
+        err.push('Please enter values for the following fields: ' + missingFields);
+        return null;
       }
     }
     if(model.properties) {
@@ -107,10 +113,12 @@ export default class AuthnWidget {
     let actionId = source.dataset['actionid'];
     //TODO run mapping of data to model and throw validation
     let formData = this.getFormData();
-    let err;
+    let err = [];
     formData = this.validateActionModel(actionId, formData, err);
+    console.log('errors: ' + err);
     if(err) {
       //re-render with errors
+      this.store.dispatch('ERRORS', null, {userMessage: err});
       return;
     }
     else {
@@ -159,7 +167,7 @@ export default class AuthnWidget {
   registerEventListeners(stateName) {
     console.log('registering events for: ' + stateName);
     if(stateName && this.eventHandler.get(stateName)) {
-        this.eventHandler.get(stateName)();
+        this.eventHandler.get(stateName).forEach(fn => fn());
     }
   }
 
@@ -179,8 +187,13 @@ export default class AuthnWidget {
     return template;
   }
 
-  registerState(stateName, eventHandlerFn = this.defaultEventHandler) {
+  registerState(stateName, eventHandlerFn = [this.defaultEventHandler]) {
     this.eventHandler.set(stateName, eventHandlerFn);
+  }
+
+  addEventHandler(stateName, eventHandler) {
+    let evtHandlers = this.eventHandler.get(stateName);
+    evtHandlers.push(eventHandler);
   }
 
   registerActionModel(action, model) {
