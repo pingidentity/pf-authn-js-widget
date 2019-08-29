@@ -1,4 +1,5 @@
 import FetchUtil from './utils/fetchUtil';
+import Assets from './utils/asserts';
 import queryString from 'query-string';
 import 'regenerator-runtime/runtime'; //for async await
 import Handlebars from 'handlebars/runtime';
@@ -17,6 +18,7 @@ export default class AuthnWidget {
       'IDENTIFIER_REQUIRED'
     ];
   }
+
   /*
    * Constructs a new AuthnWidget object
    * @param {string} baseUrl Required: PingFederate Base Url
@@ -29,6 +31,7 @@ export default class AuthnWidget {
     if (!baseUrl) {
       throw new Error('Must provide base Url for PingFederate in the constructor');
     }
+    this.assets = new Assets(options);
     this.fetchUtil = new FetchUtil(baseUrl);
     this.dispatch = this.dispatch.bind(this);
     this.render = this.render.bind(this);
@@ -155,7 +158,8 @@ export default class AuthnWidget {
       template = this.getTemplate('general_error');
     }
     let widgetDiv = document.getElementById(this.divId);
-    widgetDiv.innerHTML = template(state);
+    var params = Object.assign(state, this.assets.toTemplateParams())
+    widgetDiv.innerHTML = template(params);
     this.registerEventListeners(currentState);
   }
 
