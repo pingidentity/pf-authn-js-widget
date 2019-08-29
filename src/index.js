@@ -71,16 +71,24 @@ export default class AuthnWidget {
     Array.from(document.querySelector(`#${this.divId}`)
                        .querySelectorAll("[data-actionId]")).forEach(element => element.addEventListener("click", this.dispatch));
 
-    // document.getElementById(this.divId).addEventListener('blur', e => {
-    //   if(e.target.tagName == "input") {
-    //     console.log('input changed');
-    //   }
-    //   // e.stopPropagation();
-    // });
+    let nodes = document.querySelectorAll(`#${this.divId} input[type=text], input[type=password], input[type=email]`);
+    if(nodes) {
+      nodes.forEach(n => n.addEventListener('input', this.enableSubmit));
+    }
   }
 
   enableSubmit(evt) {
-
+    let nodes = document.querySelectorAll('input[type=text], input[type=password], input[type=email]');  //TODO why doesn't it accept divId as parent
+    let disabled = false;
+    if(nodes) {
+      nodes.forEach(input => {
+        //validate empty + other things
+        if (input.value === '' || !input.value.replace(/\s/g, '').length) {
+          disabled = true
+        }
+      });
+    }
+    document.querySelector('#submit').disabled = disabled;
   }
 
   /**

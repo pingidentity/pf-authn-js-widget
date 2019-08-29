@@ -9,11 +9,11 @@
   {{> errors}}
   <form class="form form--margin-small" id="AuthnWidgetForm">
     <div class="float-label">
-      <input type="text" class="text-input float-label__input" name="email" placeholder="Email Address" required />
+      <input type="email" class="text-input float-label__input" name="email" placeholder="Email Address" required />
       <label class="float-label__label" for="email">Email Address</label>
     </div>
     <div class="button-set">
-      <button data-actionid="checkUsernameRecoveryEmail" class="button button--primary brand-primary-bg">
+      <button id="submit" type="submit" data-actionid="checkUsernameRecoveryEmail" class="button button--primary brand-primary-bg" disabled>
         Send Request
       </button>
       <button data-actionId="cancelUsernameRecovery" class="button">Cancel</button>
