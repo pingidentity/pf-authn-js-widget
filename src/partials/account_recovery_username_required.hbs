@@ -1,25 +1,25 @@
 <div class="card">
-    <div class="org-logo">
-        <img class="org-logo__image" src="https://uilibrary.ping-eng.com/end-user/ping-logo.svg" alt="Company Logo"/>
+  <div class="org-logo">
+    <img class="org-logo__image" src="https://uilibrary.ping-eng.com/end-user/ping-logo.svg" alt="Company Logo" />
+  </div>
+  <h1 class="heading">Account Recovery</h1>
+  <div class="text-block">
+    <div class="text-block__text">Enter your username to reset your password or unlock your account.</div>
+  </div>
+  {{> errors}}
+  <form class="form form--margin-small" id="AuthnWidgetForm">
+    <div class="float-label">
+      <input type="text" class="text-input float-label__input" name="username" placeholder="Username" required />
+      <label class="float-label__label" for="username">Username</label>
     </div>
-    <h1 class="heading">Account Recovery</h1>
-    <div class="text-block">
-        <div class="text-block__text">Enter your username to reset your password or unlock your account.</div>
+    <div class="text-block text-block--small">
+      <a href="#" data-actionid="recoverUsername">Trouble With Username?</a>
     </div>
-    {{> errors}}
-    <form class="form form--margin-small" id="AuthnWidgetForm">
-        <div class="float-label">
-            <input type="text" class="text-input float-label__input" name="username" placeholder="Username" required/>
-            <label class="float-label__label" for="username">Username</label>
-        </div>
-        <div class="text-block text-block--small">
-            <a href="#" data-actionid="recoverUsername">Trouble With Username?</a>
-        </div>
-        <div class="button-set">
-            <button data-actionid="checkAccountRecoveryUsername" class="button button--primary brand-primary-bg">
-                Send Request
-            </button>
-            <button data-actionId="cancelAccountRecovery" class="button">Cancel</button>
-        </div>
-    </form>
+    <div class="button-set">
+      <button data-actionid="checkAccountRecoveryUsername" class="button button--primary brand-primary-bg">
+        Send Request
+      </button>
+      <button data-actionId="cancelAccountRecovery" class="button">Cancel</button>
+    </div>
+  </form>
 </div>

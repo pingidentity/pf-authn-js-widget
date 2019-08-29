@@ -1,22 +1,23 @@
 <div class="card">
-    <div class="org-logo">
-        <img class="org-logo__image" src="https://uilibrary.ping-eng.com/end-user/ping-logo.svg" alt="Company Logo"/>
+  <div class="org-logo">
+    <img class="org-logo__image" src="https://uilibrary.ping-eng.com/end-user/ping-logo.svg" alt="Company Logo" />
+  </div>
+  <h1 class="heading">Challenge Response Required</h1>
+  <div class="text-block">
+    <div class="text-block__text">The user's challenge response is required.</div>
+  </div>
+  {{> errors}}
+  <form class="form form--margin-small" id="AuthnWidgetForm">
+    <div class="float-label">
+      <input type="text" class="text-input float-label__input" name="challengeResponse" placeholder="Challenge Response"
+        required />
+      <label class="float-label__label" for="challengeResponse">Challenge Response</label>
     </div>
-    <h1 class="heading">Challenge Response Required</h1>
-    <div class="text-block">
-        <div class="text-block__text">The user's challenge response is required.</div>
+    <div class="button-set">
+      <button data-actionid="checkChallengeResponse" class="button button--primary brand-primary-bg">
+        Check Challenge Response
+      </button>
+      <button data-actionId="cancelAuthentication" class="button">Cancel</button>
     </div>
-    {{> errors}}
-    <form class="form form--margin-small" id="AuthnWidgetForm">
-        <div class="float-label">
-            <input type="text" class="text-input float-label__input" name="challengeResponse" placeholder="Challenge Response" required/>
-            <label class="float-label__label" for="challengeResponse">Challenge Response</label>
-        </div>
-        <div class="button-set">
-            <button data-actionid="checkChallengeResponse" class="button button--primary brand-primary-bg">
-                Check Challenge Response
-            </button>
-            <button data-actionId="cancelAuthentication" class="button">Cancel</button>
-        </div>
-    </form>
+  </form>
 </div>
