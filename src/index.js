@@ -88,6 +88,22 @@ export default class AuthnWidget {
         }
       });
     }
+
+    let newpass = document.querySelector('#newpassword');
+    let verifypass = document.querySelector('#verifypassword');
+    if(newpass && verifypass) {
+      newpass.classList.remove("text-input--success");
+      verifypass.classList.remove("text-input--success");
+      disabled =  (newpass.value === '' && verifypass.value === '') ||  newpass.value != verifypass.value;
+      if(!disabled) {
+        newpass.classList.add("text-input--success");
+        verifypass.classList.add("text-input--success");
+      }
+      else {
+        newpass.classList.remove("text-input--success");
+        verifypass.classList.remove("text-input--success");
+      }
+    }
     document.querySelector('#submit').disabled = disabled;
   }
 
@@ -110,7 +126,6 @@ export default class AuthnWidget {
     if(requiredFields) {
       let noValueFields = Object.keys(data).filter(key => data[key] == "" || data[key] === null);
       let missingFields = requiredFields.filter(e => noValueFields.includes(e));
-      console.log('missing fields: ' + missingFields);
       if(missingFields.length > 0) {
         console.log('missing required attributes');
         err.push('Please enter values for the following fields: ' + missingFields);
@@ -119,6 +134,7 @@ export default class AuthnWidget {
     }
     if(model.properties) {
       //remove unneeded params?
+      Object.keys(data).forEach(key => !model.properties.includes(key) ? delete data[key] : '');
     }
     return data;
   }

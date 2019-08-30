@@ -45,6 +45,7 @@ export default class Store {
     }
     json = await result.json();
     let combinedData = this.state;
+    delete combinedData.userMessage;  //TODO update new error message
     if (json.status) {
       combinedData = json;
       this.state = json;
