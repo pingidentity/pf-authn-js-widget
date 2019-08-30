@@ -75,6 +75,15 @@ export default class AuthnWidget {
     if(nodes) {
       nodes.forEach(n => n.addEventListener('input', this.enableSubmit));
     }
+    this.getForm().addEventListener("keydown", evt => {
+      if (evt.key === "Enter") {
+        evt.preventDefault();
+        let elem = document.querySelector("#submit");
+        if(elem) {
+          elem.click();
+        }
+      }
+    });
   }
 
   enableSubmit(evt) {
