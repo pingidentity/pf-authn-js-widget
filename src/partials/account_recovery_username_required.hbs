@@ -12,9 +12,13 @@
       <input type="text" class="text-input float-label__input" name="username" placeholder="Username" required />
       <label class="float-label__label" for="username">Username</label>
     </div>
+    {{#with _links as |actions|}}
+    {{#if recoverUsername}}
     <div class="text-block text-block--small">
       <a href="#" data-actionid="recoverUsername">Trouble With Username?</a>
     </div>
+    {{/if}}
+    {{/with}}
     <div class="button-set">
       <button id="submit" type="submit" data-actionid="checkAccountRecoveryUsername" class="button button--primary brand-primary-bg" disabled>
         Send Request

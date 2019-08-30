@@ -78,13 +78,19 @@ export default class AuthnWidget {
   }
 
   enableSubmit(evt) {
-    let nodes = document.querySelectorAll('input[type=text], input[type=password], input[type=email]');  //TODO why doesn't it accept divId as parent
+    let nodes = document.querySelectorAll('input[type=text], input[type=password], input[type=email]');
     let disabled = false;
     if(nodes) {
       nodes.forEach(input => {
         //validate empty + other things
         if (input.value === '' || !input.value.replace(/\s/g, '').length) {
           disabled = true
+        }
+        if(input.type === 'email') {
+          let isValidEmail = input.checkValidity();
+          if(!isValidEmail) {
+            disabled = true;
+          }
         }
       });
     }
@@ -127,13 +133,12 @@ export default class AuthnWidget {
       let noValueFields = Object.keys(data).filter(key => data[key] == "" || data[key] === null);
       let missingFields = requiredFields.filter(e => noValueFields.includes(e));
       if(missingFields.length > 0) {
-        console.log('missing required attributes');
         err.push('Please enter values for the following fields: ' + missingFields);
         // return null;
       }
     }
     if(model.properties) {
-      //remove unneeded params?
+      //remove unneeded params
       Object.keys(data).forEach(key => !model.properties.includes(key) ? delete data[key] : '');
     }
     return data;
@@ -152,7 +157,6 @@ export default class AuthnWidget {
     let formData = this.getFormData();
     let err = [];
     formData = this.validateActionModel(actionId, formData, err);
-    console.log('errors: ' + err);
     if(err) {
       //re-render with errors
       // this.store.dispatch('ERRORS', null, {userMessage: err});
