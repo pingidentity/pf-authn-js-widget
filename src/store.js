@@ -50,8 +50,13 @@ export default class Store {
       combinedData = json;
       this.state = json;
     } else {
-      let errors = this.getErrorDetails(json);
-      combinedData = { ...errors, ...this.state };
+      if(json.code === 'RESOURCE_NOT_FOUND') {
+        this.state = {}
+      }
+      else {
+        let errors = this.getErrorDetails(json);
+        combinedData = { ...errors, ...this.state };
+      }
     }
     return combinedData;
   }
@@ -65,6 +70,9 @@ export default class Store {
       else {
         errors.push(json.userMessage);
       }
+    }
+    else if(json.code === 'RESOURCE_NOT_FOUND') {
+      errors.push(json.message);
     }
     return {
       userMessage: errors
