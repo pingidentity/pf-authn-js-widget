@@ -2,7 +2,6 @@ import FetchUtil from './utils/fetchUtil';
 import Assets from './utils/asserts';
 import queryString from 'query-string';
 import 'regenerator-runtime/runtime'; //for async await
-import Handlebars from 'handlebars/runtime';
 import Store from './store';
 
 export default class AuthnWidget {
@@ -78,9 +77,8 @@ export default class AuthnWidget {
       if (evt.key === "Enter") {
         evt.preventDefault();
         let elem = document.querySelector("#submit");
-        if(elem) {
-          elem.click();
-        }
+        elem && elem.click();
+
       }
     });
   }
