@@ -42,7 +42,7 @@ module.exports = (env, argv) => {
           test: /\.(handlebars|hbs)$/,
           loader: "handlebars-loader",
           options: {
-            helperDirs: path.join(__dirname, 'helpers'),
+            helperDirs: path.join(__dirname, 'src', 'helpers'),
             precompileOptions: {
               knownHelpersOnly: false,
             },

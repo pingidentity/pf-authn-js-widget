@@ -39,7 +39,6 @@ export default class AuthnWidget {
     this.stateTemplates = new Map();  //state -> handlebar templates
     this.eventHandler = new Map();  //state -> eventHandlers
     this.actionModels = new Map();
-    this.registerHelpers(); //TODO do it as part of webpack helper
     this.store = new Store(this.flowId, this.fetchUtil);
     this.store.registerListener(this.render);
     AuthnWidget.CORE_STATES.forEach(state => this.registerState(state));
@@ -180,12 +179,6 @@ export default class AuthnWidget {
       let formData = new FormData(formElement);
       return Object.fromEntries(formData);
     }
-  }
-
-  registerHelpers() {
-    Handlebars.registerHelper("checkedIf", function (condition) {
-      return (condition) ? "checked" : "";
-    });
   }
 
   render(prevState, state) {
