@@ -1,11 +1,13 @@
 
 export default class Store {
-  constructor(flowId, fetchUtil) {
+  constructor(flowId, fetchUtil, checkRecaptcha) {
     this.listeners = [];
     this.prevState = {};
     this.state = {};
     this.flowId = flowId;
     this.fetchUtil = fetchUtil;
+    this.checkRecaptcha = checkRecaptcha;
+    this.pendingState = {};
   }
 
   getStore() {
@@ -20,6 +22,19 @@ export default class Store {
     this.notifyListeners();
   }
 
+  savePendingState (method, actionId, payload) {
+    this.pendingState = {
+      method, actionId, payload,
+    }
+  }
+
+  dispatchPendingState(token) {
+    if(this.pendingState) {
+      let payLoadString = JSON.stringify({...this.pendingState.payload, ...{captchaResponse: token}});
+      this.dispatch(this.pendingState.method, this.pendingState.actionId, payLoadString);
+      this.pendingState = {};
+    }
+  }
 
   /**
    * based on actionId + payload, return a new state
@@ -58,6 +73,8 @@ export default class Store {
         combinedData = { ...errors, ...this.state };
       }
     }
+    this.checkRecaptcha;
+    combinedData = {...combinedData, checkRecaptcha: this.checkRecaptcha};
     return combinedData;
   }
 

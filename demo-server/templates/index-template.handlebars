@@ -8,6 +8,38 @@
   <script src="./pf.authn-widget.js"></script>
   <script type='application/json' src="./pf.authn-widget.map"></script>
   <link rel="stylesheet" type="text/css" href="https://uilibrary.ping-eng.com/end-user/end-user.css">
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <script type="text/javascript">
+        var authnWidget;
+        function checkRecaptcha(token) {
+            console.log('captcha response: ' + token);
+            if (token.length === 0) {
+                //reCaptcha not verified
+                // alert("no pass");
+                console.log('did not pass captcha try again');
+            } else {
+                //reCaptch verified
+                authnWidget.dispatchPendingState(token);
+                grecaptcha.reset();
+            }
+        }
+
+        function invokeReCaptcha() {
+            let token = grecaptcha.getResponse();
+            if(token) {
+                checkRecaptcha(token);
+            }
+            else {
+                grecaptcha.execute();
+            }
+        }
+
+        $(document).ready(function () {
+            <!--authnWidget = new PfAuthnWidget("{{baseUrl}}", { divId: 'authnwidget', invokeReCaptcha: invokeReCaptcha, checkRecaptcha: 'checkRecaptcha', grecaptcha: grecaptcha });-->
+            authnWidget = new PfAuthnWidget("{{baseUrl}}", { divId: 'authnwidget' });
+            authnWidget.init();
+        });
+    </script>
 </head>
 
 <body>
@@ -17,10 +49,7 @@
   </div>
 </body>
 <script>
-  $(document).ready(function () {
-    var authnWidget = new PfAuthnWidget("{{baseUrl}}", { divId: 'authnwidget' });
-    authnWidget.init();
-  });
+
 </script>
 
 </html>

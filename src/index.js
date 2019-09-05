@@ -32,13 +32,16 @@ export default class AuthnWidget {
     }
     this.assets = new Assets(options);
     this.fetchUtil = new FetchUtil(baseUrl);
+    this.invokeReCaptcha = options.invokeReCaptcha;
+    this.checkRecaptcha = options.checkRecaptcha;
+    this.grecaptcha = options.grecaptcha;
     this.dispatch = this.dispatch.bind(this);
     this.render = this.render.bind(this);
     this.defaultEventHandler = this.defaultEventHandler.bind(this);
     this.stateTemplates = new Map();  //state -> handlebar templates
     this.eventHandler = new Map();  //state -> eventHandlers
     this.actionModels = new Map();
-    this.store = new Store(this.flowId, this.fetchUtil);
+    this.store = new Store(this.flowId, this.fetchUtil, this.checkRecaptcha);
     this.store.registerListener(this.render);
     AuthnWidget.CORE_STATES.forEach(state => this.registerState(state));
 
@@ -73,14 +76,15 @@ export default class AuthnWidget {
     if(nodes) {
       nodes.forEach(n => n.addEventListener('input', this.enableSubmit));
     }
-    this.getForm().addEventListener("keydown", evt => {
-      if (evt.key === "Enter") {
-        evt.preventDefault();
-        let elem = document.querySelector("#submit");
-        elem && elem.click();
-
-      }
-    });
+    if(this.getForm()) {
+      this.getForm().addEventListener("keydown", evt => {
+        if (evt.key === "Enter") {
+          evt.preventDefault();
+          let elem = document.querySelector("#submit");
+          elem && elem.click();
+        }
+      });
+    }
   }
 
   enableSubmit(evt) {
@@ -168,7 +172,23 @@ export default class AuthnWidget {
       // this.store.dispatch('ERRORS', null, {userMessage: err});
       // return;
     }
-    this.store.dispatch('POST_FLOW', actionId, JSON.stringify(formData));
+
+    if(this.needsCaptchaResponse(actionId) && this.store.state.captchaSiteKey && this.store.state.showCaptcha) {
+      this.store.savePendingState('POST_FLOW', actionId, formData);
+      this.invokeReCaptcha();
+      return;
+    }
+    else {
+      this.store.dispatch('POST_FLOW', actionId, JSON.stringify(formData));
+    }
+  }
+
+  needsCaptchaResponse(actionId) {
+    return this.actionModels.get(actionId) && this.actionModels.get(actionId).propereties.includes('captchaResponse');
+  }
+
+  dispatchPendingState(token) {
+    this.store.dispatchPendingState(token);
   }
 
   getFormData(){
