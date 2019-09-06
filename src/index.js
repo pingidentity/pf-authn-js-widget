@@ -134,19 +134,10 @@ export default class AuthnWidget {
    * @param err
    * @returns {string|*} the model to be sent to PingFederate after all required fields are available
    */
-  validateActionModel(action, data, err = []) {
+  validateActionModel(action, data) {
     const model = this.actionModels.get(action);
     if(model === undefined) {
       return undefined;
-    }
-    let requiredFields = model.required;
-    if(requiredFields) {
-      let noValueFields = Object.keys(data).filter(key => data[key] == "" || data[key] === null);
-      let missingFields = requiredFields.filter(e => noValueFields.includes(e));
-      if(missingFields.length > 0) {
-        err.push('Please enter values for the following fields: ' + missingFields);
-        // return null;
-      }
     }
     if(model.properties) {
       //remove unneeded params
@@ -167,12 +158,7 @@ export default class AuthnWidget {
     //TODO run mapping of data to model and throw validation
     let formData = this.getFormData();
     let err = [];
-    formData = this.validateActionModel(actionId, formData, err);
-    if(err) {
-      //re-render with errors
-      // this.store.dispatch('ERRORS', null, {userMessage: err});
-      // return;
-    }
+    formData = this.validateActionModel(actionId, formData);
 
     if(this.store.state.showCaptcha && this.needsCaptchaResponse(actionId) && this.store.state.captchaSiteKey) {
       this.store.savePendingState('POST_FLOW', actionId, formData);
