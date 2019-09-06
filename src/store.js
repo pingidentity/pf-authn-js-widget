@@ -48,8 +48,6 @@ export default class Store {
     let result;
     let json;
     switch (method) {
-      case 'ERRORS':
-        return {...this.state, ...payload};
       case 'GET_FLOW':
         result = await this.fetchUtil.getFlow(this.flowId);
         break;
@@ -89,10 +87,13 @@ export default class Store {
             });
           }
           else {
-            errors.push(msg.userMessage + (msg.target ? ': ' + msg.target : ''));
+            let errorMsg = msg.userMessage;
+            if(msg.target) {
+              errorMsg = errorMsg.slice(0, -1).concat(' : ').concat(msg.target);
+            }
+            errors.push(errorMsg);
           }
-        })
-
+        });
       }
       else {
         errors.push(json.userMessage);

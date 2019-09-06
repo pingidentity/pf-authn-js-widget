@@ -157,7 +157,6 @@ export default class AuthnWidget {
     let actionId = source.dataset['actionid'];
     //TODO run mapping of data to model and throw validation
     let formData = this.getFormData();
-    let err = [];
     formData = this.validateActionModel(actionId, formData);
 
     if(this.store.state.showCaptcha && this.needsCaptchaResponse(actionId) && this.store.state.captchaSiteKey) {
