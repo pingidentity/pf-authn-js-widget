@@ -30,6 +30,7 @@ export default class AuthnWidget {
     if (!baseUrl) {
       throw new Error('Must provide base Url for PingFederate in the constructor');
     }
+    this.captchaDivId = 'invisibleRecaptchaId';
     this.assets = new Assets(options);
     this.fetchUtil = new FetchUtil(baseUrl);
     this.invokeReCaptcha = options.invokeReCaptcha;
@@ -173,7 +174,7 @@ export default class AuthnWidget {
       // return;
     }
 
-    if(this.needsCaptchaResponse(actionId) && this.store.state.captchaSiteKey && this.store.state.showCaptcha) {
+    if(this.store.state.showCaptcha && this.needsCaptchaResponse(actionId) && this.store.state.captchaSiteKey) {
       this.store.savePendingState('POST_FLOW', actionId, formData);
       this.invokeReCaptcha();
       return;
@@ -184,7 +185,7 @@ export default class AuthnWidget {
   }
 
   needsCaptchaResponse(actionId) {
-    return this.actionModels.get(actionId) && this.actionModels.get(actionId).propereties.includes('captchaResponse');
+    return this.actionModels.get(actionId) && this.actionModels.get(actionId).properties && this.actionModels.get(actionId).properties.some(prop => prop === 'captchaResponse');
   }
 
   dispatchPendingState(token) {
@@ -200,6 +201,7 @@ export default class AuthnWidget {
   }
 
   render(prevState, state) {
+
     let currentState = state.status;
     if (currentState === 'RESUME') {
       window.location.replace(state.resumeUrl);
@@ -217,6 +219,9 @@ export default class AuthnWidget {
     var params = Object.assign(state, this.assets.toTemplateParams())
     widgetDiv.innerHTML = template(params);
     this.registerEventListeners(currentState);
+    if(this.store.state.showCaptcha) {
+      this.grecaptcha.render(this.captchaDivId);
+    }
   }
 
   getBrowserFlowId() {
