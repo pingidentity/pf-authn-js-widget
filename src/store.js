@@ -36,6 +36,10 @@ export default class Store {
     }
   }
 
+  clearPendingState() {
+    this.pendingState = {};
+  }
+
   /**
    * based on actionId + payload, return a new state
    * @param flowId

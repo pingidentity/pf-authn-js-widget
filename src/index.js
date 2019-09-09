@@ -162,6 +162,10 @@ export default class AuthnWidget {
     this.store.dispatchPendingState(token);
   }
 
+  clearPendingState() {
+    this.store.clearPendingState();
+  }
+
   getFormData(){
     let formElement = this.getForm();
     if(formElement) {
