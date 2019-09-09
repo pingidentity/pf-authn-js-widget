@@ -1,5 +1,5 @@
 import FetchUtil from './utils/fetchUtil';
-import Assets from './utils/asserts';
+import Assets from './utils/assets';
 import queryString from 'query-string';
 import 'regenerator-runtime/runtime'; //for async await
 import Store from './store';
@@ -106,21 +106,6 @@ export default class AuthnWidget {
       });
     }
 
-    let newpass = document.querySelector('#newpassword');
-    let verifypass = document.querySelector('#verifypassword');
-    if(newpass && verifypass) {
-      newpass.classList.remove("text-input--success");
-      verifypass.classList.remove("text-input--success");
-      disabled =  (newpass.value === '' && verifypass.value === '') ||  newpass.value != verifypass.value;
-      if(!disabled) {
-        newpass.classList.add("text-input--success");
-        verifypass.classList.add("text-input--success");
-      }
-      else {
-        newpass.classList.remove("text-input--success");
-        verifypass.classList.remove("text-input--success");
-      }
-    }
     document.querySelector('#submit').disabled = disabled;
   }
 

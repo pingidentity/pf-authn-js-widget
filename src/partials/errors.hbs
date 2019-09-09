@@ -1,10 +1,11 @@
-{{#if userMessage}}
+{{#if errorMsg}}
 <div class="feedback feedback--error">
-  <img class="feedback__icon" src="{{error}}" alt="Error" />
   <div class="feedback__message">
-    {{#each userMessage}}
-    <div>{{this}}</div>
-    {{/each}}
+    <ul>
+        <div>
+          <img class="feedback__icon" src="{{error}}" alt="Error" />
+          {{errorMsg}}
+        </div>
     </ul>
   </div>
 </div>

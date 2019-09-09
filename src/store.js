@@ -77,34 +77,32 @@ export default class Store {
   }
 
   getErrorDetails(json) {
-    let errors = [];
+    let errors = {};
     if(json.code && json.code == 'VALIDATION_ERROR') {
       if(json.details) {
         json.details.forEach(msg => {
           if(msg.failedValidators) {
-            msg.failedValidators.forEach(v => {
-              errors.push(v.userMessage);
-            });
+            errors.failedValidators = msg.failedValidators.map(msg => msg.userMessage);
           }
-          else {
-            let errorMsg = msg.userMessage;
-            if(msg.target) {
-              errorMsg = errorMsg.slice(0, -1).concat(' : ').concat(msg.target);
-            }
-            errors.push(errorMsg);
+          if(msg.satisfiedValidators) {
+            errors.satisfiedValidators = msg.satisfiedValidators.map(msg => msg.userMessage);
           }
+
+          let errorMsg = msg.userMessage;
+          if(msg.target) {
+            errorMsg = errorMsg.slice(0, -1).concat(' : ').concat(msg.target);
+          }
+          errors.errorMsg = errorMsg;
         });
       }
       else {
-        errors.push(json.userMessage);
+        errors.errorMsg = json.userMessage;
       }
     }
     else if(json.code === 'RESOURCE_NOT_FOUND') {
-      errors.push(json.message);
+      errors.errorMsg = json.message;
     }
-    return {
-      userMessage: errors
-    };
+    return errors;
   }
 
 
