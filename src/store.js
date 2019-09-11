@@ -78,17 +78,18 @@ export default class Store {
         combinedData = { ...errors, ...this.state };
       }
     }
-    if(this.combinedData && this.combinedData.daysToExpire) {
-      let daysToExpire = this.combinedData.daysToExpire;
+    let daysToExpireMsg;
+    if(json.daysToExpire) {
+      let daysToExpire = json.daysToExpire;
       if (daysToExpire === 0) {
-        this.combinedData.daysToExpireMsg = "today";
+        daysToExpireMsg = "today";
       } else if (daysToExpire === 1) {
-        this.combinedData.daysToExpireMsg = "tomorrow";
+        daysToExpireMsg = "tomorrow";
       } else if (daysToExpire > 1) {
-        this.combinedData.daysToExpireMsg = "in " + daysToExpire + " days";
+        daysToExpireMsg = "in " + daysToExpire + " days";
       }
     }
-    combinedData = {...combinedData, checkRecaptcha: this.checkRecaptcha};
+    combinedData = {...combinedData, checkRecaptcha: this.checkRecaptcha, daysToExpireMsg};
     return combinedData;
   }
 
