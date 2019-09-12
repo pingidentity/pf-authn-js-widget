@@ -71,7 +71,7 @@ export default class Store {
       this.state = json;
     } else {
       if(json.code === 'RESOURCE_NOT_FOUND') {
-        this.state = {}
+        this.state = {};
       }
       else {
         let errors = this.getErrorDetails(json);
@@ -79,8 +79,8 @@ export default class Store {
       }
     }
     let daysToExpireMsg;
-    if(json.daysToExpire) {
-      let daysToExpire = json.daysToExpire;
+    let daysToExpire = json.daysToExpire;
+    if(daysToExpire !== undefined) {
       if (daysToExpire === 0) {
         daysToExpireMsg = "today";
       } else if (daysToExpire === 1) {
