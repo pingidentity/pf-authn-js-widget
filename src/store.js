@@ -105,19 +105,19 @@ export default class Store {
             errors.satisfiedValidators = msg.satisfiedValidators.map(msg => msg.userMessage);
           }
 
-          let errorMsg = msg.userMessage;
+          let userMessage = msg.userMessage;
           if(msg.target) {
-            errorMsg = errorMsg.slice(0, -1).concat(' : ').concat(msg.target);
+            userMessage = userMessage.slice(0, -1).concat(' : ').concat(msg.target);
           }
-          errors.errorMsg = errorMsg;
+          errors.userMessage = userMessage;
         });
       }
       else {
-        errors.errorMsg = json.userMessage;
+        errors.userMessage = json.userMessage;
       }
     }
     else if(json.code === 'RESOURCE_NOT_FOUND') {
-      errors.errorMsg = json.message;
+      errors.userMessage = json.message;
     }
     return errors;
   }
