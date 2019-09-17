@@ -78,6 +78,12 @@ export default class AuthnWidget {
     if(nodes) {
       nodes.forEach(n => n.addEventListener('input', this.enableSubmit));
     }
+    let element = nodes[0];
+    if(element) {
+      let event = new Event('input');
+      element.dispatchEvent(event);
+    }
+
     if(this.getForm()) {
       this.getForm().addEventListener("keydown", evt => {
         if (evt.key === "Enter") {

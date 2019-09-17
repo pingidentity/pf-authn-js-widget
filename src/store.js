@@ -54,6 +54,13 @@ export default class Store {
     this.prevState = this.state;
     let result;
     let json;
+    let timeout;
+    if(document.querySelector("#spinnerId")) {
+      console.log('showing spinner...');
+      timeout = setTimeout(function () {
+        document.querySelector('#spinnerId').style.display = 'block'
+      }, 600)
+    }
     switch (method) {
       case 'GET_FLOW':
         result = await this.fetchUtil.getFlow(this.flowId);
@@ -64,6 +71,13 @@ export default class Store {
         break;
     }
     json = await result.json();
+    if(document.querySelector("#spinnerId")) {
+      if(timeout)
+        clearTimeout(timeout);
+      document.querySelector("#spinnerId").style.display ='none';
+      console.log('hiding spinner....');
+
+    }
     let combinedData = this.state;
     delete combinedData.userMessage;  //clear previous error shown
     if (json.status) {
