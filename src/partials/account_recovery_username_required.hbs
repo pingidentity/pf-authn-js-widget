@@ -7,6 +7,7 @@
     <div class="text-block__text">Enter your username to reset your password or unlock your account.</div>
   </div>
   {{> errors}}
+  {{> spinner}}
   <form class="form form--margin-small" id="AuthnWidgetForm">
     {{#if showCaptcha}}
         <div class="g-recaptcha"
