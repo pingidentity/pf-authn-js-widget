@@ -2,7 +2,7 @@
   "name": "pf-authn-widget",
   "version": "1.0.0",
   "description": "PingFederate Authentication API widget",
-  "main": "./src/index.js",
+  "main": "./dist/pf.authn-widget.js",
   "scripts": {
     "start": "cross-env-shell webpack-dev-server --config webpack.config.js --baseurl=$BASEURL",
     "build": "webpack --mode production  --progress --profile --colors",
@@ -27,6 +27,10 @@
   "bugs": {
     "url": "https://github.com/pingidentity/pf-authn-widget/issues"
   },
+  "browserslist": [
+    "> 0.1%",
+    "not ie <= 9"
+  ],
   "homepage": "https://github.com/pingidentity/pf-authn-widget#readme",
   "devDependencies": {
     "@babel/cli": "^7.0.0",
