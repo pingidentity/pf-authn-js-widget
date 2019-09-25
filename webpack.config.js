@@ -69,14 +69,13 @@ module.exports = (env, argv) => {
             {
               loader: "css-loader",
               options: {
-                sourceMap: isDevelopment,
-                minimize: !isDevelopment
+                sourceMap: true,
               }
             },
             {
               loader: "sass-loader",
               options: {
-                sourceMap: isDevelopment
+                sourceMap: true
               }
             }
           ]

@@ -1,0 +1,27 @@
+$background-color: red;
+$logo: 'https://placedog.net/500';
+$link-color: purple;
+$button-color: green;
+$button-text-color: white;
+
+a {
+    color: $link-color;
+    &:hover {
+        color: rgba($link-color, 0.8);
+    }
+}
+
+.content {
+    background: $background-color;
+}
+
+.button--primary {
+    background: $button-color;
+    border: $button-color;
+    color: $button-text-color;
+    &:hover {
+        background: rgba($button-color, 0.8);
+    }
+}
+
+// Place any custom css classes here

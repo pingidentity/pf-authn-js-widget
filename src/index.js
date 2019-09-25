@@ -1,8 +1,12 @@
+// require("./scss/branding.scss");
+
 import FetchUtil from './utils/fetchUtil';
 import Assets from './utils/assets';
 import queryString from 'query-string';
 import 'regenerator-runtime/runtime'; //for async await
 import Store from './store';
+
+import "./scss/branding.scss";
 
 export default class AuthnWidget {
 
