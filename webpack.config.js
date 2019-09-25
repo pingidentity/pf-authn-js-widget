@@ -34,8 +34,7 @@ module.exports = (env, argv) => {
       publicPath: '/',
       sourceMapFilename: 'pf.authn-widget.map',
       libraryTarget: 'umd',
-      umdNamedDefine: true,
-      globalObject: "typeof self !== 'undefined' ? self : this"
+      umdNamedDefine: true
     },
     devtool: "source-map",
     module: {
