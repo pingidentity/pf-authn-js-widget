@@ -1,21 +1,13 @@
 module.exports = function (api) {
   // api.cache(true);
   const presets = [
-    ["@babel/preset-env",
-      {
-        "modules": "commonjs",
-      }],
+    ["@babel/preset-env"],
     "minify",
   ];
   let plugins = [
-    "add-module-exports",
-    ["@babel/plugin-transform-runtime",
-      {
-        "corejs": 3,
-      }]
-    ,
+    ["add-module-exports"],
     [
-      "@babel/plugin-proposal-class-properties",
+    "@babel/plugin-proposal-class-properties",
     ]
   ];
 

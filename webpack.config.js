@@ -31,9 +31,11 @@ module.exports = (env, argv) => {
       path: PATHS.dist,
       filename: 'pf.authn-widget.js',
       library: 'PfAuthnWidget',
+      libraryExport: 'default',
       publicPath: '/',
       sourceMapFilename: 'pf.authn-widget.map',
       libraryTarget: 'umd',
+      globalObject: '(typeof self !== \'undefined\' ? self : this)',
       umdNamedDefine: true
     },
     devtool: "source-map",
@@ -60,10 +62,12 @@ module.exports = (env, argv) => {
         {
           test: /\.js$/,
           use: ["source-map-loader"],
+          exclude: /(node_modules|bower_components)/,
           enforce: "pre"
         },
         {
           test: /\.(scss|css)$/,
+          exclude: /node_modules/,
           use: [
             MiniCssExtractPlugin.loader,
             {
