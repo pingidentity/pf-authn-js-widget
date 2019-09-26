@@ -8,8 +8,14 @@
   </div>
   <form class="form form--margin-small" id="AuthnWidgetForm">
     <div class="button-set">
+     {{#with _links as |actions|}}
+     {{#if continueAuthentication}}
       <button data-actionId="continueAuthentication" class="button">Continue Authentication</button>
+     {{/if}}
+     {{#if continueAccountRecovery}}
       <button data-actionId="continueAccountRecovery" class="button">Continue Account Recovery</button>
+     {{/if}}
+     {{/with}}
     </div>
   </form>
 </div>

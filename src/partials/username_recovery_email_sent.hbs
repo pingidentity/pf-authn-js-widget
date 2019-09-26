@@ -7,7 +7,11 @@
     <div class="text-block__text">Thanks for your request. If your email address is verified, you'll receive an email
       with your username.</div>
   </div>
+  {{#with _links as |actions|}}
+  {{#if continueAuthentication}}
   <form class="form form--margin-small" id="AuthnWidgetForm">
     <button data-actionId="continueAuthentication" class="button">Continue</button>
   </form>
+  {{/if}}
+  {{/with}}
 </div>

@@ -112,12 +112,8 @@ export default class Store {
     if(json.code && json.code == 'VALIDATION_ERROR') {
       if(json.details) {
         json.details.forEach(msg => {
-          if(msg.failedValidators) {
-            errors.failedValidators = msg.failedValidators.map(msg => msg.userMessage);
-          }
-          if(msg.satisfiedValidators) {
-            errors.satisfiedValidators = msg.satisfiedValidators.map(msg => msg.userMessage);
-          }
+          errors.failedValidators = msg.failedValidators ? msg.failedValidators.map(msg => msg.userMessage) : "";
+          errors.satisfiedValidators = msg.satisfiedValidators ? msg.satisfiedValidators.map(msg => msg.userMessage) : "";
 
           let userMessage = msg.userMessage;
           if(msg.target) {
