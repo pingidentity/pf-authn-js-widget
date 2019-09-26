@@ -9,14 +9,13 @@ module.exports = function (api) {
   ];
   let plugins = [
     "add-module-exports",
-    ["@babel/plugin-transform-runtime",
-      {
-        "corejs": 3,
-      }]
-    ,
-    [
-      "@babel/plugin-proposal-class-properties",
-    ]
+    ["@babel/plugin-transform-runtime", {
+      "corejs": 3,
+    }
+    ],
+     "@babel/plugin-proposal-class-properties",
+     "@babel/plugin-transform-arrow-functions",
+    
   ];
 
   if(api.env("production"))

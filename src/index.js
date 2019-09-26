@@ -1,6 +1,7 @@
 import FetchUtil from './utils/fetchUtil';
 import Assets from './utils/assets';
 import queryString from 'query-string';
+import 'core-js/stable';
 import 'regenerator-runtime/runtime'; //for async await
 import Store from './store';
 
