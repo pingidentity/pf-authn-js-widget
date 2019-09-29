@@ -1,4 +1,4 @@
-
+import 'whatwg-fetch';
 export default class fetchUtil {
 
   constructor(baseUrl) {

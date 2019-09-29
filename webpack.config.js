@@ -97,6 +97,9 @@ module.exports = (env, argv) => {
       ]
     },
     plugins: [
+      new webpack.ProvidePlugin({
+        Promise: ['es6-promise', 'Promise']
+      }),
       new webpack.LoaderOptionsPlugin({
         options: {
           handlebarsLoader: {}
