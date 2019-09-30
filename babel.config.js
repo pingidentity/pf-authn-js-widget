@@ -5,8 +5,7 @@ module.exports = function (api) {
       {
         useBuiltIns: "usage",
         corejs: 3,
-        "modules": "commonjs",
-        "debug":true
+        "modules": "commonjs"
       }],
     "minify",
   ];
