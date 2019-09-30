@@ -26,7 +26,7 @@ module.exports = (env, argv) => {
       port: 8443,
       https: true
     },
-    entry: ['whatwg-fetch', path.join(PATHS.src, 'index')],
+    entry: ['formdata-polyfill', 'whatwg-fetch', path.join(PATHS.src, 'index')],
     output: {
       path: PATHS.dist,
       filename: 'pf.authn-widget.js',

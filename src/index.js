@@ -5,6 +5,20 @@ import 'core-js/stable';
 import 'regenerator-runtime/runtime'; //for async await
 import Store from './store';
 
+(function () {
+
+  if ( typeof window.CustomEvent === "function" ) return false;
+
+  function CustomEvent ( event, params ) {
+    params = params || { bubbles: false, cancelable: false, detail: null };
+    var evt = document.createEvent( 'CustomEvent' );
+    evt.initCustomEvent( event, params.bubbles, params.cancelable, params.detail );
+    return evt;
+   }
+
+  window.CustomEvent = CustomEvent;
+})();
+
 export default class AuthnWidget {
 
   static get FORM_ID(){
@@ -81,7 +95,7 @@ export default class AuthnWidget {
     }
     let element = nodes[0];
     if(element) {
-      let event = new Event('input');
+      let event = new CustomEvent('input');
       element.dispatchEvent(event);
     }
 
@@ -97,7 +111,7 @@ export default class AuthnWidget {
   }
 
   enableSubmit(evt) {
-    let nodes = document.querySelectorAll('input[type=text], input[type=password], input[type=email]');
+    let nodes = (document.querySelectorAll('input[type=text], input[type=password], input[type=email]'));
     let disabled = false;
     if(nodes) {
       nodes.forEach(input => {
@@ -140,7 +154,7 @@ export default class AuthnWidget {
   }
 
   getForm() {
-    return document.querySelector(`#${this.divId}`).querySelector(`#${AuthnWidget.FORM_ID}`);
+    return document.getElementById(AuthnWidget.FORM_ID);
   }
 
   dispatch(evt){
@@ -178,7 +192,14 @@ export default class AuthnWidget {
     let formElement = this.getForm();
     if(formElement) {
       let formData = new FormData(formElement);
-      return Object.fromEntries(formData);
+      let object = {};
+      var formDataEntries = formData.entries(), formDataEntry = formDataEntries.next(), pair;
+      while (!formDataEntry.done) {
+          pair = formDataEntry.value;
+          object[pair[0]] = pair[1];
+          formDataEntry = formDataEntries.next();
+      }
+      return object;
     }
   }
 
