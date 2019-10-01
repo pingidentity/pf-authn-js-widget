@@ -17,6 +17,12 @@ export default class Store {
   async dispatch(method, actionId, payload) {
     this.prevState = this.state;
     this.state = await this.reduce(method, actionId, payload);
+    if(this.prevState.status === 'NEW_PASSWORD_REQUIRED') {
+      this.state.userTitle = 'Change Password';
+    }
+    else if(this.prevState.status === 'ACCOUNT_RECOVERY_USERNAME_REQUIRED') {
+      this.state.userTitle = 'Account Recovery';
+    }
     if(this.prevState.username && !this.state.username) {
       this.state.username = this.prevState.username;
     }
