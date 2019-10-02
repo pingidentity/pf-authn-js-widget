@@ -33,7 +33,12 @@ This is a good choice if you already have a project and can just add this widget
   * baseUrl
   * divId where the widget should be rendered
   * logo to display on top of every page
-      
+
+* PingFederate Configuration
+  * Enable Authentication Applications
+  * Add an Authentication Application whose redirect uri is where this app will be hosted
+  * Create a policy tree branch where the adapter will reside and attach the authentication application to the policy tree
+  * Start SSO flow where you will get redirected to the app.       
   
 * **Html Form Adapter** - All functionality of HTML form adapter such as
  - Login
@@ -45,15 +50,21 @@ This is a good choice if you already have a project and can just add this widget
 # Technical Notes
 Handlebars templates are used for rendering the pages under `/partials` directory. CSS should be imported by default from CDN and any 
 customization should be done under `/scss/` folder to overwrite the existing CSS.
-* **Instantiate the Widget** 
+### **Instantiate the Widget** 
 Just add the following script to your applications onload function. 
 
         <script>
           var authnWidget = new PfAuthnWidget("{{baseUrl}}", { divId: 'authnwidget' });
           authnWidget.init();
         </script>
+        
+### Customization
+All handlebars templates can be customized for any formatting. There are a few things that should not be customized.
+- `data-actionId` must match the actionId that is sent to PingFederate
+- Form Ids in the handlebars templates must match what's being referenced in the index.js `FORM_ID`
+-        
 
-* **Enabling Captcha**
+### **Enabling Captcha**
 In order to use Captcha with HTML form Adapter, we must import `api.js` from Google's CDN at `<script src="https://www.google.com/recaptcha/api.js?onload=onloadCallback&render=explicit" async defer></script>`
 Once the script is loaded, then we will instantiate the widget. Three functions are needed:
 
@@ -102,6 +113,11 @@ The widget should work with all major browsers including Chrome, Firefox and Int
 - `npm run clean` - Remove `dist/` directory
 - `npm test` - Run tests
 
+# Bug Reports
+
+Please use the issue tracker to report any bugs or file feature requests.
+
 
 # License
 
+This project is licensed under the MIT license. See the LICENSE file for more info.
