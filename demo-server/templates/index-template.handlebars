@@ -7,8 +7,8 @@
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
   <script src="./pf.authn-widget.js"></script>
   <script type='application/json' src="./pf.authn-widget.map"></script>
-    <link rel="stylesheet" href="./main-styles.css">
   <link rel="stylesheet" type="text/css" href="https://uilibrary.ping-eng.com/end-user/end-user.css">
+  <link rel="stylesheet" href="./main-styles.css">
 <!--    <script src="https://www.google.com/recaptcha/api.js?onload=onloadCallback&render=explicit" async defer></script>-->
     <script type="text/javascript">
         var authnWidget;
@@ -63,7 +63,7 @@
     $(document).ready(function () {
 
       // let customLogo = 'https://www.pingidentity.com/content/dam/ping-6-2-assets/images/home/9001-home-logos/Cisco@2x.png.png'
-      authnWidget = new PfAuthnWidget("https://pfdev.ping-eng.com:9031", {divId: 'authnwidget'});
+      authnWidget = new PfAuthnWidget("https://localhost:9031", {divId: 'authnwidget'});
       <!--authnWidget = new PfAuthnWidget("{{baseUrl}}", { divId: 'authnwidget' });-->
       authnWidget.init();
     });

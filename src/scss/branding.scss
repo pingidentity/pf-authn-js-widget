@@ -1,4 +1,5 @@
-$background-color: red;
+$card-background: red;
+$text-color: white;
 $logo: 'https://placedog.net/500';
 $link-color: purple;
 $button-color: green;
@@ -11,8 +12,9 @@ a {
     }
 }
 
-.content {
-    background: $background-color;
+.card {
+    background: $card-background;
+    color: $text-color;
 }
 
 .button--primary {
