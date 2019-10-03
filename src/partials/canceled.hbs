@@ -4,17 +4,17 @@
     </div>
     <h1 class="heading">
       {{#if userTitle}}
-        {{userTitle}}
+        {{canceledTitle}}
       {{else}}
-        Account Recovery
+          Account Recovery
       {{/if}}
     </h1>
     <div class="text-block">
         <div class="text-block__text">
-            {{#if userMessage}}
-              {{userMessage}}
+            {{#if canceledMessage}}
+              {{canceledMessage}}
             {{else}}
-              You have cancelled the attempt to recovery your account. Please close this window.
+                You have cancelled the attempt to recovery your account. Please close this window.
             {{/if}}
         </div>
     </div>

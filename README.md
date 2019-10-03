@@ -120,4 +120,4 @@ Please use the issue tracker to report any bugs or file feature requests.
 
 # License
 
-This project is licensed under the MIT license. See the LICENSE file for more info.
+This project is licensed under the MIT license. See the [LICENSE](LICENSE) file for more info.

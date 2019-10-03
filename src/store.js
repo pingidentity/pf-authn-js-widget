@@ -17,12 +17,6 @@ export default class Store {
   async dispatch(method, actionId, payload) {
     this.prevState = this.state;
     this.state = await this.reduce(method, actionId, payload);
-    if(this.prevState.status === 'NEW_PASSWORD_REQUIRED') {
-      this.state.userTitle = 'Change Password';
-    }
-    else if(this.prevState.status === 'ACCOUNT_RECOVERY_USERNAME_REQUIRED') {
-      this.state.userTitle = 'Account Recovery';
-    }
     if(this.prevState.username && !this.state.username) {
       this.state.username = this.prevState.username;
     }
@@ -62,7 +56,6 @@ export default class Store {
     let json;
     let timeout;
     if(document.querySelector("#spinnerId")) {
-      console.log('showing spinner...');
       timeout = setTimeout(function () {
         document.querySelector('#spinnerId').style.display = 'block'
       }, 600)
@@ -81,14 +74,30 @@ export default class Store {
       if(timeout)
         clearTimeout(timeout);
       document.querySelector("#spinnerId").style.display ='none';
-      console.log('hiding spinner....');
-
     }
+
     let combinedData = this.state;
     delete combinedData.userMessage;  //clear previous error shown
     if (json.status) {
       combinedData = json;
       this.state = json;
+      if(json.status === 'CANCELED') {
+        //read the cancel operation
+        switch(json.canceledOperation) {
+          case 'PASSWORD_CHANGE':
+            this.state.canceledTitle = 'Change Password';
+            this.state.canceledMessage = 'You have cancelled the attempt to change your password. Please close this window. ';
+            break;
+          case 'ACCOUNT_RECOVERY':
+            this.state.canceledTitle = 'Account Recovery';
+            this.state.canceledMessage = 'You have cancelled the attempt to reset your password. Please close this window.';
+            break;
+          case 'USERNAME_RECOVERY':
+            this.state.canceledTitle = 'Account Recovery ';
+            this.state.canceledMessage = 'You have cancelled the attempt to retrieve your username. Please close this window.';
+            break;
+        }
+      }
     } else {
       if(json.code === 'RESOURCE_NOT_FOUND') {
         this.state = {};
