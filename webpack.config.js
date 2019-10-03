@@ -1,30 +1,31 @@
-const path = require('path');
-const webpack = require('webpack');
-const MiniCssExtractPlugin = require("mini-css-extract-plugin");
-const devServer = require('./demo-server');
+const path = require('path')
+const webpack = require('webpack')
+const MiniCssExtractPlugin = require('mini-css-extract-plugin')
+const devServer = require('./demo-server')
 // const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 const PATHS = {
   dist: path.join(__dirname, 'dist'),
   node_modules: path.join(__dirname, 'node_modules'),
-  src: path.join(__dirname, 'src')
-};
+  src: path.join(__dirname, 'src'),
+  scss: path.join(__dirname, 'scss'),
+}
 
 module.exports = (env, argv) => {
-  const isDevelopment = argv.mode === 'development';
+  const isDevelopment = argv.mode === 'development'
 
   return {
     devServer: {
       hot: true,
       before: function (app, server) {
         var options = {
-          baseUrl: argv.baseurl
+          baseUrl: argv.baseurl,
         }
-        devServer(app, server, options);
+        devServer(app, server, options)
       },
       contentBase: [path.join(__dirname, 'dist')],
       compress: true,
       port: 8443,
-      https: true
+      https: true,
     },
     entry: ['whatwg-fetch', path.join(PATHS.src, 'index')],
     output: {
@@ -36,81 +37,86 @@ module.exports = (env, argv) => {
       sourceMapFilename: 'pf.authn-widget.map',
       libraryTarget: 'umd',
       globalObject: '(typeof self !== \'undefined\' ? self : this)',
-      umdNamedDefine: true
+      umdNamedDefine: true,
     },
-    devtool: "source-map",
+    devtool: 'source-map',
     module: {
       rules: [
         {
           test: /\.(handlebars|hbs)$/,
-          loader: "handlebars-loader",
+          loader: 'handlebars-loader',
           options: {
             helperDirs: path.join(__dirname, 'src', 'helpers'),
             precompileOptions: {
               knownHelpersOnly: false,
             },
           },
-          exclude: /node_modules/
+          exclude: /node_modules/,
         },
         {
           test: /\.js$/,
           exclude: /(node_modules|bower_components)/,
           use: {
-            loader: 'babel-loader'
+            loader: 'babel-loader',
           },
         },
         {
           test: /\.js$/,
-          use: ["source-map-loader"],
+          use: ['source-map-loader'],
           exclude: /(node_modules|bower_components)/,
-          enforce: "pre"
+          enforce: 'pre',
         },
         {
           test: /\.(scss|css)$/,
-          exclude: /node_modules/,
           use: [
             MiniCssExtractPlugin.loader,
             {
               loader: "css-loader",
+            },
+            {
+              loader: "postcss-loader",
               options: {
-                sourceMap: true,
-              }
+                autoprefixer: {
+                  browsers: ["last 2 versions"]
+                },
+              },
+            },
+            {
+              loader: "resolve-url-loader",
             },
             {
               loader: "sass-loader",
-              options: {
-                sourceMap: true
-              }
-            }
+            },
+
           ]
         },
         {
           test: /\.(jpg|png|gif|svg)$/,
           use: [
             {
-              loader: "file-loader",
+              loader: 'file-loader',
               options: {
                 name: '[name].[ext]',
-                outputPath: 'static/',
+                // outputPath: 'static/',
                 useRelativePath: true,
-              }
-            }
-          ]
-        }
-      ]
+              },
+            },
+          ],
+        },
+      ],
     },
     plugins: [
       new webpack.LoaderOptionsPlugin({
         options: {
-          handlebarsLoader: {}
-        }
+          handlebarsLoader: {},
+        },
       }),
       new MiniCssExtractPlugin({
-        filename: "[name]-styles.css",
-        chunkFilename: "[id].css"
+        filename: '[name]-styles.css',
+        chunkFilename: '[id].css',
       }),
       // new BundleAnalyzerPlugin(),
-    ]
+    ],
   }
 }
 

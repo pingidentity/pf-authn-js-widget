@@ -1,8 +1,9 @@
+import pinglogo from '../assets/ping-logo.svg'
 
 export default class Assets {
 
   constructor(options) {
-    this.logo = options.logo || 'https://uilibrary.ping-eng.com/end-user/ping-logo.svg';
+    this.logo = options.logo || pinglogo;
     this.error = options.error || 'https://uilibrary.ping-eng.com/end-user/error.svg';
     this.spinner = options.spinner || 'https://uilibrary.ping-eng.com/end-user/spinner.svg'
   }
