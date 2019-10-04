@@ -1,4 +1,4 @@
-# Pf-Authn-Widget 
+# PingFederate Authentication Widget
 
 PingFederate Authentication Widget is a javascript library that provides full capabilities of [HTML form Adapter](https://support.pingidentity.com/s/document-item?bundleId=pingfederate-93&topicId=xvy1564003022890.html) via [Authentication APIs](https://support.pingidentity.com/s/document-item?bundleId=pingfederate-93&topicId=qsl1564002999029.html) in a ready to use drop-in bundle along 
 with CSS and customizable templates.
@@ -20,19 +20,19 @@ There are two ways to get the widget. You can build and install it locally on yo
 Before installing, make sure you have [node.js](https://nodejs.org/en/) installed. Check out this repository first.
 
 
-This will kick off webpack dev server and instantiate your widget. If you need to modify the base url from `localhost:9031`, you can modify it inside `demo-server/templates-index-template.handlebars`. 
+This will start the webpack devserver on port https://localhost:8443 (as specified in webpack.config.js) and instantiate your widget. If you need to modify the base url from `localhost:9031`, you can modify it inside `demo-server/templates-index-template.handlebars`. 
 
 # Npm Module
 
 This is a good choice if you already have a project and can just add this widget as a dependency. 
  
 # Configuration
-`authnWidget = new PfAuthnWidget("https://localhost:9031", {divId: 'authnwidget', logo: customLogo});`
+`authnWidget = new PfAuthnWidget(str baseUrl, obj params);`
 
 * Configuration Parameters
-  * baseUrl
-  * divId where the widget should be rendered
-  * logo to display on top of every page
+  * baseUrl: full address of where PingFederate is running such as https://localhost:9031
+  * divId where the widget should be rendered (Optional)
+  * logo to display on top of every page (this can be passed in as form of file or url where the image is hosted)
 
 * PingFederate Configuration
   * Enable Authentication Applications
@@ -54,10 +54,15 @@ customization should be done under `/scss/` folder to overwrite the existing CSS
 Just add the following script to your applications onload function. 
 
         <script>
-          var authnWidget = new PfAuthnWidget("{{baseUrl}}", { divId: 'authnwidget' });
+          var authnWidget = new PfAuthnWidget("https://localhost:9031", { divId: 'authnwidget' });
           authnWidget.init();
         </script>
-        
+
+Add a div where the widget should render as follows
+        ```<div id="authnwidget" />```
+
+The name of the div can be overwritten in the constructor under options.
+
 ### Customization
 All handlebars templates can be customized for any formatting. There are a few things that should not be customized.
 - `data-actionId` must match the actionId that is sent to PingFederate
@@ -104,7 +109,7 @@ Once the script is loaded, then we will instantiate the widget. Three functions 
 
 # Compatibility
 
-The widget should work with all major browsers including Chrome, Firefox and Internet Explorer 11 and above.
+The widget should work with all major browsers including Chrome, Firefox, IE11 and IE Edge.
 
 # Commands
 - `npm install` - install the dependencies locally
