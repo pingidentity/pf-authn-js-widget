@@ -5,9 +5,9 @@ with CSS and customizable templates.
 
 This provides an alternative solution to PingFederate templates which allows for a Single Page Application look and feel for the sign in experience.
 
-The only information needed is Base URL of the PingFederate instance where it is configured to use [Authentication Applications](https://support.pingidentity.com/s/document-item?bundleId=pingfederate-93&topicId=ldc1564002999116.html).
+The only information needed is the Base URL of the PingFederate instance where it is configured to use [Authentication Applications](https://support.pingidentity.com/s/document-item?bundleId=pingfederate-93&topicId=ldc1564002999116.html).
 
-The Authentication Application redirect URL must point to where you are hosting your SPA where the javascript library will run. 
+The configured Authentication Application redirect URL must point to where the Single Page Application is hosted. 
 
 
 
