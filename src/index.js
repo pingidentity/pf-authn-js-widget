@@ -40,17 +40,17 @@ export default class AuthnWidget {
    * @param {object} options object containing additional options such as flowId and divId
    */
   constructor(baseUrl, options) {
-    this.flowId = options.flowId || this.getBrowserFlowId();
-    this.divId = options.divId || 'authnwidget';
+    this.flowId = (options && options.flowId) || this.getBrowserFlowId();
+    this.divId = (options && options.divId) || 'authnwidget';
     if (!baseUrl) {
       throw new Error('Must provide base Url for PingFederate in the constructor');
     }
     this.captchaDivId = 'invisibleRecaptchaId';
     this.assets = new Assets(options);
     this.fetchUtil = new FetchUtil(baseUrl);
-    this.invokeReCaptcha = options.invokeReCaptcha;
-    this.checkRecaptcha = options.checkRecaptcha;
-    this.grecaptcha = options.grecaptcha;
+    this.invokeReCaptcha = options && options.invokeReCaptcha;
+    this.checkRecaptcha = options && options.checkRecaptcha;
+    this.grecaptcha = options && options.grecaptcha;
     this.dispatch = this.dispatch.bind(this);
     this.render = this.render.bind(this);
     this.defaultEventHandler = this.defaultEventHandler.bind(this);
