@@ -41,10 +41,10 @@ This is a good choice if you already have a project and can just add this widget
   * Start SSO flow where you will get redirected to the app.       
   
 * **Html Form Adapter** - All functionality of HTML form adapter such as
- - Login
- - Trouble Signing on
- - Trouble with User name
- - Password Reset
+    - Login
+    - Trouble Signing on
+    - Trouble with User name
+    - Password Reset
 
 
 # Technical Notes
@@ -62,7 +62,7 @@ Just add the following script to your applications onload function.
 All handlebars templates can be customized for any formatting. There are a few things that should not be customized.
 - `data-actionId` must match the actionId that is sent to PingFederate
 - Form Ids in the handlebars templates must match what's being referenced in the index.js `FORM_ID`
--        
+       
 
 ### **Enabling Captcha**
 In order to use Captcha with HTML form Adapter, we must import `api.js` from Google's CDN at `<script src="https://www.google.com/recaptcha/api.js?onload=onloadCallback&render=explicit" async defer></script>`
