@@ -40,7 +40,7 @@ This is a good choice if you already have a project and can just add this widget
   * Create a policy tree branch where the adapter will reside and attach the authentication application to the policy tree
   * Start SSO flow where you will get redirected to the app.       
   
-* **Html Form Adapter** - All functionality of HTML form adapter such as
+* **HTML Form Adapter** - All functionality of HTML Form Adapter such as
     - Login
     - Trouble Signing on
     - Trouble with User name
@@ -70,7 +70,7 @@ All handlebars templates can be customized for any formatting. There are a few t
        
 
 ### **Enabling Captcha**
-In order to use Captcha with HTML form Adapter, we must import `api.js` from Google's CDN at `<script src="https://www.google.com/recaptcha/api.js?onload=onloadCallback&render=explicit" async defer></script>`
+In order to use Captcha with HTML Form Adapter, we must import `api.js` from Google's CDN at `<script src="https://www.google.com/recaptcha/api.js?onload=onloadCallback&render=explicit" async defer></script>`
 Once the script is loaded, then we will instantiate the widget. Three functions are needed:
 
         var authnWidget;
