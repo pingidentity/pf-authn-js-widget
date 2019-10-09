@@ -17,7 +17,7 @@ Bugs are tracked as [GitHub issues](https://guides.github.com/features/issues/).
 Please understand that bug reports are reviewed and prioritized internally, and we may not be able to address all bug reports or provide an estimated time for resolution.
 
 **Suggesting enhancements**
-As with bugs, requests are tracked as bug report?**
+As with bugs, enhancement requests are tracked as bug report?
 Bugs are tracked as [GitHub issues](https://guides.github.com/features/issues/). You can suggest an enhancement by submitting an issue in the project's issue tracker.
 
 Please understand that enhancement requests are reviewed and prioritized internally, and we may not be able to address all requests or provide an estimated time for resolution.
