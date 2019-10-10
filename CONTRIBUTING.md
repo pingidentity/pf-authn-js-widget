@@ -5,7 +5,7 @@ Thank you for taking the time to help improve the Authentication Widget, it is v
 
 **Before submitting an issue**
 
-Please review the documentation and examples before submitting an issue. It is also very appreciated, if you review the GitHub issue tracker for this project to see if your issue or one similar has already been reported. If you do find a similar issue, please feel free to add a commnent with a :+1: to upvote the issue.
+Please review the documentation and examples before submitting an issue. It is also very appreciated if you review the GitHub issue tracker for this project to see if your issue or one similar has already been reported. If you do find a similar issue, please feel free to add a comment with a :+1: to upvote the issue.
 
 **How do I submit a bug report?**
 
@@ -13,13 +13,13 @@ Bugs are tracked as [GitHub issues](https://guides.github.com/features/issues/).
 
 * A clear and descriptive title.
 * A description of what happened and a description of what you expected to happen.
-* An example with the exact steps needed to reproduce the problem. If relevant, sample code is helpful.
+* An example of the exact steps needed to reproduce the problem. If relevant, sample code is helpful.
 
 Please understand that bug reports are reviewed and prioritized internally, and we may not be able to address all bug reports or provide an estimated time for resolution.
 
 **Suggesting enhancements**
 
-As with bugs, enhancement requests are tracked as [GitHub issues](https://guides.github.com/features/issues/). You can suggest an enhancement by submitting an issue in this projects issue tracker.
+As with bugs, enhancement requests are tracked as [GitHub issues](https://guides.github.com/features/issues/). You can suggest an enhancement by submitting an issue in this project's issue tracker.
 
 Please understand that enhancement requests are reviewed and prioritized internally, and we may not be able to address all requests or provide an estimated time for resolution.
 
