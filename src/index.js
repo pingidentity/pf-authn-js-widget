@@ -5,6 +5,9 @@ import 'core-js/stable';
 import 'regenerator-runtime/runtime'; //for async await
 import Store from './store';
 
+import './scss/main.scss';
+import './scss/branding.scss';
+
 (function () {
 
   if ( typeof window.CustomEvent === "function" ) return false;

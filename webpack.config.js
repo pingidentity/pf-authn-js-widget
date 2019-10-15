@@ -32,7 +32,6 @@ module.exports = (env, argv) => {
       path: PATHS.dist,
       filename: 'pf.authn-widget.js',
       library: 'PfAuthnWidget',
-      libraryExport: 'default',
       publicPath: '/',
       sourceMapFilename: 'pf.authn-widget.map',
       libraryTarget: 'umd',
@@ -74,18 +73,14 @@ module.exports = (env, argv) => {
               loader: "css-loader",
             },
             {
-              loader: "postcss-loader",
-              options: {
-                autoprefixer: {
-                  browsers: ["last 2 versions"]
-                },
-              },
-            },
-            {
               loader: "resolve-url-loader",
             },
             {
               loader: "sass-loader",
+              options: {
+                sourceMap: true,
+                sourceMapContents: false
+              }
             },
 
           ]
