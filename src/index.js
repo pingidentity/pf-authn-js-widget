@@ -6,6 +6,7 @@ import 'regenerator-runtime/runtime'; //for async await
 import Store from './store';
 
 import './scss/main.scss';
+//uncomment to add your personal branding
 // import './scss/branding.scss';
 
 (function () {
@@ -113,7 +114,7 @@ export default class AuthnWidget {
     }
   }
 
-  enableSubmit(evt) {
+  enableSubmit() {
     let nodes = (document.querySelectorAll('input[type=text], input[type=password], input[type=email]'));
     let disabled = false;
     if(nodes) {

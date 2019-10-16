@@ -27,7 +27,7 @@ module.exports = (env, argv) => {
       port: 8443,
       https: true,
     },
-    entry: ['formdata-polyfill', 'whatwg-fetch', path.join(PATHS.src, 'index')],
+    entry: ['whatwg-fetch', path.join(PATHS.src, 'index')],
     output: {
       path: PATHS.dist,
       filename: 'pf.authn-widget.js',
@@ -38,7 +38,7 @@ module.exports = (env, argv) => {
       globalObject: '(typeof self !== \'undefined\' ? self : this)',
       umdNamedDefine: true,
     },
-    devtool: 'source-map',
+    devtool: isDevelopment ? 'source-map' : '',
     module: {
       rules: [
         {
@@ -99,6 +99,11 @@ module.exports = (env, argv) => {
           ],
         },
       ],
+    },
+    performance: {
+      hints: false,
+      maxEntrypointSize: 512000,
+      maxAssetSize: 512000
     },
     plugins: [
       new webpack.ProvidePlugin({
