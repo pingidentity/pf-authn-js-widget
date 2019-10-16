@@ -6,7 +6,7 @@ import 'regenerator-runtime/runtime'; //for async await
 import Store from './store';
 
 import './scss/main.scss';
-import './scss/branding.scss';
+// import './scss/branding.scss';
 
 (function () {
 
