@@ -79,6 +79,8 @@ Handlebars templates are used for rendering the pages under the `/partials` dire
 Note: There are a few things that must not be customized.
 - `data-actionId` must match the actionId that is sent to PingFederate
 - Form Ids in the handlebars templates must match what's being referenced in the index.js `FORM_ID`
+- Basic CSS `end-user.css` is provided via CDN as shown in `demo-server/templates/index-template.handlebars`
+- In order to overwrite the CSS, add any customization to `src/scss/branding.scss` and include it in `src/index.js`
 
 
 ## Enabling Captcha
