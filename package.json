@@ -20,10 +20,12 @@
   "keywords": [
     "PingFederate",
     "Ping Identity",
+    "API",
+    "Authentication",
     "javascript"
   ],
   "author": "Ping Identity",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "bugs": {
     "url": "https://github.com/pingidentity/pf-authn-widget/issues"
   },
