@@ -27,7 +27,8 @@ npm commands:
  - `npm install` - install the dependencies locally
  - `npm run build` - build for production
  - `npm run start` - start the dev server
- - `npm run clean` - remove `dist/` directory
+ - `npm run clean` - remove `dist/` and `coverage` directory
+ - `npm run coverage` - run ESLint coverage
  - `npm test` - run tests
 
 
