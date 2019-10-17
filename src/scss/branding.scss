@@ -1,9 +1,14 @@
-$card-background: red;
+$card-background: orange;
 $text-color: white;
-$logo: 'https://placedog.net/500';
-$link-color: purple;
-$button-color: green;
-$button-text-color: white;
+$logo: 'https://placedog.net/500?random';
+$link-color: white;
+$primary-button-color: green;
+$primary-button-text: white;
+$secondary-button-color: gray;
+$secondary-button-text: black;
+$primary-text: white;
+$error-color: blue;
+
 
 a {
     color: $link-color;
@@ -17,15 +22,36 @@ a {
     color: $text-color;
 }
 
-.button--primary {
-    background: $button-color;
-    border: $button-color;
-    color: $button-text-color;
+.org-logo__image {
+    background-image:url($logo) !important;
+}
+
+.button {
+    background: $secondary-button-color;
+    border-color: $secondary-button-color;
+    color: $secondary-button-text;
     &:hover {
-        background: rgba($button-color, 0.8);
+        background: rgba($secondary-button-color, 0.8);
+        border-color: rgba($secondary-button-color, 0.8);
+        color: $secondary-button-text;
     }
 }
-.h2 {
-  color: beige;
+
+.button--primary {
+    background: $primary-button-color;
+    border-color: $primary-button-color;
+    color: $primary-button-text;
+    &:hover {
+        background: rgba($primary-button-color, 0.8);
+        border-color: rgba($primary-button-color, 0.8);
+        color: $primary-button-text;
+    }
+}
+
+.feedback,.normal-text,.text-block,.tooltip,.heading,.heading-text,.checkbox,.icon-feedback,.page__footer,.page__footer.brand-footer-color {
+    color: $primary-text;
+}
+.feedback--error {
+    color: $error-color;
 }
 // Place any custom css classes here

@@ -5,6 +5,7 @@ import 'core-js/stable';
 import 'regenerator-runtime/runtime'; //for async await
 import Store from './store';
 
+<<<<<<< Updated upstream
 import './scss/main.scss';
 //uncomment to add your personal branding
 // import './scss/branding.scss';
@@ -22,6 +23,10 @@ import './scss/main.scss';
 
   window.CustomEvent = CustomEvent;
 })();
+=======
+import "./scss/main.scss";
+import "./scss/branding.scss";
+>>>>>>> Stashed changes
 
 export default class AuthnWidget {
 
