@@ -57,7 +57,10 @@ export default class Store {
     let timeout;
     if(document.querySelector("#spinnerId")) {
       timeout = setTimeout(function () {
-        document.querySelector('#spinnerId').style.display = 'block'
+        document.querySelector('#spinnerId').style.display = 'block';
+        if (document.querySelector("#AuthnWidgetForm")) {
+          document.querySelector("#AuthnWidgetForm").style.display = 'none';
+        }
       }, 600)
     }
     switch (method) {
@@ -74,6 +77,9 @@ export default class Store {
       if(timeout)
         clearTimeout(timeout);
       document.querySelector("#spinnerId").style.display ='none';
+      if (document.querySelector("#AuthnWidgetForm")) {
+        document.querySelector("#AuthnWidgetForm").style.display = 'none';
+      }
     }
 
     let combinedData = this.state;
