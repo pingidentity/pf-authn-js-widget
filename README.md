@@ -29,7 +29,8 @@ npm commands:
  - `npm run start` - start the dev server
  - `npm run clean` - remove `dist/` and `coverage` directory
  - `npm run coverage` - run ESLint coverage
- - `npm test` - run tests
+ - `npm run test` - run tests
+ - `npm run test:watch` - jest watch the tests
 
 
 # Configuration
