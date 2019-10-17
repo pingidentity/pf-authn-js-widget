@@ -26,7 +26,8 @@ This is a good choice if you already have a project and can just add this widget
 npm commands:
  - `npm install` - install the dependencies locally
  - `npm run build` - build for production
- - `npm run start` - start the dev server
+ - `npm run start` - start the dev server.
+ - `BASEURL=https://myCustomDomain:9031 npm run start` - pass a custom base URL from command line (Mac/Linux only)
  - `npm run clean` - remove `dist/` and `coverage` directory
  - `npm run coverage` - run ESLint coverage
  - `npm run test` - run tests
