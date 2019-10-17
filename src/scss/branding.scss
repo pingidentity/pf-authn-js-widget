@@ -1,15 +1,18 @@
-$card-background: orange;
-$text-color: white;
-$logo: 'https://placedog.net/500?random';
-$link-color: white;
-$primary-button-color: green;
+// update these variables to brand the module
+
+$card-background: white;
+$text-color: #595959;
+$logo: 'https://assets.pingone.com/ux/end-user/0.9.6/ping-logo.svg';
+$link-color: #277ba5;
+$primary-button-color: #277ba5;
 $primary-button-text: white;
-$secondary-button-color: gray;
-$secondary-button-text: black;
-$primary-text: white;
-$error-color: blue;
+$primary-button-border: #277ba5;
+$secondary-button-color: white;
+$secondary-button-text: #595959;
+$secondary-button-border: #595959;
+$error-color: #a31300;
 
-
+// don't touch this scss
 a {
     color: $link-color;
     &:hover {
@@ -49,9 +52,10 @@ a {
 }
 
 .feedback,.normal-text,.text-block,.tooltip,.heading,.heading-text,.checkbox,.icon-feedback,.page__footer,.page__footer.brand-footer-color {
-    color: $primary-text;
+    color: $text-color;
 }
 .feedback--error {
     color: $error-color;
 }
+
 // Place any custom css classes here
