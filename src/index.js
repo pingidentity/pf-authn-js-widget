@@ -166,7 +166,6 @@ export default class AuthnWidget {
     let source = evt.target || evt.srcElement;
     console.log('source: ' + source.dataset['actionid']);
     let actionId = source.dataset['actionid'];
-    //TODO run mapping of data to model and throw validation
     let formData = this.getFormData();
     formData = this.validateActionModel(actionId, formData);
 
