@@ -1,3 +1,4 @@
+import AuthnWidget from './index'
 
 export default class Store {
   constructor(flowId, fetchUtil, checkRecaptcha) {
@@ -12,6 +13,15 @@ export default class Store {
 
   getStore() {
     return this.state;
+  }
+
+  dispatchErrors(errors) {
+    this.state.userMessage = errors;
+    this.notifyListeners();
+  }
+
+  clearErrors() {
+    delete this.state.userMessage;
   }
 
   async dispatch(method, actionId, payload) {

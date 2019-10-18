@@ -38,7 +38,7 @@ module.exports = (env, argv) => {
       globalObject: '(typeof self !== \'undefined\' ? self : this)',
       umdNamedDefine: true,
     },
-    devtool: isDevelopment ? 'source-map' : '',
+    devtool: 'source-map',
     module: {
       rules: [
         {

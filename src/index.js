@@ -113,6 +113,19 @@ export default class AuthnWidget {
     }
   }
 
+  verifyPasswordsMatch() {
+    let pass1 = document.querySelector('#newpassword');
+    let pass2 = document.querySelector('#verifypassword');
+    if(pass1.value !== pass2.value) {
+      this.store.dispatchErrors('New passwords do not match.');
+      return false;
+    }
+    else {
+      this.store.clearErrors();
+    }
+    return true;
+  }
+
   enableSubmit() {
     let nodes = (document.querySelectorAll('input[type=text], input[type=password], input[type=email]'));
     let disabled = false;
@@ -137,11 +150,8 @@ export default class AuthnWidget {
   /**
    * validate against the action model.
    * if the model has no data, return empty post body
-   * if it's missing required attributes, fill the err message
-   * (error handling can also be done by PF but this is a way to do front end validation. e.g. missing password)
    * @param action
    * @param data
-   * @param err
    * @returns {string|*} the model to be sent to PingFederate after all required fields are available
    */
   validateActionModel(action, data) {
@@ -160,6 +170,10 @@ export default class AuthnWidget {
     return document.getElementById(AuthnWidget.FORM_ID);
   }
 
+  getPasswordResetActions() {
+    return ['checkNewPassword', 'checkPasswordReset'];
+  }
+
   dispatch(evt){
     evt.preventDefault();
     let source = evt.target || evt.srcElement;
@@ -167,13 +181,17 @@ export default class AuthnWidget {
     let actionId = source.dataset['actionid'];
     let formData = this.getFormData();
     formData = this.validateActionModel(actionId, formData);
+    if (this.getPasswordResetActions().includes(actionId) &&
+      !this.verifyPasswordsMatch()) {
+      return;
+    }
 
-    if(this.store.state.showCaptcha && this.needsCaptchaResponse(actionId) && this.store.state.captchaSiteKey) {
+    if (this.store.state.showCaptcha && this.needsCaptchaResponse(actionId) &&
+      this.store.state.captchaSiteKey) {
       this.store.savePendingState('POST_FLOW', actionId, formData);
       this.invokeReCaptcha();
       return;
-    }
-    else {
+    } else {
       this.store.dispatch('POST_FLOW', actionId, JSON.stringify(formData));
     }
   }
