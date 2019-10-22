@@ -230,14 +230,15 @@ export default class AuthnWidget {
       window.location.replace(state.resumeUrl);
       return;
     }
-
     let template;
     if(currentState) {
-      template = this.getTemplate(currentState);
-    }
-    if (!template) {
-      console.log(`Failed to load template: ${currentState}.`);
-      template = this.getTemplate('general_error');
+      try {
+        template = this.getTemplate(currentState);
+      }
+      catch (e) {
+        console.log(`Failed to load template: ${currentState}.`);
+        template = this.getTemplate('general_error');
+      }
     }
     let widgetDiv = document.getElementById(this.divId);
     var params = Object.assign(state, this.assets.toTemplateParams())
