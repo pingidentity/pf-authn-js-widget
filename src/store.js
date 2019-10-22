@@ -120,6 +120,9 @@ export default class Store {
       }
       else {
         let errors = this.getErrorDetails(json);
+        delete combinedData.failedValidators;
+        delete combinedData.satisfiedValidators;
+        delete combinedData.userMessage;
         combinedData = { ...errors, ...this.state };
       }
     }
@@ -139,13 +142,20 @@ export default class Store {
   }
 
   getErrorDetails(json) {
-    let errors = {};
+    let errors = {
+      userMessage: undefined,
+      failedValidators: [],
+      satisfiedValidators: []
+    };
     if(json.code && json.code == 'VALIDATION_ERROR') {
       if(json.details) {
         json.details.forEach(msg => {
-          errors.failedValidators = msg.failedValidators ? msg.failedValidators.map(msg => msg.userMessage) : "";
-          errors.satisfiedValidators = msg.satisfiedValidators ? msg.satisfiedValidators.map(msg => msg.userMessage) : "";
-
+          if(msg.failedValidators) {
+            msg.failedValidators.map(msg => msg.userMessage).forEach(failMsg => errors.failedValidators.push(failMsg));
+          }
+          if(msg.satisfiedValidators) {
+              msg.satisfiedValidators.map(msg => msg.userMessage).forEach(okMsg => errors.satisfiedValidators.push(okMsg));
+          }
           let userMessage = msg.userMessage;
           if(msg.target) {
             userMessage = userMessage.slice(0, -1).concat(' : ').concat(msg.target);
