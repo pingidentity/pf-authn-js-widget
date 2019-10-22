@@ -228,6 +228,7 @@ export default class AuthnWidget {
     let currentState = state.status;
     if (currentState === 'RESUME') {
       window.location.replace(state.resumeUrl);
+      return;
     }
 
     let template;
