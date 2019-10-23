@@ -13,6 +13,17 @@
             <input type="text" class="text-input float-label__input" name="identifier"  autofocus />
             <label class="float-label__label" for="identifier">Username</label>
         </div>
+        {{#each previouslySubmittedIdentifiers}}
+            <div  class="requirement">
+                    <span data-idfirstaction="submitIdentifier" data-identifier="{{this}}" class="requirement__name">{{this}}</span>
+                <img data-idfirstaction="clearIdentifier"
+                     data-identifier="{{this}}"
+                        class="requirement__icon"
+                        src="https://assets.pingone.com/ux/end-user/0.10.0/icons/ghost-stopped.svg"
+                        alt="Yes" />
+            </div>
+
+        {{/each}}
         <div class="button-set">
             <button id="submit" type="submit" data-actionid="submitIdentifier" class="button button--primary brand-primary-bg" disabled>
                 Next

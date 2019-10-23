@@ -1,5 +1,3 @@
-import AuthnWidget from './index'
-
 export default class Store {
   constructor(flowId, fetchUtil, checkRecaptcha) {
     this.listeners = [];

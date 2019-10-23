@@ -58,12 +58,16 @@ export default class AuthnWidget {
     this.dispatch = this.dispatch.bind(this);
     this.render = this.render.bind(this);
     this.defaultEventHandler = this.defaultEventHandler.bind(this);
+    this.handleIdFirstLinks = this.handleIdFirstLinks.bind(this);
+    this.registerIdFirstLinks = this.registerIdFirstLinks.bind(this);
     this.stateTemplates = new Map();  //state -> handlebar templates
     this.eventHandler = new Map();  //state -> eventHandlers
     this.actionModels = new Map();
     this.store = new Store(this.flowId, this.fetchUtil, this.checkRecaptcha);
     this.store.registerListener(this.render);
     AuthnWidget.CORE_STATES.forEach(state => this.registerState(state));
+
+    this.addEventHandler('IDENTIFIER_REQUIRED', this.registerIdFirstLinks);
 
     this.actionModels.set('checkUsernamePassword', {required: ['username', 'password'], properties: ['username', 'password', 'rememberMyUsername', 'thisIsMyDevice', 'captchaResponse']});
     this.actionModels.set('initiateAccountRecovery', {properties: ['usernameHint']});
@@ -111,6 +115,28 @@ export default class AuthnWidget {
           elem && elem.click();
         }
       });
+    }
+  }
+
+  registerIdFirstLinks() {
+    Array.from(document.querySelectorAll('[data-idFirstAction]')).
+      forEach(element => element.addEventListener('click', this.handleIdFirstLinks));
+  }
+
+  handleIdFirstLinks(evt) {
+    evt.preventDefault();
+    let source = evt.target || evt.srcElement;
+    let actionId = source.dataset['idfirstaction'];
+    let identifier = source.dataset['identifier'];
+    let data = {
+      identifier
+    }
+    console.log(actionId + ' : ' + identifier);
+    switch (actionId) {
+      case 'submitIdentifier':
+      case 'clearIdentifier':
+        this.store.dispatch('POST_FLOW', actionId, JSON.stringify(data));
+        break;
     }
   }
 
@@ -285,6 +311,7 @@ export default class AuthnWidget {
   addEventHandler(stateName, eventHandler) {
     let evtHandlers = this.eventHandler.get(stateName);
     evtHandlers.push(eventHandler);
+    this.eventHandler.set(stateName, evtHandlers);
   }
 
   registerActionModel(action, model) {
