@@ -19,3 +19,49 @@ div.wrapper {
 h1{
   color: beige;
 }
+
+input:read-only {
+  background-color: #d0d0d0;
+}
+
+
+.identifier-first {
+  &__account-list {
+    margin: 0;
+  }
+  &__account-item {
+    $color-rabbit-fur: #d1d3d4;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    border-bottom: 1px solid $color-rabbit-fur;
+    margin: 0;
+    padding: 15px 10px;
+    &:hover {
+      background-color: #f0f6f7; //sonic
+    }
+  }
+  &__account-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-right: 10px;
+  }
+  &__add-account {
+    cursor: default;
+    border: none;
+    &:hover {
+      background-color: inherit;
+    }
+  }
+  &__remove-account {
+    $color-rabbit-fur: #d1d3d4;
+    $icon-size: 26px;
+    height: $icon-size;
+    line-height: $icon-size;
+    margin-left: auto;
+    &:before {
+      color: $color-rabbit-fur;
+      content: 'x';
+    }
+  }
+}

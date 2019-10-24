@@ -66,6 +66,10 @@ module.exports = (env, argv) => {
           enforce: 'pre',
         },
         {
+          test: /\.svg$/,
+          loader: 'svg-inline-loader'
+        },
+        {
           test: /\.(scss|css)$/,
           use: [
             'style-loader',
