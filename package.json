@@ -17,6 +17,9 @@
     "type": "git",
     "url": "git@github.com:pingidentity/pf-authn-widget"
   },
+  "engines": {
+    "node" : ">=8.0.0 <=12.0.0"
+  },
   "keywords": [
     "PingFederate",
     "Ping Identity",
