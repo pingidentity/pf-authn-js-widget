@@ -119,7 +119,7 @@ export default class AuthnWidget {
   }
 
   registerIdFirstLinks() {
-    Array.from(document.querySelectorAll('[data-idFirstAction]')).
+    Array.from(document.querySelectorAll('[data-idfirstaction]')).
       forEach(element => element.addEventListener('click', this.handleIdFirstLinks));
   }
 
@@ -136,6 +136,10 @@ export default class AuthnWidget {
       case 'submitIdentifier':
       case 'clearIdentifier':
         this.store.dispatch('POST_FLOW', actionId, JSON.stringify(data));
+        break;
+      case 'selectidentifier':
+        document.getElementById('existingAccountsSelectionList').style.display = 'none';
+        document.getElementById('signonidentifier').style.display = 'block';
         break;
     }
   }

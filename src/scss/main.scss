@@ -45,6 +45,7 @@ input:read-only {
     overflow: hidden;
     text-overflow: ellipsis;
     margin-right: 10px;
+    flex: auto;
   }
   &__add-account {
     cursor: default;
@@ -55,12 +56,14 @@ input:read-only {
   }
   &__remove-account {
     $color-rabbit-fur: #d1d3d4;
-    $icon-size: 26px;
+    $icon-size: 18px;
+    font-size: $icon-size;
     height: $icon-size;
     line-height: $icon-size;
     margin-left: auto;
     &:before {
       color: $color-rabbit-fur;
+      font-family: 'iconfont';
       content: 'x';
     }
   }

@@ -13,30 +13,26 @@
   {{> errors}}
   {{> spinner}}
 {{#if previouslySubmittedIdentifiers.length}}
-    <ul id="existingAccountsSelectionList" class="identifier-first__account-list">
+    <div id="existingAccountsSelectionList" class="identifier-first__account-list">
       {{#each previouslySubmittedIdentifiers}}
-          <li class="identifier-first__account-item">
+          <div class="identifier-first__account-item">
               <div data-idfirstaction="submitIdentifier" class="identifier-first__account-name" data-identifier="{{this}}">
                 {{this}}
               </div>
               <div data-idfirstaction="clearIdentifier"
                    data-identifier="{{this}}" class="identifier-first__remove-account">
               </div>
-          </li>
+          </div>
       {{/each}}
-    </ul>
+        <div class="identifier-first__account-item">
+            <a data-idFirstAction="selectidentifier" href="#">Use Another Account</a>
+        </div>
+    </div>
+    <div id="signonidentifier" style="display: none">
+      {{> identifier_signon}}
+    </div>
 {{/if}}
-
-    <form class="form form--margin-small" id="AuthnWidgetForm">
-        <div class="float-label">
-            <input type="text" class="text-input float-label__input" name="identifier"  autofocus />
-            <label class="float-label__label" for="identifier">Username</label>
-        </div>
-        <div class="button-set">
-            <button id="submit" type="submit" data-actionid="submitIdentifier" class="button button--primary brand-primary-bg" disabled>
-                Next
-            </button>
-            <button data-actionId="cancelIdentifierSubmission" class="button">Cancel</button>
-        </div>
-    </form>
+{{#unless previouslySubmittedIdentifiers.length}}
+    {{> identifier_signon}}
+{{/unless}}
 </div>
