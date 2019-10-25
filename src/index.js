@@ -218,7 +218,7 @@ export default class AuthnWidget {
     }
 
     if (this.store.state.showCaptcha && this.needsCaptchaResponse(actionId) &&
-      this.store.state.captchaSiteKey) {
+      this.store.state.captchaSiteKey && this.invokeReCaptcha) {
       this.store.savePendingState('POST_FLOW', actionId, formData);
       this.invokeReCaptcha();
       return;
@@ -275,7 +275,7 @@ export default class AuthnWidget {
     var params = Object.assign(state, this.assets.toTemplateParams())
     widgetDiv.innerHTML = template(params);
     this.registerEventListeners(currentState);
-    if(this.store.state.showCaptcha) {
+    if(this.store.state.showCaptcha && this.grecaptcha) {
       this.grecaptcha.render(this.captchaDivId);
     }
   }
