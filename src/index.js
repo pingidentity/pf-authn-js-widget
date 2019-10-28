@@ -7,7 +7,7 @@ import Store from './store';
 
 import './scss/main.scss';
 //uncomment to add your personal branding
-import './scss/branding.scss';
+// import './scss/branding.scss';
 
 (function () {
 
