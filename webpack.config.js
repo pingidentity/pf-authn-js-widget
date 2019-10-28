@@ -12,7 +12,7 @@ const PATHS = {
 
 module.exports = (env, argv) => {
   const isDevelopment = argv.mode === 'development'
-
+  const publicPath = '/';
   return {
     devServer: {
       hot: true,
@@ -32,7 +32,7 @@ module.exports = (env, argv) => {
       path: PATHS.dist,
       filename: 'pf.authn-widget.js',
       library: 'PfAuthnWidget',
-      publicPath: '/',
+      publicPath: publicPath,
       sourceMapFilename: 'pf.authn-widget.map',
       libraryTarget: 'umd',
       globalObject: '(typeof self !== \'undefined\' ? self : this)',
@@ -68,7 +68,9 @@ module.exports = (env, argv) => {
         {
           test: /\.(scss|css)$/,
           use: [
-            'style-loader',
+            {
+              loader: MiniCssExtractPlugin.loader,
+            },
             {
               loader: "css-loader",
             },
