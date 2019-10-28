@@ -33,7 +33,6 @@ module.exports = (env, argv) => {
       filename: 'pf.authn-widget.js',
       library: 'PfAuthnWidget',
       publicPath: publicPath,
-      sourceMapFilename: 'pf.authn-widget.map',
       libraryTarget: 'umd',
       globalObject: '(typeof self !== \'undefined\' ? self : this)',
       umdNamedDefine: true,
