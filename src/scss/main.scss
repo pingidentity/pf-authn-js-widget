@@ -47,6 +47,9 @@ input:read-only {
     margin-right: 10px;
     flex: auto;
   }
+  &__cancel {
+    margin-top: 10px;
+  }
   &__add-account {
     cursor: default;
     border: none;
