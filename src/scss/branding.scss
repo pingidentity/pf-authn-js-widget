@@ -31,22 +31,22 @@ a {
 
 .button {
     background: $secondary-button-color;
-    border-color: $secondary-button-color;
+    border-color: $secondary-button-border;
     color: $secondary-button-text;
     &:hover {
         background: rgba($secondary-button-color, 0.8);
-        border-color: rgba($secondary-button-color, 0.8);
+        border-color: rgba($secondary-button-border, 0.8);
         color: $secondary-button-text;
     }
 }
 
 .button--primary {
     background: $primary-button-color;
-    border-color: $primary-button-color;
+    border-color: $primary-button-border;
     color: $primary-button-text;
     &:hover {
         background: rgba($primary-button-color, 0.8);
-        border-color: rgba($primary-button-color, 0.8);
+        border-color: rgba($primary-button-border, 0.8);
         color: $primary-button-text;
     }
 }
