@@ -40,6 +40,10 @@ input:read-only {
     &:hover {
       background-color: #f0f6f7; //sonic
     }
+    &__another_acount {
+      font-size: 13px;
+      padding: 15px 10px;
+    }
   }
   &__account-name {
     overflow: hidden;
@@ -71,3 +75,4 @@ input:read-only {
     }
   }
 }
+
