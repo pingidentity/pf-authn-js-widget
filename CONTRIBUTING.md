@@ -1,31 +1,33 @@
 # Contributing to the PingFederate Authentication Widget
-Thank you for taking the time to help improve the Authentication Widget, it is very much appreciated!
-## How can I contribute?
-### Reporting issues
 
-**Before submitting an issue**
+Thank you for taking the time to help improve the Authentication Widget. It is very much appreciated!
 
-Please review the documentation and examples before submitting an issue. It is also very appreciated if you review the GitHub issue tracker for this project to see if your issue or one similar has already been reported. If you do find a similar issue, please feel free to add a comment with a :+1: to upvote the issue.
+Issue reports and enhancement requests are reviewed and prioritized internally. Please understand that we may not be able to address all of them or provide an estimated time for resolution or implementation.
 
-**How do I submit a bug report?**
+## Reporting Issues
 
-Bugs are tracked as [GitHub issues](https://guides.github.com/features/issues/). You can report a bug by submitting an issue in the project's issue tracker. To help the maintainers understand and reproduce the problem, please try to provide information like the following:
+**Before reporting an issue**
 
-* A clear and descriptive title.
-* A description of what happened and a description of what you expected to happen.
-* An example of the exact steps needed to reproduce the problem. If relevant, sample code is helpful.
+Please review the documentation and examples before reporting a bug or other issue. It is also very much appreciated if you would review the GitHub issue tracker for this project to see if your issue or one similar has already been reported. If you do find a similar issue, please feel free to add a comment with a :+1: to upvote the issue.
 
-Please understand that bug reports are reviewed and prioritized internally, and we may not be able to address all bug reports or provide an estimated time for resolution.
+**How do I report an issue?**
 
-**Suggesting enhancements**
+Issues are tracked as [GitHub issues](https://guides.github.com/features/issues/). You can report an issue in this project's issue tracker.
 
-As with bugs, enhancement requests are tracked as [GitHub issues](https://guides.github.com/features/issues/). You can suggest an enhancement by submitting an issue in this project's issue tracker.
+To help us understand and reproduce the problem, please provide the following information:
+- a clear and descriptive title
+- a description of what happened and what you expected to happen
+- the exact steps needed to reproduce the problem
+- if relevant, a code sample
 
-Please understand that enhancement requests are reviewed and prioritized internally, and we may not be able to address all requests or provide an estimated time for resolution.
+## Suggesting Enhancements
 
-**Alternate routes for submitting bugs and suggesting enhancements**
+As with issues, enhancement requests are tracked as [GitHub issues](https://guides.github.com/features/issues/). You can suggest an enhancement in this project's issue tracker.
 
-If you have a support contract with Ping Identity, you can get assistance with the PingFederate Authentication Widget in the same way that you get support for other Ping Identity products. Contact support@pingidentity.com for more information about obtaining a support contract for the LDAP SDK.
+## Alternate Routes for Reporting Issues and Suggesting Enhancements
+
+If you have a support contract with Ping Identity, you can get assistance with the PingFederate Authentication Widget in the same way that you get support for other Ping Identity products. Contact support@pingidentity.com for information about obtaining a support contract.
 
 ## Contributing Code Changes
+
 Ping Identity does not accept third-party code submissions.
