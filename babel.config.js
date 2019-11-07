@@ -5,22 +5,30 @@ module.exports = function (api) {
       {
         useBuiltIns: "usage",
         corejs: 3,
-        "modules": "commonjs"
+        "modules": "umd",
       }],
     "minify",
   ];
   let plugins = [
     "add-module-exports",
     ["@babel/plugin-transform-runtime", {
-      "corejs": 3,
-    }
+      corejs: 3,
+      helpers: true,
+      regenerator: true,
+      useESModules: false,
+    },
     ],
-     "@babel/plugin-proposal-class-properties",
-     "@babel/plugin-transform-arrow-functions",
+    [
+      "@babel/plugin-proposal-class-properties",
+      {
+        loose: true,
+      },
+    ],
+    "@babel/plugin-transform-arrow-functions",
 
   ];
 
-  if(api.env("production"))
+  if (api.env("production"))
     plugins.push(["transform-remove-console"]);
 
   return {
