@@ -34,13 +34,12 @@ You will also need a running PingFederate instance version 9.3 or above.
 
 Before installing, make sure you have [node.js](https://nodejs.org/en/) installed. Then check out this repository.
 
+Then run the following commands
+- `npm install` - install dependencies
+- `npm run start` - start the webpack development server
+
 This will start the webpack development server on port https://localhost:8443 (as specified in webpack.config.js) and instantiate your widget. If you need to modify the base url from `localhost:9031`, you can modify it in `demo-server/templates-index-template.handlebars` or pass a `BASEURL` command line parameter.
-
-Run the following commands
-1. `npm install`
-1. `npm run start`
-
-This will kick off the development server at `https://localhost:8443`. Click on the start SSO link on the IdP Connection in PingFederate or start an OAuth flow from OAuth playground which will redirect to the widget.
+Click on the start SSO link on the IdP Connection in PingFederate or start an OAuth flow from OAuth playground which will redirect to the widget.
 A flowId is required for the widget to interact with PingFederate which is created when PingFederate redirects to the widget.
 
 all available npm commands are:
