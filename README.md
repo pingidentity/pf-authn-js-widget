@@ -84,7 +84,7 @@ The only information needed to configure the widget is the base URL of the PingF
 
 At Minimum you must include:
   - `pf.authn-widget.js` - main javascript library
-  - `https://assets.pingone.com/ux/end-user/0.10.0/end-user.css` - basic css from CDN
+  - `https://assets.pingone.com/ux/end-user/0.11.0/end-user.css` - basic css from CDN
   - `main-styles.css` - widget css
  
 Create a file called `index.html` with the following content and host it in your web server such as Tomcat or just use the webpack development server for testing.
@@ -95,7 +95,7 @@ Create a file called `index.html` with the following content and host it in your
           <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
           <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
           <script src="./pf.authn-widget.js"></script>        
-          <link rel="stylesheet" type="text/css" href="https://assets.pingone.com/ux/end-user/0.10.0/end-user.css">
+          <link rel="stylesheet" type="text/css" href="https://assets.pingone.com/ux/end-user/0.11.0/end-user.css">
           <link rel="stylesheet" type="text/css" href="main-styles.css">
     
                 function load() {
