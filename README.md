@@ -38,7 +38,7 @@ Then run the following commands
 - `npm install` - install dependencies
 - `npm run start` - start the webpack development server
 
-This will start the webpack development server on port https://localhost:8443 (as specified in webpack.config.js) and instantiate your widget. If you need to modify the base url from `localhost:9031`, you can modify it in `demo-server/templates-index-template.handlebars` or pass a `BASEURL` command line parameter.
+This will start the webpack development server on port https://localhost:8443 (as specified in webpack.config.js) and instantiate your widget. If you need to modify the base url from `localhost:9031`, you can modify it in `demo-server/templates/index-template.handlebars` or pass a `BASEURL` command line parameter.
 Click on the start SSO link on the IdP Connection in PingFederate or start an OAuth flow from OAuth playground which will redirect to the widget.
 A flowId is required for the widget to interact with PingFederate which is created when PingFederate redirects to the widget.
 
