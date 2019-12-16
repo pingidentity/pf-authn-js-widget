@@ -4,8 +4,8 @@ export default class Assets {
 
   constructor(options) {
     this.logo = (options && options.logo) || pinglogo;
-    this.error = (options && options.error) || 'https://assets.pingone.com/ux/end-user/0.11.0/icons/error.svg';
-    this.spinner = (options && options.spinner) || 'https://assets.pingone.com/ux/end-user/0.11.0/icons/spinner.svg'
+    this.error = (options && options.error) || 'https://assets.pingone.com/ux/end-user/0.13.0/icons/error.svg';
+    this.spinner = (options && options.spinner) || 'https://assets.pingone.com/ux/end-user/0.13.0/icons/spinner.svg'
   }
 
   toTemplateParams() {
