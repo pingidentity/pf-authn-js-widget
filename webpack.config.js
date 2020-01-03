@@ -22,7 +22,7 @@ module.exports = (env, argv) => {
         }
         devServer(app, server, options)
       },
-      contentBase: [path.join(__dirname, 'dist')],
+      contentBase: [path.join(__dirname, 'src')],
       compress: true,
       port: 8443,
       https: true,

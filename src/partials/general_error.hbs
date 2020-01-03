@@ -1,15 +1,20 @@
 <div class="card">
-    <div class="org-logo">
-            <img class="org-logo__image" src="{{logo}}" alt="Company Logo" />
+  <div class="org-logo">
+    <img class="org-logo__image" src="{{logo}}" alt="Company Logo" />
+  </div>
+  <div class="icon-feedback icon-feedback--error">
+    <p class="icon-feedback__label">Error</p>
+  </div>
+  <div class="feedback feedback--error">
+    <img class="feedback__icon" src="{{error}}" alt="Error" />
+    {{#if msg}}
+    <div class="feedback__message">
+      {{msg}}
     </div>
-    <div class="icon-feedback icon-feedback--error">
-        <p class="icon-feedback__label">Error</p>
+    {{else}}
+    <div class="feedback__message">
+      Something Went Wrong.
     </div>
-    <div class="feedback feedback--error">
-        <img class="feedback__icon" src="{{error}}" alt="Error"/>
-        <div class="feedback__message">
-            Something Went Wrong.
-        </div>
-    </div>
+    {{/if}}
+  </div>
 </div>
-

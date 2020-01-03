@@ -30,13 +30,24 @@ export default class AuthnWidget {
   }
 
   static get CORE_STATES() {
-    return ['USERNAME_PASSWORD_REQUIRED', 'MUST_CHANGE_PASSWORD', 'NEW_PASSWORD_RECOMMENDED', 'NEW_PASSWORD_REQUIRED', 'SUCCESSFUL_PASSWORD_CHANGE',
-      'ACCOUNT_RECOVERY_USERNAME_REQUIRED', 'ACCOUNT_RECOVERY_OTL_VERIFICATION_REQUIRED', 'RECOVERY_CODE_REQUIRED', 'PASSWORD_RESET_REQUIRED',
-      'SUCCESSFUL_PASSWORD_RESET', 'CHALLENGE_RESPONSE_REQUIRED', 'USERNAME_RECOVERY_EMAIL_REQUIRED', 'USERNAME_RECOVERY_EMAIL_SENT', 'SUCCESSFUL_ACCOUNT_UNLOCK',
-      'IDENTIFIER_REQUIRED'
-    ];
+    return ['USERNAME_PASSWORD_REQUIRED', 'MUST_CHANGE_PASSWORD', 'NEW_PASSWORD_RECOMMENDED',
+      'NEW_PASSWORD_REQUIRED', 'SUCCESSFUL_PASSWORD_CHANGE', 'ACCOUNT_RECOVERY_USERNAME_REQUIRED',
+      'ACCOUNT_RECOVERY_OTL_VERIFICATION_REQUIRED', 'RECOVERY_CODE_REQUIRED', 'PASSWORD_RESET_REQUIRED',
+      'SUCCESSFUL_PASSWORD_RESET', 'CHALLENGE_RESPONSE_REQUIRED', 'USERNAME_RECOVERY_EMAIL_REQUIRED',
+      'USERNAME_RECOVERY_EMAIL_SENT', 'SUCCESSFUL_ACCOUNT_UNLOCK', 'IDENTIFIER_REQUIRED'];
   }
 
+  static get COMMUNICATION_ERROR_MSG() {
+    return "Unable to start the authentiation flow, please contact your system administrator.";
+  }
+
+  static get FLOW_ID_REQUIRED_MSG() {
+    return "'flowId' query parameter is required.";
+  }
+
+  static get BASE_URL_REQUIRED_MSG() {
+    return "PingFederate Base URL is required."
+  }
   /*
    * Constructs a new AuthnWidget object
    * @param {string} baseUrl Required: PingFederate Base Url
@@ -47,7 +58,7 @@ export default class AuthnWidget {
     this.flowId = (options && options.flowId) || this.getBrowserFlowId();
     this.divId = (options && options.divId) || 'authnwidget';
     if (!baseUrl) {
-      throw new Error('Must provide base Url for PingFederate in the constructor');
+      throw new Error(AuthnWidget.BASE_URL_REQUIRED_MSG);
     }
     this.captchaDivId = 'invisibleRecaptchaId';
     this.assets = new Assets(options);
@@ -85,12 +96,25 @@ export default class AuthnWidget {
   init() {
     try {
       if (!this.flowId) {
-        throw new Error('Must provide flowId as a query string parameter');
+        throw new Error(AuthnWidget.FLOW_ID_REQUIRED_MSG);
       }
-      this.store.dispatch('GET_FLOW');
+      this.store
+        .dispatch('GET_FLOW')
+        .catch(this.generalErrorRenderer(AuthnWidget.COMMUNICATION_ERROR_MSG));
     } catch (err) {
-      throw err;
+      console.error(err);
+      this.generalErrorRenderer(err.message);
     }
+  }
+
+  generalErrorRenderer(msg) {
+    let template = this.getTemplate('general_error');
+    let params = this.assets.toTemplateParams();
+    if (msg) {
+      params.msg = msg;
+    }
+    let widgetDiv = document.getElementById(this.divId);
+    widgetDiv.innerHTML = template(params);
   }
 
   defaultEventHandler() {
@@ -229,7 +253,9 @@ export default class AuthnWidget {
   }
 
   needsCaptchaResponse(actionId) {
-    return this.actionModels.get(actionId) && this.actionModels.get(actionId).properties && this.actionModels.get(actionId).properties.some(prop => prop === 'captchaResponse');
+    return this.actionModels.get(actionId)
+      && this.actionModels.get(actionId).properties
+      && this.actionModels.get(actionId).properties.some(prop => prop === 'captchaResponse');
   }
 
   dispatchPendingState(token) {
