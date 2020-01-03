@@ -11,28 +11,28 @@ import './scss/main.scss';
 
 (function () {
 
-  if ( typeof window.CustomEvent === "function" ) return false;
+  if (typeof window.CustomEvent === "function") return false;
 
-  function CustomEvent ( event, params ) {
+  function CustomEvent(event, params) {
     params = params || { bubbles: false, cancelable: false, detail: null };
-    var evt = document.createEvent( 'CustomEvent' );
-    evt.initCustomEvent( event, params.bubbles, params.cancelable, params.detail );
+    var evt = document.createEvent('CustomEvent');
+    evt.initCustomEvent(event, params.bubbles, params.cancelable, params.detail);
     return evt;
-   }
+  }
 
   window.CustomEvent = CustomEvent;
 })();
 
 export default class AuthnWidget {
 
-  static get FORM_ID(){
+  static get FORM_ID() {
     return "AuthnWidgetForm";  //name of the form ID used in all handlebar templates
   }
 
   static get CORE_STATES() {
-    return ['USERNAME_PASSWORD_REQUIRED', 'MUST_CHANGE_PASSWORD', 'NEW_PASSWORD_RECOMMENDED',  'NEW_PASSWORD_REQUIRED', 'SUCCESSFUL_PASSWORD_CHANGE',
-      'ACCOUNT_RECOVERY_USERNAME_REQUIRED','ACCOUNT_RECOVERY_OTL_VERIFICATION_REQUIRED','RECOVERY_CODE_REQUIRED', 'PASSWORD_RESET_REQUIRED',
-      'SUCCESSFUL_PASSWORD_RESET', 'CHALLENGE_RESPONSE_REQUIRED',  'USERNAME_RECOVERY_EMAIL_REQUIRED', 'USERNAME_RECOVERY_EMAIL_SENT', 'SUCCESSFUL_ACCOUNT_UNLOCK',
+    return ['USERNAME_PASSWORD_REQUIRED', 'MUST_CHANGE_PASSWORD', 'NEW_PASSWORD_RECOMMENDED', 'NEW_PASSWORD_REQUIRED', 'SUCCESSFUL_PASSWORD_CHANGE',
+      'ACCOUNT_RECOVERY_USERNAME_REQUIRED', 'ACCOUNT_RECOVERY_OTL_VERIFICATION_REQUIRED', 'RECOVERY_CODE_REQUIRED', 'PASSWORD_RESET_REQUIRED',
+      'SUCCESSFUL_PASSWORD_RESET', 'CHALLENGE_RESPONSE_REQUIRED', 'USERNAME_RECOVERY_EMAIL_REQUIRED', 'USERNAME_RECOVERY_EMAIL_SENT', 'SUCCESSFUL_ACCOUNT_UNLOCK',
       'IDENTIFIER_REQUIRED'
     ];
   }
@@ -69,17 +69,17 @@ export default class AuthnWidget {
 
     this.addEventHandler('IDENTIFIER_REQUIRED', this.registerIdFirstLinks);
 
-    this.actionModels.set('checkUsernamePassword', {required: ['username', 'password'], properties: ['username', 'password', 'rememberMyUsername', 'thisIsMyDevice', 'captchaResponse']});
-    this.actionModels.set('initiateAccountRecovery', {properties: ['usernameHint']});
-    this.actionModels.set('useAlternativeAuthenticationSource', {required: ['authenticationSource'], properties: ['authenticationSource']});
-    this.actionModels.set('checkUsernameRecoveryEmail', {required: ['email'], properties: ['email', 'captchaResponse']});
-    this.actionModels.set('checkAccountRecoveryUsername', {required: ['username'], properties: ['username', 'captchaResponse']});
-    this.actionModels.set('checkNewPassword', {required: ['username', 'existingPassword', 'newPassword'], properties:  ['username', 'existingPassword', 'newPassword', 'captchaResponse']});
-    this.actionModels.set('checkPasswordReset', {required: ['newPassword'], properties: ['newPassword']});
-    this.actionModels.set('checkRecoveryCode', {required: ['recoveryCode'], properties: ['recoveryCode']});
-    this.actionModels.set('checkChallengeResponse', {required: ['challengeResponse'], properties: ['challengeResponse']});
-    this.actionModels.set('submitIdentifier', {required: ['identifier'], properties: ['identifier']});
-    this.actionModels.set('clearIdentifier', {required: ['identifier'], properties: ['identifier']});
+    this.actionModels.set('checkUsernamePassword', { required: ['username', 'password'], properties: ['username', 'password', 'rememberMyUsername', 'thisIsMyDevice', 'captchaResponse'] });
+    this.actionModels.set('initiateAccountRecovery', { properties: ['usernameHint'] });
+    this.actionModels.set('useAlternativeAuthenticationSource', { required: ['authenticationSource'], properties: ['authenticationSource'] });
+    this.actionModels.set('checkUsernameRecoveryEmail', { required: ['email'], properties: ['email', 'captchaResponse'] });
+    this.actionModels.set('checkAccountRecoveryUsername', { required: ['username'], properties: ['username', 'captchaResponse'] });
+    this.actionModels.set('checkNewPassword', { required: ['username', 'existingPassword', 'newPassword'], properties: ['username', 'existingPassword', 'newPassword', 'captchaResponse'] });
+    this.actionModels.set('checkPasswordReset', { required: ['newPassword'], properties: ['newPassword'] });
+    this.actionModels.set('checkRecoveryCode', { required: ['recoveryCode'], properties: ['recoveryCode'] });
+    this.actionModels.set('checkChallengeResponse', { required: ['challengeResponse'], properties: ['challengeResponse'] });
+    this.actionModels.set('submitIdentifier', { required: ['identifier'], properties: ['identifier'] });
+    this.actionModels.set('clearIdentifier', { required: ['identifier'], properties: ['identifier'] });
   }
 
   init() {
@@ -95,19 +95,20 @@ export default class AuthnWidget {
 
   defaultEventHandler() {
     Array.from(document.querySelector(`#${this.divId}`)
-                       .querySelectorAll("[data-actionId]")).forEach(element => element.addEventListener("click", this.dispatch));
+      .querySelectorAll("[data-actionId]"))
+      .forEach(element => element.addEventListener("click", this.dispatch));
 
     let nodes = document.querySelectorAll(`#${this.divId} input[type=text], input[type=password], input[type=email]`);
-    if(nodes) {
+    if (nodes) {
       nodes.forEach(n => n.addEventListener('input', this.enableSubmit));
     }
     let element = nodes[0];
-    if(element) {
+    if (element) {
       let event = new CustomEvent('input');
       element.dispatchEvent(event);
     }
 
-    if(this.getForm()) {
+    if (this.getForm()) {
       this.getForm().addEventListener("keydown", evt => {
         if (evt.key === "Enter") {
           evt.preventDefault();
@@ -147,7 +148,7 @@ export default class AuthnWidget {
   verifyPasswordsMatch() {
     let pass1 = document.querySelector('#newpassword');
     let pass2 = document.querySelector('#verifypassword');
-    if(pass1.value !== pass2.value) {
+    if (pass1.value !== pass2.value) {
       this.store.dispatchErrors('New passwords do not match.');
       return false;
     }
@@ -160,15 +161,15 @@ export default class AuthnWidget {
   enableSubmit() {
     let nodes = (document.querySelectorAll('input[type=text], input[type=password], input[type=email]'));
     let disabled = false;
-    if(nodes) {
+    if (nodes) {
       nodes.forEach(input => {
         //validate empty + other things
         if (input.value === '' || !input.value.replace(/\s/g, '').length) {
           disabled = true
         }
-        if(input.type === 'email') {
+        if (input.type === 'email') {
           let isValidEmail = input.checkValidity();
-          if(!isValidEmail) {
+          if (!isValidEmail) {
             disabled = true;
           }
         }
@@ -187,10 +188,10 @@ export default class AuthnWidget {
    */
   validateActionModel(action, data) {
     const model = this.actionModels.get(action);
-    if(model === undefined) {
+    if (model === undefined) {
       return undefined;
     }
-    if(model.properties) {
+    if (model.properties) {
       //remove unneeded params
       Object.keys(data).forEach(key => !model.properties.includes(key) ? delete data[key] : '');
     }
@@ -205,7 +206,7 @@ export default class AuthnWidget {
     return ['checkNewPassword', 'checkPasswordReset'];
   }
 
-  dispatch(evt){
+  dispatch(evt) {
     evt.preventDefault();
     let source = evt.target || evt.srcElement;
     console.log('source: ' + source.dataset['actionid']);
@@ -239,16 +240,16 @@ export default class AuthnWidget {
     this.store.clearPendingState();
   }
 
-  getFormData(){
+  getFormData() {
     let formElement = this.getForm();
-    if(formElement) {
+    if (formElement) {
       let formData = new FormData(formElement);
       let object = {};
       var formDataEntries = formData.entries(), formDataEntry = formDataEntries.next(), pair;
       while (!formDataEntry.done) {
-          pair = formDataEntry.value;
-          object[pair[0]] = pair[1];
-          formDataEntry = formDataEntries.next();
+        pair = formDataEntry.value;
+        object[pair[0]] = pair[1];
+        formDataEntry = formDataEntries.next();
       }
       return object;
     }
@@ -262,7 +263,7 @@ export default class AuthnWidget {
       return;
     }
     let template;
-    if(currentState) {
+    if (currentState) {
       try {
         template = this.getTemplate(currentState);
       }
@@ -275,7 +276,7 @@ export default class AuthnWidget {
     var params = Object.assign(state, this.assets.toTemplateParams())
     widgetDiv.innerHTML = template(params);
     this.registerEventListeners(currentState);
-    if(this.store.state.showCaptcha && this.grecaptcha) {
+    if (this.store.state.showCaptcha && this.grecaptcha) {
       this.grecaptcha.render(this.captchaDivId);
     }
   }
@@ -287,8 +288,8 @@ export default class AuthnWidget {
 
   registerEventListeners(stateName) {
     console.log('registering events for: ' + stateName);
-    if(stateName && this.eventHandler.get(stateName)) {
-        this.eventHandler.get(stateName).forEach(fn => fn());
+    if (stateName && this.eventHandler.get(stateName)) {
+      this.eventHandler.get(stateName).forEach(fn => fn());
     }
   }
 
@@ -301,7 +302,7 @@ export default class AuthnWidget {
   getTemplate(key) {
     key = key.toLowerCase();
     let template = this.stateTemplates.get(key);
-    if(template === undefined) {
+    if (template === undefined) {
       template = require(`./partials/${key}.hbs`);
       this.stateTemplates.set(key, template);
     }

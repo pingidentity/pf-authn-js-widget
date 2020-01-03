@@ -25,7 +25,7 @@ export default class Store {
   async dispatch(method, actionId, payload) {
     this.prevState = this.state;
     this.state = await this.reduce(method, actionId, payload);
-    if(this.prevState.username && !this.state.username) {
+    if (this.prevState.username && !this.state.username) {
       this.state.username = this.prevState.username;
     }
     console.log('dispatching actionId: ' + actionId)
@@ -33,15 +33,15 @@ export default class Store {
     this.notifyListeners();
   }
 
-  savePendingState (method, actionId, payload) {
+  savePendingState(method, actionId, payload) {
     this.pendingState = {
       method, actionId, payload,
     }
   }
 
   dispatchPendingState(token) {
-    if(this.pendingState) {
-      let payLoadString = JSON.stringify({...this.pendingState.payload, ...{captchaResponse: token}});
+    if (this.pendingState) {
+      let payLoadString = JSON.stringify({ ...this.pendingState.payload, ...{ captchaResponse: token } });
       this.dispatch(this.pendingState.method, this.pendingState.actionId, payLoadString);
       this.pendingState = {};
     }
@@ -63,7 +63,7 @@ export default class Store {
     let result;
     let json;
     let timeout;
-    if(document.querySelector("#spinnerId")) {
+    if (document.querySelector("#spinnerId")) {
       timeout = setTimeout(function () {
         document.querySelector('#spinnerId').style.display = 'block';
         if (document.querySelector("#AuthnWidgetForm")) {
@@ -81,10 +81,10 @@ export default class Store {
         break;
     }
     json = await result.json();
-    if(document.querySelector("#spinnerId")) {
-      if(timeout)
+    if (document.querySelector("#spinnerId")) {
+      if (timeout)
         clearTimeout(timeout);
-      document.querySelector("#spinnerId").style.display ='none';
+      document.querySelector("#spinnerId").style.display = 'none';
       if (document.querySelector("#AuthnWidgetForm")) {
         document.querySelector("#AuthnWidgetForm").style.display = 'none';
       }
@@ -95,9 +95,9 @@ export default class Store {
     if (json.status) {
       combinedData = json;
       this.state = json;
-      if(json.status === 'CANCELED') {
+      if (json.status === 'CANCELED') {
         //read the cancel operation
-        switch(json.canceledOperation) {
+        switch (json.canceledOperation) {
           case 'PASSWORD_CHANGE':
             this.state.canceledTitle = 'Change Password';
             this.state.canceledMessage = 'You have cancelled the attempt to change your password. Please close this window. ';
@@ -113,7 +113,7 @@ export default class Store {
         }
       }
     } else {
-      if(json.code === 'RESOURCE_NOT_FOUND') {
+      if (json.code === 'RESOURCE_NOT_FOUND') {
         this.state = {};
       }
       else {
@@ -126,7 +126,7 @@ export default class Store {
     }
     let daysToExpireMsg;
     let daysToExpire = json.daysToExpire;
-    if(daysToExpire !== undefined) {
+    if (daysToExpire !== undefined) {
       if (daysToExpire === 0) {
         daysToExpireMsg = "today";
       } else if (daysToExpire === 1) {
@@ -135,7 +135,7 @@ export default class Store {
         daysToExpireMsg = "in " + daysToExpire + " days";
       }
     }
-    combinedData = {...combinedData, checkRecaptcha: this.checkRecaptcha, daysToExpireMsg};
+    combinedData = { ...combinedData, checkRecaptcha: this.checkRecaptcha, daysToExpireMsg };
     return combinedData;
   }
 
@@ -145,17 +145,17 @@ export default class Store {
       failedValidators: [],
       satisfiedValidators: []
     };
-    if(json.code && json.code == 'VALIDATION_ERROR') {
-      if(json.details) {
+    if (json.code && json.code == 'VALIDATION_ERROR') {
+      if (json.details) {
         json.details.forEach(msg => {
-          if(msg.failedValidators) {
+          if (msg.failedValidators) {
             msg.failedValidators.map(msg => msg.userMessage).forEach(failMsg => errors.failedValidators.push(failMsg));
           }
-          if(msg.satisfiedValidators) {
-              msg.satisfiedValidators.map(msg => msg.userMessage).forEach(okMsg => errors.satisfiedValidators.push(okMsg));
+          if (msg.satisfiedValidators) {
+            msg.satisfiedValidators.map(msg => msg.userMessage).forEach(okMsg => errors.satisfiedValidators.push(okMsg));
           }
           let userMessage = msg.userMessage;
-          if(msg.target) {
+          if (msg.target) {
             userMessage = userMessage.slice(0, -1).concat(' : ').concat(msg.target);
           }
           errors.userMessage = userMessage;
@@ -165,7 +165,7 @@ export default class Store {
         errors.userMessage = json.userMessage;
       }
     }
-    else if(json.code === 'RESOURCE_NOT_FOUND') {
+    else if (json.code === 'RESOURCE_NOT_FOUND') {
       errors.userMessage = json.message;
     }
     return errors;
