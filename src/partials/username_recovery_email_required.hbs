@@ -10,19 +10,17 @@
   {{> spinner}}
   <form class="form form--margin-small" id="AuthnWidgetForm">
     {{#if showCaptcha}}
-        <div class="g-recaptcha"
-             data-sitekey="{{captchaSiteKey}}"
-             data-callback="{{checkRecaptcha}}"
-             data-size="invisible"
-             id="invisibleRecaptchaId">
-        </div>
+    <div class="g-recaptcha" data-sitekey="{{captchaSiteKey}}" data-callback="{{checkRecaptcha}}" data-size="invisible"
+      id="invisibleRecaptchaId">
+    </div>
     {{/if}}
-      <div class="float-label">
+    <div class="float-label">
       <input type="email" class="text-input float-label__input" name="email" placeholder="Email Address" autofocus />
       <label class="float-label__label" for="email">Email Address</label>
     </div>
     <div class="button-set">
-      <button id="submit" type="submit" data-actionid="checkUsernameRecoveryEmail" class="button button--primary brand-primary-bg" disabled>
+      <button id="submit" type="submit" data-actionid="checkUsernameRecoveryEmail"
+        class="button button--primary brand-primary-bg" disabled>
         Send Request
       </button>
       <button data-actionId="cancelUsernameRecovery" class="button">Cancel</button>

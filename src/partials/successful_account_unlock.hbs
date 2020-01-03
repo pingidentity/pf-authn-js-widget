@@ -1,6 +1,6 @@
 <div class="card">
   <div class="org-logo">
-        <img class="org-logo__image" src="{{logo}}" alt="Company Logo" />
+    <img class="org-logo__image" src="{{logo}}" alt="Company Logo" />
   </div>
   <h1 class="heading">Successful Account Unlock</h1>
   <div class="text-block">
@@ -8,14 +8,14 @@
   </div>
   <form class="form form--margin-small" id="AuthnWidgetForm">
     <div class="button-set">
-     {{#with _links as |actions|}}
-     {{#if continueAuthentication}}
+      {{#with _links as |actions|}}
+      {{#if continueAuthentication}}
       <button data-actionId="continueAuthentication" class="button">Continue Authentication</button>
-     {{/if}}
-     {{#if continueAccountRecovery}}
+      {{/if}}
+      {{#if continueAccountRecovery}}
       <button data-actionId="continueAccountRecovery" class="button">Continue Account Recovery</button>
-     {{/if}}
-     {{/with}}
+      {{/if}}
+      {{/with}}
     </div>
   </form>
 </div>

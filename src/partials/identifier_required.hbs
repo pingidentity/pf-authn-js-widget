@@ -1,41 +1,40 @@
 <div class="card">
-    <div class="org-logo">
-            <img class="org-logo__image" src="{{logo}}" alt="Company Logo" />
+  <div class="org-logo">
+    <img class="org-logo__image" src="{{logo}}" alt="Company Logo" />
+  </div>
+  <h1 class="heading">Sign On</h1>
+  <div class="text-block">
+    <div class="text-block__text">
+      {{#if previouslySubmittedIdentifiers.length}}
+      Choose an Account
+      {{/if}}
     </div>
-    <h1 class="heading">Sign On</h1>
-    <div class="text-block">
-        <div class="text-block__text">
-          {{#if previouslySubmittedIdentifiers.length}}
-            Choose an Account
-          {{/if}}
-        </div>
-    </div>
+  </div>
   {{> errors}}
   {{> spinner}}
-{{#if previouslySubmittedIdentifiers.length}}
-    <div id="existingAccountsSelectionList" class="identifier-first__account-list">
-      {{#each previouslySubmittedIdentifiers}}
-          <div class="identifier-first__account-item">
-              <div data-idfirstaction="submitIdentifier" class="identifier-first__account-name" data-identifier="{{this}}">
-                {{this}}
-              </div>
-              <div data-idfirstaction="clearIdentifier"
-                   data-identifier="{{this}}" class="identifier-first__remove-account">
-              </div>
-          </div>
-      {{/each}}
-        <div class="identifier-first__account-item__another_acount">
-            <a data-idFirstAction="selectidentifier" href="#">Use Another Account</a>
-        </div>
-        <div class="identifier-first__cancel">
-            <button data-actionId="cancelIdentifierSubmission" class="button">Cancel</button>
-        </div>
+  {{#if previouslySubmittedIdentifiers.length}}
+  <div id="existingAccountsSelectionList" class="identifier-first__account-list">
+    {{#each previouslySubmittedIdentifiers}}
+    <div class="identifier-first__account-item">
+      <div data-idfirstaction="submitIdentifier" class="identifier-first__account-name" data-identifier="{{this}}">
+        {{this}}
+      </div>
+      <div data-idfirstaction="clearIdentifier" data-identifier="{{this}}" class="identifier-first__remove-account">
+      </div>
     </div>
-    <div id="signonidentifier" style="display: none">
-      {{> identifier_signon}}
+    {{/each}}
+    <div class="identifier-first__account-item__another_acount">
+      <a data-idFirstAction="selectidentifier" href="#">Use Another Account</a>
     </div>
-{{/if}}
-{{#unless previouslySubmittedIdentifiers.length}}
+    <div class="identifier-first__cancel">
+      <button data-actionId="cancelIdentifierSubmission" class="button">Cancel</button>
+    </div>
+  </div>
+  <div id="signonidentifier" style="display: none">
     {{> identifier_signon}}
-{{/unless}}
+  </div>
+  {{/if}}
+  {{#unless previouslySubmittedIdentifiers.length}}
+  {{> identifier_signon}}
+  {{/unless}}
 </div>

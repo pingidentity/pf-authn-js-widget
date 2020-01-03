@@ -10,15 +10,13 @@
   {{> spinner}}
   <form class="form form--margin-small" id="AuthnWidgetForm">
     {{#if showCaptcha}}
-        <div class="g-recaptcha"
-             data-sitekey="{{captchaSiteKey}}"
-             data-callback="{{checkRecaptcha}}"
-             data-size="invisible"
-             id="invisibleRecaptchaId">
-        </div>
+    <div class="g-recaptcha" data-sitekey="{{captchaSiteKey}}" data-callback="{{checkRecaptcha}}" data-size="invisible"
+      id="invisibleRecaptchaId">
+    </div>
     {{/if}}
     <div class="float-label">
-      <input type="text" class="text-input float-label__input" name="username" placeholder="Username"  value="{{username}}" autofocus />
+      <input type="text" class="text-input float-label__input" name="username" placeholder="Username"
+        value="{{username}}" autofocus />
       <label class="float-label__label" for="username">Username</label>
     </div>
     {{#with _links as |actions|}}
@@ -29,7 +27,8 @@
     {{/if}}
     {{/with}}
     <div class="button-set">
-      <button id="submit" type="submit" data-actionid="checkAccountRecoveryUsername" class="button button--primary brand-primary-bg" disabled>
+      <button id="submit" type="submit" data-actionid="checkAccountRecoveryUsername"
+        class="button button--primary brand-primary-bg" disabled>
         Send Request
       </button>
       <button data-actionId="cancelAccountRecovery" class="button">Cancel</button>
