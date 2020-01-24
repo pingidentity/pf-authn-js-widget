@@ -43,7 +43,7 @@ If you need to modify the base URL from `localhost:9031`, you can modify it in `
 
 Click the start SSO link on the IdP Connection in PingFederate or start an OAuth flow from OAuth playground, which will redirect to the widget.
 
-    A 'flowId' value is required for the widget to interact with PingFederate, which is created when PingFederate redirects to the widget.
+Note: A 'flowId' value is required for the widget to interact with PingFederate, which is created when PingFederate redirects to the widget.
 
 ## Option 2: Adding the Widget as a Node Module
 
