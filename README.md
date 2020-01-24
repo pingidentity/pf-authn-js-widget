@@ -3,10 +3,11 @@
 The JavaScript Widget for the PingFederate Authentication API is a customizable JavaScript library that provides the capabilities of the [HTML form Adapter](https://support.pingidentity.com/s/document-item?bundleId=pingfederate-93&topicId=xvy1564003022890.html)
 and the [Identifier First Adapter](https://support.pingidentity.com/s/document-item?bundleId=pingfederate-93&topicId=iek1564003022460.html)
 via [Authentication APIs](https://support.pingidentity.com/s/document-item?bundleId=pingfederate-93&topicId=qsl1564002999029.html), including:
- - User Login
- - Trouble Signing in
- - Trouble with Username
- - Password Reset
+ - user login
+ - trouble signing in
+ - trouble with username
+ - password reset
+ - authenticate with identifier
 
 The widget is a ready-to-use drop-in bundle with a CSS and customizable templates. This alternative to PingFederate templates provides a sign-in experience as a single page application.
 
