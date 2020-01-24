@@ -1,6 +1,6 @@
-# Contributing to the PingFederate Authentication Widget
+# Contributing to the JavaScript Widget for the PingFederate Authentication API
 
-Thank you for taking the time to help improve the Authentication Widget. It is very much appreciated!
+Thank you for taking the time to help improve the JavaScript Widget for the PingFederate Authentication API. It is very much appreciated!
 
 Issue reports and enhancement requests are reviewed and prioritized internally. Please understand that we may not be able to address all of them or provide an estimated time for resolution or implementation.
 
@@ -14,7 +14,7 @@ Please review the documentation and examples before reporting a bug or other iss
 
 Issues are tracked as [GitHub issues](https://guides.github.com/features/issues/). You can report an issue in this project's issue tracker.
 
-To help us understand and reproduce the problem, please provide the following information:
+To help us understand and reproduce the problem, provide the following information:
 - a clear and descriptive title
 - a description of what happened and what you expected to happen
 - the exact steps needed to reproduce the problem
@@ -26,7 +26,7 @@ As with issues, enhancement requests are tracked as [GitHub issues](https://guid
 
 ## Alternate Routes for Reporting Issues and Suggesting Enhancements
 
-If you have a support contract with Ping Identity, you can get assistance with the PingFederate Authentication Widget in the same way that you get support for other Ping Identity products. Contact support@pingidentity.com for information about obtaining a support contract.
+If you have a support contract with Ping Identity, you can get assistance with the JavaScript Widget for the PingFederate Authentication API in the same way that you get support for other Ping Identity products. Contact support@pingidentity.com for information about obtaining a support contract.
 
 ## Contributing Code Changes
 
