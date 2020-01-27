@@ -30,4 +30,4 @@ If you have a support contract with Ping Identity, you can get assistance with t
 
 ## Contributing Code Changes
 
-Ping Identity does not accept third-party code submissions.
+This Ping Identity project does not accept third-party code submissions.
