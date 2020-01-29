@@ -15,7 +15,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git@github.com:pingidentity/pf-authn-widget"
+    "url": "git@github.com:pingidentity/pf-authn-js-widget.git"
   },
   "engines": {
     "node": ">=8.0.0 <=12.0.0"
