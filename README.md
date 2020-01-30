@@ -206,4 +206,4 @@ Use the [issue tracker](https://github.com/pingidentity/pf-authn-js-widget/issue
 
 # License
 
-This project is licensed under the MIT license. See the [LICENSE](LICENSE) file for more information.
+This project is licensed under the Apache license. See the [LICENSE](LICENSE) file for more information.
