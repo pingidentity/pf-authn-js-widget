@@ -58,18 +58,18 @@ To add the widget as a dependency:
 ## Widget Configuration
 
 The only information required to configure the widget is PingFederate's base URL. The widget can be instantiated and initialized using the following code example:
-```javascript 
+```javascript
 var baseUrl = 'https://localhost:9031';
 var authnWidget = new PfAuthnWidget(baseurl);
 authnWidget.init();
 ```
 
-Here are all the available constructor parameters, their descriptions, and a usage code example: 
+Here are all the available constructor parameters, their descriptions, and a usage code example:
   - **baseUrl**: full address of where PingFederate is running, such as https://localhost:9031
   - **divId**: where the widget should be rendered (optional)
   - **logo**: to display on top of every page (this can be passed in as a file or as the URL where the image is hosted)
 
-```javascript 
+```javascript
 var baseUrl = 'https://localhost:9031';
 var authnWidget = new PfAuthnWidget(baseUrl, {divId: 'mywidget', logo: 'https://path-to-my-logo.svg'})
 authnWidget.init();
@@ -121,7 +121,8 @@ Create a file called `index.html` with the following content and host it in your
     <link rel="stylesheet" type="text/css" href="main-styles.css">
     <script>
       function load() {
-        var authnWidget = new PfAuthnWidget("{{baseUrl}}", { divId: 'authnwidget', logo: 'assets/ping-logo.svg'});
+        var authnWidget = new PfAuthnWidget("{{baseUrl}}", { divId: 'authnwidget',
+                                logo: 'assets/ping-logo.svg'});
         authnWidget.init()
       }
       window.onload = load;
@@ -154,7 +155,7 @@ Note: Some items cannot be customized:
 ## Enabling Captcha
 
 To use Captcha with the HTML Form Adapter, import `api.js` from Google's CDN at `<script src="https://www.google.com/recaptcha/api.js?onload=onloadCallback&render=explicit" async defer></script>`
-After the script is loaded, instantiate the widget. 
+After the script is loaded, instantiate the widget.
 
 Three functions are needed:
 
