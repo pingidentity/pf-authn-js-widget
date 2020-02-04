@@ -12,6 +12,8 @@ via [Authentication APIs](https://support.pingidentity.com/s/document-item?bundl
 
 The widget is a ready-to-use drop-in bundle with a CSS and customizable templates. This alternative to PingFederate templates provides a sign-in experience as a single page application.
 
+![JavaScript Widget for the PingFederate Authentication API](/images/loginscreen.png)
+
 ## PingFederate Configuration
 
 PingFederate acts as the server interacting with the widget via APIs to authenticate the user.
@@ -58,18 +60,18 @@ To add the widget as a dependency:
 ## Widget Configuration
 
 The only information required to configure the widget is PingFederate's base URL. The widget can be instantiated and initialized using the following code example:
-```javascript 
+```javascript
 var baseUrl = 'https://localhost:9031';
 var authnWidget = new PfAuthnWidget(baseurl);
 authnWidget.init();
 ```
 
-Here are all the available constructor parameters, their descriptions, and a usage code example: 
+Here are all the available constructor parameters, their descriptions, and a usage code example:
   - **baseUrl**: full address of where PingFederate is running, such as https://localhost:9031
   - **divId**: where the widget should be rendered (optional)
   - **logo**: to display on top of every page (this can be passed in as a file or as the URL where the image is hosted)
 
-```javascript 
+```javascript
 var baseUrl = 'https://localhost:9031';
 var authnWidget = new PfAuthnWidget(baseUrl, {divId: 'mywidget', logo: 'https://path-to-my-logo.svg'})
 authnWidget.init();
@@ -154,7 +156,7 @@ Note: Some items cannot be customized:
 ## Enabling Captcha
 
 To use Captcha with the HTML Form Adapter, import `api.js` from Google's CDN at `<script src="https://www.google.com/recaptcha/api.js?onload=onloadCallback&render=explicit" async defer></script>`
-After the script is loaded, instantiate the widget. 
+After the script is loaded, instantiate the widget.
 
 Three functions are needed:
 
