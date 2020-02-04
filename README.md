@@ -125,7 +125,8 @@ Create a file called `index.html` with the following content and host it in your
     <link rel="stylesheet" type="text/css" href="main-styles.css">
     <script>
       function load() {
-        var authnWidget = new PfAuthnWidget("{{baseUrl}}", { divId: 'authnwidget' });
+        var authnWidget = new PfAuthnWidget("{{baseUrl}}", { divId: 'authnwidget',
+                                logo: 'assets/ping-logo.svg'});
         authnWidget.init()
       }
       window.onload = load;
