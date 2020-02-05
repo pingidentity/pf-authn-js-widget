@@ -56,7 +56,7 @@ Note: A 'flowId' value is required for the widget to interact with PingFederate,
 This is a good choice if you already have a node project with `package.json` and can just add this widget as a dependency.
 
 To add the widget as a dependency:
-1. Run `npm install pf-authn-widget --save`
+1. Run `npm install @ping-identity/pf-authn-js-widget --save`
 2. Add `<div id="authnwidget"></div>` to your app.
 
 ## Widget Configuration
