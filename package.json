@@ -1,6 +1,6 @@
 {
-  "name": "pf-authn-js-widget",
-  "version": "1.0.0",
+  "name": "@ping-identity/pf-authn-js-widget",
+  "version": "0.9.0",
   "description": "JavaScript Widget for the PingFederate Authentication API",
   "main": "./dist/pf.authn-widget.js",
   "scripts": {
@@ -12,6 +12,9 @@
     "coverage": "jest --coverage --config=jest.config.js",
     "test": "jest --config=jest.config.js",
     "test:watch": "jest --watch"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "repository": {
     "type": "git",
