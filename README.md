@@ -57,7 +57,7 @@ This is a good choice if you already have a node project with `package.json` and
 
 To add the widget as a dependency:
 1. Run `npm install @ping-identity/pf-authn-js-widget --save`
-2. Add `<div id="@ping-identity/pf-authn-js-widget"></div>` to your app.
+2. Add `<div id="authnwidget"></div>` to your app.
 
 ## Widget Configuration
 
