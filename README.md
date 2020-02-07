@@ -13,7 +13,7 @@ via [Authentication APIs](https://support.pingidentity.com/s/document-item?bundl
 The widget is a ready-to-use drop-in bundle with a CSS and customizable templates. This alternative to PingFederate templates provides a sign-in experience as a single page application.
 
 <p align="center">
-  <img src="/images/loginscreen.png" alt="JavaScript Widget for the PingFederate Authentication API">
+  <img src="/images/WidgetAnimation.gif" alt="JavaScript Widget for the PingFederate Authentication API">
 </p>
 
 ## PingFederate Configuration
