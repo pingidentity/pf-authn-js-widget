@@ -1,4 +1,3 @@
-import pinglogo from '../assets/ping-logo.svg'
 
 export default class Assets {
 
