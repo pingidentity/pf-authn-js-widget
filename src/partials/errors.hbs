@@ -1,10 +1,9 @@
 {{#if userMessage}}
-<div class="feedback feedback--error">
-  <div class="feedback__message">
-    <div>
-      <img class="feedback__icon" src="{{error}}" alt="Error" />
+  <div class="feedback feedback--error"><img
+          class="feedback__icon" src="{{error}}"
+          alt="Error"/>
+    <div class="feedback__message">
       {{userMessage}}
     </div>
   </div>
-</div>
 {{/if}}

@@ -47,7 +47,7 @@ This will start the webpack development server on https://localhost:8443 (as spe
 
 If you need to modify the base URL from `localhost:9031`, you can modify it in `demo-server/templates/index-template.handlebars` or pass a `BASEURL` command line parameter (see [Technical Notes](#tech-notes)).
 
-Click the start SSO link on an SP Connection in PingFederate or start an OAuth flow from OAuth playground, which will redirect to the widget.
+Click the start SSO link on the IdP Connection in PingFederate or start an OAuth flow from OAuth playground, which will redirect to the widget.
 
 Note: A 'flowId' value is required for the widget to interact with PingFederate, which is created when PingFederate redirects to the widget.
 

@@ -28,7 +28,7 @@ export default class Store {
     if (this.prevState.username && !this.state.username) {
       this.state.username = this.prevState.username;
     }
-    console.log('dispatching actionId: ' + actionId)
+    console.log('dispatching actionId: ' + actionId);
     console.log(this.state);
     this.notifyListeners();
   }
@@ -145,7 +145,7 @@ export default class Store {
       failedValidators: [],
       satisfiedValidators: []
     };
-    if (json.code && json.code == 'VALIDATION_ERROR') {
+    if (json.code && json.code === 'VALIDATION_ERROR' || json.code === "REGISTRATION_FAILED") {
       if (json.details) {
         json.details.forEach(msg => {
           if (msg.failedValidators) {

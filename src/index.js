@@ -14,7 +14,7 @@ import './scss/main.scss';
   if (typeof window.CustomEvent === "function") return false;
 
   function CustomEvent(event, params) {
-    params = params || { bubbles: false, cancelable: false, detail: null };
+    params = params || {bubbles: false, cancelable: false, detail: null};
     var evt = document.createEvent('CustomEvent');
     evt.initCustomEvent(event, params.bubbles, params.cancelable, params.detail);
     return evt;
@@ -34,11 +34,11 @@ export default class AuthnWidget {
       'NEW_PASSWORD_REQUIRED', 'SUCCESSFUL_PASSWORD_CHANGE', 'ACCOUNT_RECOVERY_USERNAME_REQUIRED',
       'ACCOUNT_RECOVERY_OTL_VERIFICATION_REQUIRED', 'RECOVERY_CODE_REQUIRED', 'PASSWORD_RESET_REQUIRED',
       'SUCCESSFUL_PASSWORD_RESET', 'CHALLENGE_RESPONSE_REQUIRED', 'USERNAME_RECOVERY_EMAIL_REQUIRED',
-      'USERNAME_RECOVERY_EMAIL_SENT', 'SUCCESSFUL_ACCOUNT_UNLOCK', 'IDENTIFIER_REQUIRED'];
+      'USERNAME_RECOVERY_EMAIL_SENT', 'SUCCESSFUL_ACCOUNT_UNLOCK', 'IDENTIFIER_REQUIRED', 'REGISTRATION_REQUIRED'];
   }
 
   static get COMMUNICATION_ERROR_MSG() {
-    return "Unable to start the authentiation flow, please contact your system administrator.";
+    return "Unable to start the authentication flow, please contact your system administrator.";
   }
 
   static get FLOW_ID_REQUIRED_MSG() {
@@ -48,6 +48,7 @@ export default class AuthnWidget {
   static get BASE_URL_REQUIRED_MSG() {
     return "PingFederate Base URL is required."
   }
+
   /*
    * Constructs a new AuthnWidget object
    * @param {string} baseUrl Required: PingFederate Base Url
@@ -71,6 +72,8 @@ export default class AuthnWidget {
     this.defaultEventHandler = this.defaultEventHandler.bind(this);
     this.handleIdFirstLinks = this.handleIdFirstLinks.bind(this);
     this.registerIdFirstLinks = this.registerIdFirstLinks.bind(this);
+    this.registerRegistrationLinks = this.registerRegistrationLinks.bind(this);
+    this.handleRegisterUser = this.handleRegisterUser.bind(this);
     this.stateTemplates = new Map();  //state -> handlebar templates
     this.eventHandler = new Map();  //state -> eventHandlers
     this.actionModels = new Map();
@@ -79,18 +82,41 @@ export default class AuthnWidget {
     AuthnWidget.CORE_STATES.forEach(state => this.registerState(state));
 
     this.addEventHandler('IDENTIFIER_REQUIRED', this.registerIdFirstLinks);
+    this.addEventHandler('REGISTRATION_REQUIRED', this.registerRegistrationLinks);
 
-    this.actionModels.set('checkUsernamePassword', { required: ['username', 'password'], properties: ['username', 'password', 'rememberMyUsername', 'thisIsMyDevice', 'captchaResponse'] });
-    this.actionModels.set('initiateAccountRecovery', { properties: ['usernameHint'] });
-    this.actionModels.set('useAlternativeAuthenticationSource', { required: ['authenticationSource'], properties: ['authenticationSource'] });
-    this.actionModels.set('checkUsernameRecoveryEmail', { required: ['email'], properties: ['email', 'captchaResponse'] });
-    this.actionModels.set('checkAccountRecoveryUsername', { required: ['username'], properties: ['username', 'captchaResponse'] });
-    this.actionModels.set('checkNewPassword', { required: ['username', 'existingPassword', 'newPassword'], properties: ['username', 'existingPassword', 'newPassword', 'captchaResponse'] });
-    this.actionModels.set('checkPasswordReset', { required: ['newPassword'], properties: ['newPassword'] });
-    this.actionModels.set('checkRecoveryCode', { required: ['recoveryCode'], properties: ['recoveryCode'] });
-    this.actionModels.set('checkChallengeResponse', { required: ['challengeResponse'], properties: ['challengeResponse'] });
-    this.actionModels.set('submitIdentifier', { required: ['identifier'], properties: ['identifier'] });
-    this.actionModels.set('clearIdentifier', { required: ['identifier'], properties: ['identifier'] });
+    this.actionModels.set('checkUsernamePassword', {
+      required: ['username', 'password'],
+      properties: ['username', 'password', 'rememberMyUsername', 'thisIsMyDevice', 'captchaResponse']
+    });
+    this.actionModels.set('initiateAccountRecovery', {properties: ['usernameHint']});
+    this.actionModels.set('useAlternativeAuthenticationSource', {
+      required: ['authenticationSource'],
+      properties: ['authenticationSource']
+    });
+    this.actionModels.set('checkUsernameRecoveryEmail', {
+      required: ['email'],
+      properties: ['email', 'captchaResponse']
+    });
+    this.actionModels.set('checkAccountRecoveryUsername', {
+      required: ['username'],
+      properties: ['username', 'captchaResponse']
+    });
+    this.actionModels.set('checkNewPassword', {
+      required: ['username', 'existingPassword', 'newPassword'],
+      properties: ['username', 'existingPassword', 'newPassword', 'captchaResponse']
+    });
+    this.actionModels.set('checkPasswordReset', {required: ['newPassword'], properties: ['newPassword']});
+    this.actionModels.set('checkRecoveryCode', {required: ['recoveryCode'], properties: ['recoveryCode']});
+    this.actionModels.set('checkChallengeResponse', {
+      required: ['challengeResponse'],
+      properties: ['challengeResponse']
+    });
+    this.actionModels.set('submitIdentifier', {required: ['identifier'], properties: ['identifier']});
+    this.actionModels.set('clearIdentifier', {required: ['identifier'], properties: ['identifier']});
+    this.actionModels.set('registerUser', {
+      required: ['password', 'fieldValues'],
+      properties: ['password', 'captchaResponse', 'fieldValues', 'thisIsMyDevice']
+    })
   }
 
   init() {
@@ -126,6 +152,16 @@ export default class AuthnWidget {
     if (nodes) {
       nodes.forEach(n => n.addEventListener('input', this.enableSubmit));
     }
+
+    let dropdowns = document.querySelectorAll(`#${this.divId} select`);
+    this.checkDropdownSelected = this.checkDropdownSelected.bind(this);
+    if (dropdowns) {
+      dropdowns.forEach(dropdown => {
+        dropdown.addEventListener('change', this.onChangeDropdown);
+        this.checkDropdownSelected(dropdown);
+      });
+    }
+
     let element = nodes[0];
     if (element) {
       let event = new CustomEvent('input');
@@ -144,8 +180,11 @@ export default class AuthnWidget {
   }
 
   registerIdFirstLinks() {
-    Array.from(document.querySelectorAll('[data-idfirstaction]')).
-      forEach(element => element.addEventListener('click', this.handleIdFirstLinks));
+    Array.from(document.querySelectorAll('[data-idfirstaction]')).forEach(element => element.addEventListener('click', this.handleIdFirstLinks));
+  }
+
+  registerRegistrationLinks() {
+    Array.from(document.querySelectorAll('[data-registrationactionid]')).forEach(element => element.addEventListener('click', this.handleRegisterUser));
   }
 
   handleIdFirstLinks(evt) {
@@ -155,7 +194,7 @@ export default class AuthnWidget {
     let identifier = source.dataset['identifier'];
     let data = {
       identifier
-    }
+    };
     console.log(actionId + ' : ' + identifier);
     switch (actionId) {
       case 'submitIdentifier':
@@ -175,15 +214,14 @@ export default class AuthnWidget {
     if (pass1.value !== pass2.value) {
       this.store.dispatchErrors('New passwords do not match.');
       return false;
-    }
-    else {
+    } else {
       this.store.clearErrors();
     }
     return true;
   }
 
   enableSubmit() {
-    let nodes = (document.querySelectorAll('input[type=text], input[type=password], input[type=email]'));
+    let nodes = (document.querySelectorAll('input.required[type=text]:not(:disabled), input.required[type=password]:not(:disabled), input.required[type=email]:not(:disabled)'));
     let disabled = false;
     if (nodes) {
       nodes.forEach(input => {
@@ -271,12 +309,15 @@ export default class AuthnWidget {
     if (formElement) {
       let formData = new FormData(formElement);
       let object = {};
-      var formDataEntries = formData.entries(), formDataEntry = formDataEntries.next(), pair;
-      while (!formDataEntry.done) {
-        pair = formDataEntry.value;
-        object[pair[0]] = pair[1];
-        formDataEntry = formDataEntries.next();
+
+      for(var key of formData.keys()) {
+        var values = formData.getAll(key);
+        if(values.length > 1)
+          object[key] = values;
+        else
+          object[key] = values[0]
       }
+
       return object;
     }
   }
@@ -292,8 +333,7 @@ export default class AuthnWidget {
     if (currentState) {
       try {
         template = this.getTemplate(currentState);
-      }
-      catch (e) {
+      } catch (e) {
         console.log(`Failed to load template: ${currentState}.`);
         template = this.getTemplate('general_error');
       }
@@ -347,5 +387,45 @@ export default class AuthnWidget {
 
   registerActionModel(action, model) {
     this.actionModels.set(action, model);
+  }
+
+  onChangeDropdown(event) {
+    event.target.classList.remove("placeholder-shown");
+  }
+
+  checkDropdownSelected(field) {
+    let selected_options = field.querySelectorAll(`option[selected]`);
+    if(selected_options.length > 0)
+      field.classList.remove("placeholder-shown");
+  }
+
+  handleRegisterUser(event) {
+    event.preventDefault();
+    let source = event.target || event.srcElement;
+    let actionId = source.dataset['registrationactionid'];
+    let formData = this.getFormData();
+    let actionModelProperties = this.actionModels.get('registerUser').properties;
+    console.log(formData);
+
+    let payload = {fieldValues: {}};
+    Object.keys(formData).forEach((key) => {
+      if(actionModelProperties.indexOf(key) >= 0)
+        payload[key] = formData[key];
+      else {
+        let field_value = formData[key];
+
+        if(Array.isArray(field_value)) {
+          let values = {};
+          field_value.forEach(option => {
+            values[option] = true;
+          });
+          field_value = values;
+        }
+
+        payload.fieldValues[key] = field_value;
+      }
+    });
+
+    this.store.dispatch('POST_FLOW', actionId, JSON.stringify(payload));
   }
 }
