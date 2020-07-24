@@ -100,7 +100,7 @@ export default class AuthnWidget {
       }
       this.store
         .dispatch('GET_FLOW')
-        .catch(this.generalErrorRenderer(AuthnWidget.COMMUNICATION_ERROR_MSG));
+        .catch(() => this.generalErrorRenderer(AuthnWidget.COMMUNICATION_ERROR_MSG));
     } catch (err) {
       console.error(err);
       this.generalErrorRenderer(err.message);
