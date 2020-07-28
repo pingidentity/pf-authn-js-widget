@@ -37,7 +37,7 @@ module.exports = function (field_info) {
         '          class="' + css_classes + ' dropdown__select float-label__input placeholder-shown">' +
         '    <option disabled="" value="">Select one</option>';
       field_info.options.forEach(option => {
-        let selected = ((field_info.defaultValue === option) ? 'selected' : "");
+        let selected = ((field_value === option) ? 'selected' : "");
         html += '<option value="' + option + '" ' + selected + '>' + option + '</option>';
       });
       html += '  </select>' +
@@ -53,7 +53,9 @@ module.exports = function (field_info) {
         '  <input type="checkbox"' +
         '         class="' + css_classes + ' checkbox__input"' +
         '         id="' + field_info.id + '"' +
-        '         name="' + field_info.id + '"/>' +
+        '         name="' + field_info.id + '"' +
+                  ((field_value.toLowerCase() === 'true' || field_value.toLowerCase() === 'on') ? 'checked' : '') +
+        '  />' +
         '    <span class="checkbox__standin"></span>' +
         '    <span class="checkbox__label">' + field_info.label + '</span>' +
         '</label>';
