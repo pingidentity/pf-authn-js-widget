@@ -34,7 +34,8 @@ export default class AuthnWidget {
       'NEW_PASSWORD_REQUIRED', 'SUCCESSFUL_PASSWORD_CHANGE', 'ACCOUNT_RECOVERY_USERNAME_REQUIRED',
       'ACCOUNT_RECOVERY_OTL_VERIFICATION_REQUIRED', 'RECOVERY_CODE_REQUIRED', 'PASSWORD_RESET_REQUIRED',
       'SUCCESSFUL_PASSWORD_RESET', 'CHALLENGE_RESPONSE_REQUIRED', 'USERNAME_RECOVERY_EMAIL_REQUIRED',
-      'USERNAME_RECOVERY_EMAIL_SENT', 'SUCCESSFUL_ACCOUNT_UNLOCK', 'IDENTIFIER_REQUIRED'];
+      'USERNAME_RECOVERY_EMAIL_SENT', 'SUCCESSFUL_ACCOUNT_UNLOCK', 'IDENTIFIER_REQUIRED',
+      'DEVICE_PROFILE_REQUIRED'];
   }
 
   static get COMMUNICATION_ERROR_MSG() {
@@ -71,6 +72,7 @@ export default class AuthnWidget {
     this.defaultEventHandler = this.defaultEventHandler.bind(this);
     this.handleIdFirstLinks = this.handleIdFirstLinks.bind(this);
     this.registerIdFirstLinks = this.registerIdFirstLinks.bind(this);
+    this.postDeviceProfileAction = this.postDeviceProfileAction.bind(this);
     this.stateTemplates = new Map();  //state -> handlebar templates
     this.eventHandler = new Map();  //state -> eventHandlers
     this.actionModels = new Map();
@@ -79,6 +81,7 @@ export default class AuthnWidget {
     AuthnWidget.CORE_STATES.forEach(state => this.registerState(state));
 
     this.addEventHandler('IDENTIFIER_REQUIRED', this.registerIdFirstLinks);
+    this.addEventHandler('DEVICE_PROFILE_REQUIRED', this.postDeviceProfileAction);
 
     this.actionModels.set('checkUsernamePassword', { required: ['username', 'password'], properties: ['username', 'password', 'rememberMyUsername', 'thisIsMyDevice', 'captchaResponse'] });
     this.actionModels.set('initiateAccountRecovery', { properties: ['usernameHint'] });
@@ -166,6 +169,16 @@ export default class AuthnWidget {
         document.getElementById('existingAccountsSelectionList').style.display = 'none';
         document.getElementById('signonidentifier').style.display = 'block';
         break;
+    }
+  }
+
+  postDeviceProfileAction() {
+    let idw = document.getElementById('idw');
+    if (idw) {
+      setTimeout(() => {
+        this.store.dispatch('POST_FLOW', 'continueAuthentication', '{}');
+      },
+      3000);
     }
   }
 
