@@ -34,11 +34,12 @@ export default class AuthnWidget {
       'NEW_PASSWORD_REQUIRED', 'SUCCESSFUL_PASSWORD_CHANGE', 'ACCOUNT_RECOVERY_USERNAME_REQUIRED',
       'ACCOUNT_RECOVERY_OTL_VERIFICATION_REQUIRED', 'RECOVERY_CODE_REQUIRED', 'PASSWORD_RESET_REQUIRED',
       'SUCCESSFUL_PASSWORD_RESET', 'CHALLENGE_RESPONSE_REQUIRED', 'USERNAME_RECOVERY_EMAIL_REQUIRED',
-      'USERNAME_RECOVERY_EMAIL_SENT', 'SUCCESSFUL_ACCOUNT_UNLOCK', 'IDENTIFIER_REQUIRED'];
+      'USERNAME_RECOVERY_EMAIL_SENT', 'SUCCESSFUL_ACCOUNT_UNLOCK', 'IDENTIFIER_REQUIRED',
+      'EXTERNAL_AUTHENTICATION_COMPLETED', 'EXTERNAL_AUTHENTICATION_FAILED', 'EXTERNAL_AUTHENTICATION_REQUIRED'];
   }
 
   static get COMMUNICATION_ERROR_MSG() {
-    return "Unable to start the authentiation flow, please contact your system administrator.";
+    return "Unable to start the authentication flow, please contact your system administrator.";
   }
 
   static get FLOW_ID_REQUIRED_MSG() {
@@ -94,17 +95,32 @@ export default class AuthnWidget {
   }
 
   init() {
-    try {
-      if (!this.flowId) {
-        throw new Error(AuthnWidget.FLOW_ID_REQUIRED_MSG);
+    if (window.opener !== null) {
+      // for external authentication in popup, refresh parent window
+      // to get new state and close popup
+      window.opener.location.reload(true);
+      window.close();
+    } else {
+      try {
+        if (!this.flowId) {
+          throw new Error(AuthnWidget.FLOW_ID_REQUIRED_MSG);
+        }
+        this.renderSpinner();
+        this.store
+          .dispatch('GET_FLOW')
+          .catch(() => {this.generalErrorRenderer(AuthnWidget.COMMUNICATION_ERROR_MSG)});
+      } catch (err) {
+        console.error(err);
+        this.generalErrorRenderer(err.message);
       }
-      this.store
-        .dispatch('GET_FLOW')
-        .catch(() => this.generalErrorRenderer(AuthnWidget.COMMUNICATION_ERROR_MSG));
-    } catch (err) {
-      console.error(err);
-      this.generalErrorRenderer(err.message);
     }
+  }
+
+  renderSpinner() {
+    let template = this.getTemplate('initial_spinner');
+    let params = this.assets.toTemplateParams();
+    let widgetDiv = document.getElementById(this.divId);
+    widgetDiv.innerHTML = template(params);
   }
 
   generalErrorRenderer(msg) {
@@ -288,6 +304,21 @@ export default class AuthnWidget {
       window.location.replace(state.resumeUrl);
       return;
     }
+    if (currentState === 'EXTERNAL_AUTHENTICATION_REQUIRED') {
+      if (state.popupMode) {
+        let winRef = window.open(state.authenticationUrl, "_blank", "width=500px,height=500px");
+        this.checkPopupStatus(winRef);
+      } else {
+        window.location.replace(state.authenticationUrl);
+        return;
+      }
+    }
+    if (currentState === 'EXTERNAL_AUTHENTICATION_FAILED') {
+      if (state.errorUrl) {
+        window.location.replace(state.errorUrl);
+        return;
+      }
+    }
     let template;
     if (currentState) {
       try {
@@ -347,5 +378,20 @@ export default class AuthnWidget {
 
   registerActionModel(action, model) {
     this.actionModels.set(action, model);
+  }
+
+  checkPopupStatus(windowReference) {
+    if (windowReference.closed) {
+      if (document.querySelector("#spinnerId")) {
+        document.querySelector('#spinnerId').style.display = 'none';
+      }
+      if (document.querySelector("#externalAuthnId")) {
+        document.querySelector('#externalAuthnId').style.display = 'block';
+      }
+    }
+    else
+    {
+      setTimeout(() => {this.checkPopupStatus(windowReference)}, 100);
+    }
   }
 }
