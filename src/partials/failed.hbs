@@ -8,7 +8,9 @@
   <div class="feedback feedback--error">
     <img class="feedback__icon" src="{{error}}" alt="Error" />
     <div class="feedback__message">
+    {{#each userMessages as |userMessage|}}
       <div>{{userMessage}}</div>
+    {{/each}}
     </div>
   </div>
 </div>

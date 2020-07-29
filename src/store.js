@@ -14,12 +14,12 @@ export default class Store {
   }
 
   dispatchErrors(errors) {
-    this.state.userMessage = errors;
+    this.state.userMessages = errors;
     this.notifyListeners();
   }
 
   clearErrors() {
-    delete this.state.userMessage;
+    delete this.state.userMessages;
   }
 
   async dispatch(method, actionId, payload) {
@@ -91,7 +91,7 @@ export default class Store {
     }
 
     let combinedData = this.state;
-    delete combinedData.userMessage;  //clear previous error shown
+    delete combinedData.userMessages;  //clear previous error shown
     if (json.status) {
       combinedData = json;
       this.state = json;
@@ -120,7 +120,7 @@ export default class Store {
         let errors = this.getErrorDetails(json);
         delete combinedData.failedValidators;
         delete combinedData.satisfiedValidators;
-        delete combinedData.userMessage;
+        delete combinedData.userMessages;
         combinedData = { ...errors, ...this.state };
       }
     }
@@ -141,7 +141,7 @@ export default class Store {
 
   getErrorDetails(json) {
     let errors = {
-      userMessage: undefined,
+      userMessages: [],
       failedValidators: [],
       satisfiedValidators: []
     };
@@ -158,15 +158,15 @@ export default class Store {
           if (msg.target) {
             userMessage = userMessage.slice(0, -1).concat(' : ').concat(msg.target);
           }
-          errors.userMessage = userMessage;
+          errors.userMessages.push(userMessage);
         });
       }
       else {
-        errors.userMessage = json.userMessage;
+        errors.userMessages = json.userMessage;
       }
     }
     else if (json.code === 'RESOURCE_NOT_FOUND') {
-      errors.userMessage = json.message;
+      errors.userMessages = json.message;
     }
     return errors;
   }
