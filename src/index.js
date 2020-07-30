@@ -310,9 +310,11 @@ export default class AuthnWidget {
       let formData = new FormData(formElement);
       let object = {};
 
-      for(var key of formData.keys()) {
-        var values = formData.getAll(key);
-        if(values.length > 1)
+      console.log(formData);
+
+      for(let key of formData.keys()) {
+        let values = formData.getAll(key);
+        if(this.isMultiValueField(formElement, key))
           object[key] = values;
         else
           object[key] = values[0]
@@ -320,6 +322,22 @@ export default class AuthnWidget {
 
       return object;
     }
+  }
+
+  isMultiValueField(formElement, name) {
+    let inputs = formElement.querySelectorAll("input[name='" + name + "']");
+    console.log(inputs);
+    let count = 0;
+
+    if (inputs) {
+      inputs.forEach(element => {
+        if (element.name === name) {
+          count++;
+        }
+      });
+    }
+
+    return count > 1;
   }
 
   render(prevState, state) {

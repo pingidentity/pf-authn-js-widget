@@ -4,7 +4,7 @@
   "description": "JavaScript Widget for the PingFederate Authentication API",
   "main": "./dist/pf.authn-widget.js",
   "scripts": {
-    "start": "cross-env-shell webpack-dev-server --config webpack.config.js --baseurl=$BASEURL",
+    "start": "cross-env-shell webpack-dev-server --config webpack.config.js --baseurl=https://ketchumlocal.ping-eng.com:9031",
     "build": "webpack --mode production  --progress --profile --colors",
     "dev": "webpack --mode development --progress --profile --colors",
     "clean": "rimraf dist test/coverage",
