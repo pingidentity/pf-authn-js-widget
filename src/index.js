@@ -305,7 +305,7 @@ export default class AuthnWidget {
       return;
     }
     if (currentState === 'EXTERNAL_AUTHENTICATION_REQUIRED') {
-      if (state.popupMode) {
+      if (state.presentationMode === 'POP_UP') {
         let winRef = window.open(state.authenticationUrl, "_blank", "width=500px,height=500px");
         this.checkPopupStatus(winRef);
       } else {
