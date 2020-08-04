@@ -173,12 +173,14 @@ export default class AuthnWidget {
   }
 
   postDeviceProfileAction() {
-    let idw = document.getElementById('idw');
-    if (idw) {
-      setTimeout(() => {
-        this.store.dispatch('POST_FLOW', 'continueAuthentication', '{}');
-      },
-      3000);
+    let profilingElement = document.querySelector('[data-profilingtype]');
+    switch (profilingElement.dataset['profilingtype']) {
+      case 'IDW':
+        setTimeout(() => {
+          this.store.dispatch('POST_FLOW', 'continueAuthentication', '{}');
+        },
+        parseInt(profilingElement.dataset['profilingTimeout']));
+        break;
     }
   }
 
