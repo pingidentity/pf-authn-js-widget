@@ -269,6 +269,7 @@ export default class AuthnWidget {
   }
 
   dispatch(evt) {
+    console.log("dispatching");
     evt.preventDefault();
     let source = evt.target || evt.srcElement;
     console.log('source: ' + source.dataset['actionid']);
@@ -280,8 +281,14 @@ export default class AuthnWidget {
       return;
     }
 
+    this.dispatchWithCaptcha(actionId, formData)
+  }
+
+  dispatchWithCaptcha(actionId, formData) {
     if (this.store.state.showCaptcha && this.needsCaptchaResponse(actionId) &&
       this.store.state.captchaSiteKey && this.invokeReCaptcha) {
+      console.log("doing captcha");
+
       this.store.savePendingState('POST_FLOW', actionId, formData);
       this.invokeReCaptcha();
       return;
@@ -444,6 +451,6 @@ export default class AuthnWidget {
       }
     });
 
-    this.store.dispatch('POST_FLOW', actionId, JSON.stringify(payload));
+    this.dispatchWithCaptcha(actionId, payload)
   }
 }
