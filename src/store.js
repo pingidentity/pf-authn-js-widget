@@ -28,10 +28,6 @@ export default class Store {
     if (this.prevState.username && !this.state.username) {
       this.state.username = this.prevState.username;
     }
-    if (this.state.status === 'EXTERNAL_AUTHENTICATION_COMPLETED') {
-      await this.dispatch('POST_FLOW', 'continueAuthentication', '{}');
-      return;
-    }
     console.log('dispatching actionId: ' + actionId)
     console.log(this.state);
     this.notifyListeners();

@@ -72,6 +72,7 @@ export default class AuthnWidget {
     this.defaultEventHandler = this.defaultEventHandler.bind(this);
     this.handleIdFirstLinks = this.handleIdFirstLinks.bind(this);
     this.registerIdFirstLinks = this.registerIdFirstLinks.bind(this);
+    this.postExternalAuthenticationCompleted = this.postExternalAuthenticationCompleted.bind(this);
     this.stateTemplates = new Map();  //state -> handlebar templates
     this.eventHandler = new Map();  //state -> eventHandlers
     this.actionModels = new Map();
@@ -80,6 +81,7 @@ export default class AuthnWidget {
     AuthnWidget.CORE_STATES.forEach(state => this.registerState(state));
 
     this.addEventHandler('IDENTIFIER_REQUIRED', this.registerIdFirstLinks);
+    this.addEventHandler('EXTERNAL_AUTHENTICATION_COMPLETED', this.postExternalAuthenticationCompleted);
 
     this.actionModels.set('checkUsernamePassword', { required: ['username', 'password'], properties: ['username', 'password', 'rememberMyUsername', 'thisIsMyDevice', 'captchaResponse'] });
     this.actionModels.set('initiateAccountRecovery', { properties: ['usernameHint'] });
@@ -105,7 +107,7 @@ export default class AuthnWidget {
         if (!this.flowId) {
           throw new Error(AuthnWidget.FLOW_ID_REQUIRED_MSG);
         }
-        this.renderSpinner();
+        this.renderSpinnerTemplate();
         this.store
           .dispatch('GET_FLOW')
           .catch(() => {this.generalErrorRenderer(AuthnWidget.COMMUNICATION_ERROR_MSG)});
@@ -116,7 +118,7 @@ export default class AuthnWidget {
     }
   }
 
-  renderSpinner() {
+  renderSpinnerTemplate() {
     let template = this.getTemplate('initial_spinner');
     let params = this.assets.toTemplateParams();
     let widgetDiv = document.getElementById(this.divId);
@@ -183,6 +185,12 @@ export default class AuthnWidget {
         document.getElementById('signonidentifier').style.display = 'block';
         break;
     }
+  }
+
+  postExternalAuthenticationCompleted() {
+    setTimeout(() => {
+        this.store.dispatch('POST_FLOW', 'continueAuthentication', '{}');
+      }, 1000)
   }
 
   verifyPasswordsMatch() {
@@ -388,10 +396,10 @@ export default class AuthnWidget {
       if (document.querySelector("#externalAuthnId")) {
         document.querySelector('#externalAuthnId').style.display = 'block';
       }
-    }
-    else
-    {
-      setTimeout(() => {this.checkPopupStatus(windowReference)}, 100);
+    } else {
+      setTimeout(() => {
+        this.checkPopupStatus(windowReference)
+      }, 100);
     }
   }
 }
