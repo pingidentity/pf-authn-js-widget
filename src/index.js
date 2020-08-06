@@ -179,7 +179,7 @@ export default class AuthnWidget {
         setTimeout(() => {
           this.store.dispatch('POST_FLOW', 'continueAuthentication', '{}');
         },
-        parseInt(profilingElement.dataset['profilingTimeout']));
+        parseInt(profilingElement.dataset['timeout']));
         break;
     }
   }
