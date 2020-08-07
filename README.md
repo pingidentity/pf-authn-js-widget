@@ -17,21 +17,22 @@ The widget is a ready-to-use drop-in bundle with a CSS and customizable template
 </p>
 
 **Table of Contents**
-- [JavaScript Widget for the PingFederate Authentication API](#JavaScript-Widget-for-the-PingFederate-Authentication-API)
-  - [PingFederate Configuration](#PingFederate-Configuration)
-- [Installation](#Installation)
-  - [Option 1: Building the Widget](#Option-1:-Building-the-Widget)
-  - [Option 2: Adding the Widget as a Node Module](#Option-2:-Adding-the-Widget-as-a-Node-Module)
-  - [Widget Configuration](#Widget-Configuration)
-  - [Building the Latest Version of the Widget](#Building-the-Latest-Version-of-the-Widget)
-  - [Adding the Widget to an Application](#Adding-the-Widget-to-an-Application)
-  - [Creating the index.html File](#Creating-the-index.html-File)
-  - [Customizing the Widget](#Customizing-the-Widget)
-  - [Enabling Captcha](#Enabling-Captcha)
-  - [Using Risk-Based Authentication With the Widget]
-- [Browser Compatibility](#Browser-Compatibility)
-- [Bug Reports](#Bug-Reports)
-- [License](#License)
+- [JavaScript Widget for the PingFederate Authentication API](#javascript-widget-for-the-pingfederate-authentication-api)
+  - [PingFederate Configuration](#pingfederate-configuration)
+- [Installation](#installation)
+  - [Option 1: Building the Widget](#option-1-building-the-widget)
+  - [Option 2: Adding the Widget as a Node Module](#option-2-adding-the-widget-as-a-node-module)
+  - [Widget Configuration](#widget-configuration)
+- [Technical Notes](#technical-notes)
+  - [Building the Latest Version of the Widget](#building-the-latest-version-of-the-widget)
+  - [Adding the Widget to an Application](#adding-the-widget-to-an-application)
+  - [Creating the index.html File](#creating-the-indexhtml-file)
+  - [Customizing the Widget](#customizing-the-widget)
+  - [Enabling Captcha](#enabling-captcha)
+  - [Using Risk-Based Authentication With the Widget](#using-risk-based-authentication-with-the-widget)
+- [Browser Compatibility](#browser-compatibility)
+- [Bug Reports](#bug-reports)
+- [License](#license)
 
 ## PingFederate Configuration
 
@@ -219,7 +220,7 @@ will be available after the `api.js` is loaded. For more information, see [Captc
 
 ## Using Risk-Based Authentication With the Widget
 
-Please refer to [the guide](RISK-AUTHENTICATION.md) for more infomation on how to set up the widget with risk-based authentication adapters
+Please refer to the [guide for using risk-based authentication with the widget](RISK-AUTHENTICATION.md) for more infomation on how to set up the widget with risk-based authentication adapters.
 
 # Browser Compatibility
 
