@@ -1,21 +1,6 @@
 [![Build Status](https://travis-ci.org/pingidentity/pf-authn-js-widget.svg?branch=master)](https://travis-ci.org/pingidentity/pf-authn-js-widget)
 # JavaScript Widget for the PingFederate Authentication API
 
-The JavaScript Widget for the PingFederate Authentication API is a customizable JavaScript library that provides the capabilities of the [HTML form Adapter](https://support.pingidentity.com/s/document-item?bundleId=pingfederate-93&topicId=xvy1564003022890.html), the [Identifier First Adapter](https://support.pingidentity.com/s/document-item?bundleId=pingfederate-93&topicId=iek1564003022460.html), and the [ID DataWeb Integration Kit](https://docs.pingidentity.com/bundle/integrations/page/ndg1577481773402.html)
-via [Authentication APIs](https://support.pingidentity.com/s/document-item?bundleId=pingfederate-93&topicId=qsl1564002999029.html), including:
- - user login
- - trouble signing in
- - trouble with username
- - password reset
- - authenticate with identifier
- - risk-based authentication
-
-The widget is a ready-to-use drop-in bundle with a CSS and customizable templates. This alternative to PingFederate templates provides a sign-in experience as a single page application.
-
-<p align="center">
-  <img src="/images/WidgetAnimation.gif" alt="JavaScript Widget for the PingFederate Authentication API">
-</p>
-
 **Table of Contents**
 - [JavaScript Widget for the PingFederate Authentication API](#javascript-widget-for-the-pingfederate-authentication-api)
   - [PingFederate Configuration](#pingfederate-configuration)
@@ -33,6 +18,21 @@ The widget is a ready-to-use drop-in bundle with a CSS and customizable template
 - [Browser Compatibility](#browser-compatibility)
 - [Bug Reports](#bug-reports)
 - [License](#license)
+
+The JavaScript Widget for the PingFederate Authentication API is a customizable JavaScript library that provides the capabilities of the [HTML form Adapter](https://support.pingidentity.com/s/document-item?bundleId=pingfederate-93&topicId=xvy1564003022890.html), the [Identifier First Adapter](https://support.pingidentity.com/s/document-item?bundleId=pingfederate-93&topicId=iek1564003022460.html), and the [ID DataWeb Integration Kit](https://docs.pingidentity.com/bundle/integrations/page/ndg1577481773402.html)
+via [Authentication APIs](https://support.pingidentity.com/s/document-item?bundleId=pingfederate-93&topicId=qsl1564002999029.html), including:
+ - user login
+ - trouble signing in
+ - trouble with username
+ - password reset
+ - authenticate with identifier
+ - risk-based authentication
+
+The widget is a ready-to-use drop-in bundle with a CSS and customizable templates. This alternative to PingFederate templates provides a sign-in experience as a single page application.
+
+<p align="center">
+  <img src="/images/WidgetAnimation.gif" alt="JavaScript Widget for the PingFederate Authentication API">
+</p>
 
 ## PingFederate Configuration
 
