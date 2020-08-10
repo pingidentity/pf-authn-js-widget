@@ -46,7 +46,7 @@
             });
             // let customLogo = 'https://www.pingidentity.com/content/dam/ping-6-2-assets/images/home/9001-home-logos/Cisco@2x.png.png'
             // authnWidget = new PfAuthnWidget("https://localhost:9031", {divId: 'authnwidget', logo: customLogo});
-            authnWidget.init();
+            initWidget(authnWidget);
         }
 
         /**  --------------------------------------------------
@@ -55,7 +55,24 @@
         **/
         function load() {
             var authnWidget = new PfAuthnWidget("{{baseUrl}}", { divId: 'authnwidget' });
-            authnWidget.init()
+            // decide how to init the widget based on the mode option
+            initWidget(authnWidget);
+        }
+
+        /**
+         * initialize the widget based on the operation mode
+         */
+        function initWidget(widget) {
+          {{#if redirectless}}
+          var config = {
+            onAuthorizationSuccess: function(response) {
+              // success callback function
+            }
+          };
+          widget.initRedirectless(config);
+          {{else}}
+          widget.init();
+          {{/if}}
         }
         window.onload = load;
     </script>

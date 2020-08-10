@@ -4,6 +4,7 @@ import queryString from 'query-string';
 import 'core-js/stable';
 import 'regenerator-runtime/runtime'; //for async await
 import Store from './store';
+import redirectlessConfigValidator from './validators/redirectless';
 
 import './scss/main.scss';
 //uncomment to add your personal branding
@@ -125,6 +126,17 @@ export default class AuthnWidget {
     let params = this.assets.toTemplateParams();
     let widgetDiv = document.getElementById(this.divId);
     widgetDiv.innerHTML = template(params);
+  }
+
+  initRedirectless(configuration) {
+    // input validation
+    try {
+      console.log(configuration);
+      redirectlessConfigValidator(configuration);
+    } catch(err) {
+      console.error(err);
+      this.generalErrorRenderer(err.message)
+    }
   }
 
   generalErrorRenderer(msg) {

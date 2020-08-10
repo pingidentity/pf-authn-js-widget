@@ -19,7 +19,13 @@ module.exports = (env, argv) => {
       before: function (app, server) {
         var options = {
           baseUrl: argv.baseurl,
+          operationMode: argv.operationmode || 'default'
         }
+        console.log('#############################################');
+        console.log('#')
+        console.log(`# Dev server options: ${JSON.stringify(options)}`);
+        console.log('#')
+        console.log('#############################################');
         devServer(app, server, options)
       },
       contentBase: [path.join(__dirname, 'src')],
