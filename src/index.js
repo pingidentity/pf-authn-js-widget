@@ -63,6 +63,7 @@ export default class AuthnWidget {
     }
     this.captchaDivId = 'invisibleRecaptchaId';
     this.assets = new Assets(options);
+    this.baseUrl = baseUrl;
     this.fetchUtil = new FetchUtil(baseUrl);
     this.invokeReCaptcha = options && options.invokeReCaptcha;
     this.checkRecaptcha = options && options.checkRecaptcha;
@@ -73,6 +74,8 @@ export default class AuthnWidget {
     this.handleIdFirstLinks = this.handleIdFirstLinks.bind(this);
     this.registerIdFirstLinks = this.registerIdFirstLinks.bind(this);
     this.postExternalAuthenticationCompleted = this.postExternalAuthenticationCompleted.bind(this);
+    this.registerReopenPopUpHandler = this.registerReopenPopUpHandler.bind(this);
+    this.handleReopenPopUp = this.handleReopenPopUp.bind(this);
     this.stateTemplates = new Map();  //state -> handlebar templates
     this.eventHandler = new Map();  //state -> eventHandlers
     this.actionModels = new Map();
@@ -82,6 +85,7 @@ export default class AuthnWidget {
 
     this.addEventHandler('IDENTIFIER_REQUIRED', this.registerIdFirstLinks);
     this.addEventHandler('EXTERNAL_AUTHENTICATION_COMPLETED', this.postExternalAuthenticationCompleted);
+    this.addEventHandler('EXTERNAL_AUTHENTICATION_REQUIRED', this.registerReopenPopUpHandler)
 
     this.actionModels.set('checkUsernamePassword', { required: ['username', 'password'], properties: ['username', 'password', 'rememberMyUsername', 'thisIsMyDevice', 'captchaResponse'] });
     this.actionModels.set('initiateAccountRecovery', { properties: ['usernameHint'] });
@@ -97,24 +101,17 @@ export default class AuthnWidget {
   }
 
   init() {
-    if (window.opener !== null) {
-      // for external authentication in popup, refresh parent window
-      // to get new state and close popup
-      window.opener.location.reload(true);
-      window.close();
-    } else {
-      try {
-        if (!this.flowId) {
-          throw new Error(AuthnWidget.FLOW_ID_REQUIRED_MSG);
-        }
-        this.renderSpinnerTemplate();
-        this.store
-          .dispatch('GET_FLOW')
-          .catch(() => {this.generalErrorRenderer(AuthnWidget.COMMUNICATION_ERROR_MSG)});
-      } catch (err) {
-        console.error(err);
-        this.generalErrorRenderer(err.message);
+    try {
+      if (!this.flowId) {
+        throw new Error(AuthnWidget.FLOW_ID_REQUIRED_MSG);
       }
+      this.renderSpinnerTemplate();
+      this.store
+        .dispatch('GET_FLOW')
+        .catch(() => this.generalErrorRenderer(AuthnWidget.COMMUNICATION_ERROR_MSG));
+    } catch (err) {
+      console.error(err);
+      this.generalErrorRenderer(err.message);
     }
   }
 
@@ -191,6 +188,25 @@ export default class AuthnWidget {
     setTimeout(() => {
         this.store.dispatch('POST_FLOW', 'continueAuthentication', '{}');
       }, 1000)
+  }
+
+  registerReopenPopUpHandler() {
+    Array.from(document.querySelectorAll('[data-externalAuthActionId]'))
+      .forEach(element => element.addEventListener('click', this.handleReopenPopUp));
+  }
+
+  handleReopenPopUp(evt) {
+    evt.preventDefault();
+    console.log(this)
+    let windowReference = window.open(this.store.getStore().authenticationUrl, "_blank", "width=500px,height=500px");
+    if (document.querySelector("#spinnerId")) {
+      document.querySelector('#spinnerId').style.display = 'block';
+    }
+    if (document.querySelector("#externalAuthnId")) {
+      document.querySelector('#externalAuthnId').style.display = 'none';
+    }
+    clearTimeout(this.checkPopupStatusTimeout)
+    this.checkPopupStatus(windowReference);
   }
 
   verifyPasswordsMatch() {
@@ -314,8 +330,10 @@ export default class AuthnWidget {
     }
     if (currentState === 'EXTERNAL_AUTHENTICATION_REQUIRED') {
       if (state.presentationMode === 'POP_UP') {
-        let winRef = window.open(state.authenticationUrl, "_blank", "width=500px,height=500px");
-        this.checkPopupStatus(winRef);
+        if (this.store.getStore().status !== this.store.getPreviousStore().status) {
+          let windowReference = window.open(state.authenticationUrl, "_blank", "width=500px,height=500px");
+          this.checkPopupStatus(windowReference);
+        }
       } else {
         window.location.replace(state.authenticationUrl);
         return;
@@ -389,17 +407,34 @@ export default class AuthnWidget {
   }
 
   checkPopupStatus(windowReference) {
-    if (windowReference.closed) {
-      if (document.querySelector("#spinnerId")) {
-        document.querySelector('#spinnerId').style.display = 'none';
-      }
-      if (document.querySelector("#externalAuthnId")) {
-        document.querySelector('#externalAuthnId').style.display = 'block';
+    if (windowReference !== null) {
+      if (windowReference.closed) {
+        clearTimeout(this.checkPopupStatusTimeout)
+        this.store
+          .dispatch('GET_FLOW')
+          .then(() => {
+            if (document.querySelector("#spinnerId")) {
+              document.querySelector('#spinnerId').style.display = 'none';
+            }
+            if (document.querySelector("#externalAuthnId")) {
+              document.querySelector('#externalAuthnId').style.display = 'block';
+            }
+          });
+      } else {
+        this.checkPopupStatusTimeout = setTimeout(() => {
+          this.checkPopupStatus(windowReference)
+        }, 100);
       }
     } else {
-      setTimeout(() => {
-        this.checkPopupStatus(windowReference)
-      }, 100);
+      if (!(document.querySelector("#spinnerId") && document.querySelector("#externalAuthnId"))) {
+        this.checkPopupStatusTimeout = setTimeout(() => {
+          this.checkPopupStatus(windowReference)
+        }, 100);
+      } else {
+        clearTimeout(this.checkPopupStatusTimeout)
+        document.querySelector('#spinnerId').style.display = 'none';
+        document.querySelector('#externalAuthnId').style.display = 'block';
+      }
     }
   }
 }
