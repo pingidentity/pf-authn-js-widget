@@ -62,7 +62,6 @@ export default class AuthnWidget {
     }
     this.captchaDivId = 'invisibleRecaptchaId';
     this.assets = new Assets(options);
-    this.baseUrl = baseUrl;
     this.fetchUtil = new FetchUtil(baseUrl);
     this.invokeReCaptcha = options && options.invokeReCaptcha;
     this.checkRecaptcha = options && options.checkRecaptcha;
