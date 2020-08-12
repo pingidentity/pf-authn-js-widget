@@ -72,7 +72,10 @@ export default class AuthnWidget {
     this.defaultEventHandler = this.defaultEventHandler.bind(this);
     this.handleIdFirstLinks = this.handleIdFirstLinks.bind(this);
     this.registerIdFirstLinks = this.registerIdFirstLinks.bind(this);
-    this.postExternalAuthenticationCompleted = this.postExternalAuthenticationCompleted.bind(this);
+    this.resumeToPf = this.resumeToPf.bind(this);
+    this.openExternalAuthnPopup = this.openExternalAuthnPopup.bind(this);
+    this.externalAuthnFailure = this.externalAuthnFailure.bind(this);
+    this.postContinueAuthentication = this.postContinueAuthentication.bind(this);
     this.registerReopenPopUpHandler = this.registerReopenPopUpHandler.bind(this);
     this.handleReopenPopUp = this.handleReopenPopUp.bind(this);
     this.stateTemplates = new Map();  //state -> handlebar templates
@@ -84,8 +87,11 @@ export default class AuthnWidget {
     AuthnWidget.CORE_STATES.forEach(state => this.registerState(state));
 
     this.addEventHandler('IDENTIFIER_REQUIRED', this.registerIdFirstLinks);
-    this.addEventHandler('EXTERNAL_AUTHENTICATION_COMPLETED', this.postExternalAuthenticationCompleted);
-    this.addEventHandler('EXTERNAL_AUTHENTICATION_REQUIRED', this.registerReopenPopUpHandler)
+    this.addEventHandler('EXTERNAL_AUTHENTICATION_COMPLETED', this.postContinueAuthentication);
+    this.addEventHandler('EXTERNAL_AUTHENTICATION_REQUIRED', this.registerReopenPopUpHandler);
+    this.addPostRenderCallback('RESUME', this.resumeToPf);
+    this.addPostRenderCallback('EXTERNAL_AUTHENTICATION_REQUIRED', this.openExternalAuthnPopup);
+    this.addPostRenderCallback('EXTERNAL_AUTHENTICATION_FAILED', this.externalAuthnFailure);
 
     this.actionModels.set('checkUsernamePassword', { required: ['username', 'password'], properties: ['username', 'password', 'rememberMyUsername', 'thisIsMyDevice', 'captchaResponse'] });
     this.actionModels.set('initiateAccountRecovery', { properties: ['usernameHint'] });
@@ -184,7 +190,31 @@ export default class AuthnWidget {
     }
   }
 
-  postExternalAuthenticationCompleted() {
+  resumeToPf() {
+    window.location.replace(this.store.getStore().resumeUrl);
+  }
+
+  openExternalAuthnPopup() {
+    if (this.store.getStore().presentationMode === 'REDIRECT') {
+      window.location.replace(this.store.getStore().authenticationUrl);
+    } else {
+      if (document.querySelector("#externalAuthnHeaderId")) {
+        document.querySelector('#externalAuthnHeaderId').style.display = 'block';
+      }
+      if (this.store.getStore().status !== this.store.getPreviousStore().status) {
+        let windowReference = window.open(this.store.getStore().authenticationUrl, "_blank", "width=500px,height=500px");
+        this.checkPopupStatus(windowReference);
+      }
+    }
+  }
+
+  externalAuthnFailure() {
+    if (this.store.getStore().errorUrl) {
+      window.location.replace(this.store.getStore().errorUrl);
+    }
+  }
+
+  postContinueAuthentication() {
     setTimeout(() => {
         this.store.dispatch('POST_FLOW', 'continueAuthentication', '{}');
       }, 1000)
@@ -197,7 +227,6 @@ export default class AuthnWidget {
 
   handleReopenPopUp(evt) {
     evt.preventDefault();
-    console.log(this)
     let windowReference = window.open(this.store.getStore().authenticationUrl, "_blank", "width=500px,height=500px");
     if (document.querySelector("#spinnerId")) {
       document.querySelector('#spinnerId').style.display = 'block';
@@ -322,29 +351,7 @@ export default class AuthnWidget {
   }
 
   render(prevState, state) {
-
     let currentState = state.status;
-    if (currentState === 'RESUME') {
-      window.location.replace(state.resumeUrl);
-      return;
-    }
-    if (currentState === 'EXTERNAL_AUTHENTICATION_REQUIRED') {
-      if (state.presentationMode === 'POP_UP') {
-        if (this.store.getStore().status !== this.store.getPreviousStore().status) {
-          let windowReference = window.open(state.authenticationUrl, "_blank", "width=500px,height=500px");
-          this.checkPopupStatus(windowReference);
-        }
-      } else {
-        window.location.replace(state.authenticationUrl);
-        return;
-      }
-    }
-    if (currentState === 'EXTERNAL_AUTHENTICATION_FAILED') {
-      if (state.errorUrl) {
-        window.location.replace(state.errorUrl);
-        return;
-      }
-    }
     let template;
     if (currentState) {
       try {
@@ -433,13 +440,10 @@ export default class AuthnWidget {
         }, 100);
       }
     } else {
-      if (!(document.querySelector("#spinnerId") && document.querySelector("#externalAuthnId"))) {
-        this.checkPopupStatusTimeout = setTimeout(() => {
-          this.checkPopupStatus(windowReference)
-        }, 100);
-      } else {
-        clearTimeout(this.checkPopupStatusTimeout)
+      if (document.querySelector("#spinnerId")) {
         document.querySelector('#spinnerId').style.display = 'none';
+      }
+      if (document.querySelector("#externalAuthnId")) {
         document.querySelector('#externalAuthnId').style.display = 'block';
       }
     }
