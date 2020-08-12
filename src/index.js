@@ -24,7 +24,6 @@ import './scss/main.scss';
 })();
 
 export default class AuthnWidget {
-
   static get FORM_ID() {
     return "AuthnWidgetForm";  //name of the form ID used in all handlebar templates
   }
@@ -78,6 +77,7 @@ export default class AuthnWidget {
     this.handleReopenPopUp = this.handleReopenPopUp.bind(this);
     this.stateTemplates = new Map();  //state -> handlebar templates
     this.eventHandler = new Map();  //state -> eventHandlers
+    this.postRenderCallbacks = new Map();
     this.actionModels = new Map();
     this.store = new Store(this.flowId, this.fetchUtil, this.checkRecaptcha);
     this.store.registerListener(this.render);
@@ -359,6 +359,9 @@ export default class AuthnWidget {
     var params = Object.assign(state, this.assets.toTemplateParams())
     widgetDiv.innerHTML = template(params);
     this.registerEventListeners(currentState);
+    if(this.postRenderCallbacks[currentState]){
+      this.postRenderCallbacks[currentState](state);
+    }
     if (this.store.state.showCaptcha && this.grecaptcha) {
       this.grecaptcha.render(this.captchaDivId);
     }
@@ -400,6 +403,10 @@ export default class AuthnWidget {
     let evtHandlers = this.eventHandler.get(stateName);
     evtHandlers.push(eventHandler);
     this.eventHandler.set(stateName, evtHandlers);
+  }
+
+  addPostRenderCallback(stateName, callback) {
+    this.postRenderCallbacks[stateName] = callback;
   }
 
   registerActionModel(action, model) {
