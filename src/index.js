@@ -24,7 +24,6 @@ import './scss/main.scss';
 })();
 
 export default class AuthnWidget {
-
   static get FORM_ID() {
     return "AuthnWidgetForm";  //name of the form ID used in all handlebar templates
   }
@@ -35,11 +34,12 @@ export default class AuthnWidget {
       'ACCOUNT_RECOVERY_OTL_VERIFICATION_REQUIRED', 'RECOVERY_CODE_REQUIRED', 'PASSWORD_RESET_REQUIRED',
       'SUCCESSFUL_PASSWORD_RESET', 'CHALLENGE_RESPONSE_REQUIRED', 'USERNAME_RECOVERY_EMAIL_REQUIRED',
       'USERNAME_RECOVERY_EMAIL_SENT', 'SUCCESSFUL_ACCOUNT_UNLOCK', 'IDENTIFIER_REQUIRED',
+      'EXTERNAL_AUTHENTICATION_COMPLETED', 'EXTERNAL_AUTHENTICATION_FAILED', 'EXTERNAL_AUTHENTICATION_REQUIRED',
       'DEVICE_PROFILE_REQUIRED'];
   }
 
   static get COMMUNICATION_ERROR_MSG() {
-    return "Unable to start the authentiation flow, please contact your system administrator.";
+    return "Unable to start the authentication flow, please contact your system administrator.";
   }
 
   static get FLOW_ID_REQUIRED_MSG() {
@@ -72,15 +72,27 @@ export default class AuthnWidget {
     this.defaultEventHandler = this.defaultEventHandler.bind(this);
     this.handleIdFirstLinks = this.handleIdFirstLinks.bind(this);
     this.registerIdFirstLinks = this.registerIdFirstLinks.bind(this);
+    this.resumeToPf = this.resumeToPf.bind(this);
+    this.openExternalAuthnPopup = this.openExternalAuthnPopup.bind(this);
+    this.externalAuthnFailure = this.externalAuthnFailure.bind(this);
+    this.postContinueAuthentication = this.postContinueAuthentication.bind(this);
+    this.registerReopenPopUpHandler = this.registerReopenPopUpHandler.bind(this);
+    this.handleReopenPopUp = this.handleReopenPopUp.bind(this);
     this.postDeviceProfileAction = this.postDeviceProfileAction.bind(this);
     this.stateTemplates = new Map();  //state -> handlebar templates
     this.eventHandler = new Map();  //state -> eventHandlers
+    this.postRenderCallbacks = new Map();
     this.actionModels = new Map();
     this.store = new Store(this.flowId, this.fetchUtil, this.checkRecaptcha);
     this.store.registerListener(this.render);
     AuthnWidget.CORE_STATES.forEach(state => this.registerState(state));
 
     this.addEventHandler('IDENTIFIER_REQUIRED', this.registerIdFirstLinks);
+    this.addEventHandler('EXTERNAL_AUTHENTICATION_COMPLETED', this.postContinueAuthentication);
+    this.addEventHandler('EXTERNAL_AUTHENTICATION_REQUIRED', this.registerReopenPopUpHandler);
+    this.addPostRenderCallback('RESUME', this.resumeToPf);
+    this.addPostRenderCallback('EXTERNAL_AUTHENTICATION_REQUIRED', this.openExternalAuthnPopup);
+    this.addPostRenderCallback('EXTERNAL_AUTHENTICATION_FAILED', this.externalAuthnFailure);
     this.addEventHandler('DEVICE_PROFILE_REQUIRED', this.postDeviceProfileAction);
 
     this.actionModels.set('checkUsernamePassword', { required: ['username', 'password'], properties: ['username', 'password', 'rememberMyUsername', 'thisIsMyDevice', 'captchaResponse'] });
@@ -101,6 +113,7 @@ export default class AuthnWidget {
       if (!this.flowId) {
         throw new Error(AuthnWidget.FLOW_ID_REQUIRED_MSG);
       }
+      this.renderSpinnerTemplate();
       this.store
         .dispatch('GET_FLOW')
         .catch(() => this.generalErrorRenderer(AuthnWidget.COMMUNICATION_ERROR_MSG));
@@ -108,6 +121,13 @@ export default class AuthnWidget {
       console.error(err);
       this.generalErrorRenderer(err.message);
     }
+  }
+
+  renderSpinnerTemplate() {
+    let template = this.getTemplate('initial_spinner');
+    let params = this.assets.toTemplateParams();
+    let widgetDiv = document.getElementById(this.divId);
+    widgetDiv.innerHTML = template(params);
   }
 
   generalErrorRenderer(msg) {
@@ -170,6 +190,54 @@ export default class AuthnWidget {
         document.getElementById('signonidentifier').style.display = 'block';
         break;
     }
+  }
+
+  resumeToPf() {
+    window.location.replace(this.store.getStore().resumeUrl);
+  }
+
+  openExternalAuthnPopup() {
+    if (this.store.getStore().presentationMode === 'REDIRECT') {
+      window.location.replace(this.store.getStore().authenticationUrl);
+    } else {
+      if (document.querySelector("#externalAuthnHeaderId")) {
+        document.querySelector('#externalAuthnHeaderId').style.display = 'block';
+      }
+      if (this.store.getStore().status !== this.store.getPreviousStore().status) {
+        let windowReference = window.open(this.store.getStore().authenticationUrl, "_blank", "width=500px,height=500px");
+        this.checkPopupStatus(windowReference);
+      }
+    }
+  }
+
+  externalAuthnFailure() {
+    if (this.store.getStore().errorUrl) {
+      window.location.replace(this.store.getStore().errorUrl);
+    }
+  }
+
+  postContinueAuthentication() {
+    setTimeout(() => {
+        this.store.dispatch('POST_FLOW', 'continueAuthentication', '{}');
+      }, 1000)
+  }
+
+  registerReopenPopUpHandler() {
+    Array.from(document.querySelectorAll('[data-externalAuthActionId]'))
+      .forEach(element => element.addEventListener('click', this.handleReopenPopUp));
+  }
+
+  handleReopenPopUp(evt) {
+    evt.preventDefault();
+    let windowReference = window.open(this.store.getStore().authenticationUrl, "_blank", "width=500px,height=500px");
+    if (document.querySelector("#spinnerId")) {
+      document.querySelector('#spinnerId').style.display = 'block';
+    }
+    if (document.querySelector("#externalAuthnId")) {
+      document.querySelector('#externalAuthnId').style.display = 'none';
+    }
+    clearTimeout(this.checkPopupStatusTimeout)
+    this.checkPopupStatus(windowReference);
   }
 
   postDeviceProfileAction() {
@@ -297,12 +365,7 @@ export default class AuthnWidget {
   }
 
   render(prevState, state) {
-
     let currentState = state.status;
-    if (currentState === 'RESUME') {
-      window.location.replace(state.resumeUrl);
-      return;
-    }
     let template;
     if (currentState) {
       try {
@@ -317,6 +380,9 @@ export default class AuthnWidget {
     var params = Object.assign(state, this.assets.toTemplateParams())
     widgetDiv.innerHTML = template(params);
     this.registerEventListeners(currentState);
+    if(this.postRenderCallbacks[currentState]){
+      this.postRenderCallbacks[currentState](state);
+    }
     if (this.store.state.showCaptcha && this.grecaptcha) {
       this.grecaptcha.render(this.captchaDivId);
     }
@@ -360,7 +426,40 @@ export default class AuthnWidget {
     this.eventHandler.set(stateName, evtHandlers);
   }
 
+  addPostRenderCallback(stateName, callback) {
+    this.postRenderCallbacks[stateName] = callback;
+  }
+
   registerActionModel(action, model) {
     this.actionModels.set(action, model);
+  }
+
+  checkPopupStatus(windowReference) {
+    if (windowReference !== null) {
+      if (windowReference.closed) {
+        clearTimeout(this.checkPopupStatusTimeout)
+        this.store
+          .dispatch('GET_FLOW')
+          .then(() => {
+            if (document.querySelector("#spinnerId")) {
+              document.querySelector('#spinnerId').style.display = 'none';
+            }
+            if (document.querySelector("#externalAuthnId")) {
+              document.querySelector('#externalAuthnId').style.display = 'block';
+            }
+          });
+      } else {
+        this.checkPopupStatusTimeout = setTimeout(() => {
+          this.checkPopupStatus(windowReference)
+        }, 100);
+      }
+    } else {
+      if (document.querySelector("#spinnerId")) {
+        document.querySelector('#spinnerId').style.display = 'none';
+      }
+      if (document.querySelector("#externalAuthnId")) {
+        document.querySelector('#externalAuthnId').style.display = 'block';
+      }
+    }
   }
 }
