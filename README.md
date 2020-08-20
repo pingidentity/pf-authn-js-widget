@@ -14,7 +14,7 @@
   - [Creating the index.html File](#creating-the-indexhtml-file)
   - [Customizing the Widget](#customizing-the-widget)
   - [Enabling Captcha](#enabling-captcha)
-  - [Using Risk-Based Authentication With the Widget](#using-risk-based-authentication-with-the-widget)
+  - [Using Risk-Based Authentication With the Widget](/docs/riskAuthentication.md)
 - [Browser Compatibility](#browser-compatibility)
 - [Bug Reports](#bug-reports)
 - [License](#license)
@@ -217,10 +217,6 @@ function onloadCallback() {
 ```
 It is crucial that `api.js` is loaded before the widget is instantiated. Therefore we are using a callback function to load the widget. The `grecaptcha` object
 will be available after the `api.js` is loaded. For more information, see [Captcha documentations](https://developers.google.com/recaptcha/docs/display).
-
-## Using Risk-Based Authentication With the Widget
-
-Please refer to the [guide for using risk-based authentication with the widget](RISK-AUTHENTICATION.md) for more infomation on how to set up the widget with risk-based authentication adapters.
 
 # Browser Compatibility
 
