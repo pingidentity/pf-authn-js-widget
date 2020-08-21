@@ -2,8 +2,12 @@
   <div class="org-logo">
     <img class="org-logo__image" src="{{logo}}" alt="Company Logo" />
   </div>
+  {{#if authorizeResponse}}
+  <h1 class="heading">Authentication Success!</h1>
+  {{else}}
   <h1 class="heading">Change Password</h1>
   <div class="text-block">
     <div class="text-block__text">Congratulations! You have successfully changed your password.</div>
   </div>
+  {{/if}}
 </div>

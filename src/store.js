@@ -1,10 +1,14 @@
+import { initRedirectless } from './utils/redirectless';
+import FetchUtil from './utils/fetchUtil';
+
 export default class Store {
-  constructor(flowId, fetchUtil, checkRecaptcha) {
+  constructor(flowId, baseUrl, checkRecaptcha) {
     this.listeners = [];
     this.prevState = {};
     this.state = {};
     this.flowId = flowId;
-    this.fetchUtil = fetchUtil;
+    this.baseUrl = baseUrl
+    this.fetchUtil = new FetchUtil(baseUrl);
     this.checkRecaptcha = checkRecaptcha;
     this.pendingState = {};
   }
@@ -79,6 +83,9 @@ export default class Store {
       case 'GET_FLOW':
         result = await this.fetchUtil.getFlow(this.flowId);
         break;
+      case 'INIT_REDIRECTLESS':
+        result = await initRedirectless(this.baseUrl, payload);
+        break;
       case 'POST_FLOW':
       default:
         result = await this.fetchUtil.postFlow(this.flowId, actionid, payload);
@@ -97,6 +104,7 @@ export default class Store {
     let combinedData = this.state;
     delete combinedData.userMessage;  //clear previous error shown
     if (json.status) {
+      this.flowId = json.id;
       combinedData = json;
       this.state = json;
       if (json.status === 'CANCELED') {

@@ -11,7 +11,6 @@ const PATHS = {
 }
 
 module.exports = (env, argv) => {
-  const isDevelopment = argv.mode === 'development'
   const publicPath = '/';
   return {
     devServer: {
@@ -22,11 +21,12 @@ module.exports = (env, argv) => {
           operationMode: argv.operationmode || 'default'
         }
         console.log('#############################################');
-        console.log('#')
+        console.log('#');
         console.log(`# Dev server options: ${JSON.stringify(options)}`);
-        console.log('#')
+        console.log('#');
         console.log('#############################################');
-        devServer(app, server, options)
+        console.log('');
+        devServer(app, server, options);
       },
       contentBase: [path.join(__dirname, 'src')],
       compress: true,

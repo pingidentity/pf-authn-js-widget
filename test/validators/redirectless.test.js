@@ -42,7 +42,7 @@ describe('init-redirectless validator', () => {
 
   test('onAuthorizationSuccess attribute must be a function', () => {
     const configuration = {
-      onGetFlowId: () => { },
+      onAuthorizationRequest: () => { },
       onAuthorizationSuccess: () => { }
     }
     expect(() => {
@@ -50,9 +50,9 @@ describe('init-redirectless validator', () => {
     }).not.toThrow(Error);
   });
 
-  test('onGetFlowId attribute must be a function if present', () => {
+  test('onAuthorizationRequest attribute must be a function if present', () => {
     const configuration = {
-      onGetFlowId: () => { },
+      onAuthorizationRequest: () => { },
       onAuthorizationSuccess: () => { }
     }
     expect(() => {
@@ -60,9 +60,9 @@ describe('init-redirectless validator', () => {
     }).not.toThrow(Error);
   });
 
-  test('onGetFlowId attribute not a string if present', () => {
+  test('onAuthorizationRequest attribute not a string if present', () => {
     const configuration = {
-      onGetFlowId: 'string',
+      onAuthorizationRequest: 'string',
       onAuthorizationSuccess: () => { }
     }
     expect(() => {
@@ -70,9 +70,9 @@ describe('init-redirectless validator', () => {
     }).toThrow(Error);
   });
 
-  test('onGetFlowId attribute not an integer if present', () => {
+  test('onAuthorizationRequest attribute not an integer if present', () => {
     const configuration = {
-      onGetFlowId: 1,
+      onAuthorizationRequest: 1,
       onAuthorizationSuccess: () => { }
     }
     expect(() => {
@@ -80,9 +80,9 @@ describe('init-redirectless validator', () => {
     }).toThrow(Error);
   });
 
-  test('onGetFlowId attribute not a boolean if present', () => {
+  test('onAuthorizationRequest attribute not a boolean if present', () => {
     const configuration = {
-      onGetFlowId: true,
+      onAuthorizationRequest: true,
       onAuthorizationSuccess: () => { }
     }
     expect(() => {
@@ -90,7 +90,7 @@ describe('init-redirectless validator', () => {
     }).toThrow(Error);
   });
 
-  test('client_id attribute must be a string if onGetFlowId attribute is not present', () => {
+  test('client_id attribute must be a string if onAuthorizationRequest attribute is not present', () => {
     const configuration = {
       client_id: 'client id',
       response_type: 'token',
@@ -101,7 +101,7 @@ describe('init-redirectless validator', () => {
     }).not.toThrow(Error);
   });
 
-  test('client_id attribute must be present if onGetFlowId attribute is not present', () => {
+  test('client_id attribute must be present if onAuthorizationRequest attribute is not present', () => {
     const configuration = {
       onAuthorizationSuccess: () => { }
     }
@@ -110,7 +110,7 @@ describe('init-redirectless validator', () => {
     }).toThrow(Error);
   });
 
-  test('client_id attribute must not be null if onGetFlowId attribute is not present', () => {
+  test('client_id attribute must not be null if onAuthorizationRequest attribute is not present', () => {
     const configuration = {
       client_id: null,
       onAuthorizationSuccess: () => { }
@@ -120,7 +120,7 @@ describe('init-redirectless validator', () => {
     }).toThrow(Error);
   });
 
-  test('client_id attribute must not be empty if onGetFlowId attribute is not present', () => {
+  test('client_id attribute must not be empty if onAuthorizationRequest attribute is not present', () => {
     const configuration = {
       client_id: '',
       onAuthorizationSuccess: () => { }
@@ -130,7 +130,7 @@ describe('init-redirectless validator', () => {
     }).toThrow(Error);
   });
 
-  test('client_id attribute must not be integer if onGetFlowId attribute is not present', () => {
+  test('client_id attribute must not be integer if onAuthorizationRequest attribute is not present', () => {
     const configuration = {
       client_id: 1,
       onAuthorizationSuccess: () => { }
@@ -140,7 +140,7 @@ describe('init-redirectless validator', () => {
     }).toThrow(Error);
   });
 
-  test('response_type attribute must be a string if onGetFlowId attribute is not present', () => {
+  test('response_type attribute must be a string if onAuthorizationRequest attribute is not present', () => {
     const configuration = {
       client_id: 'client id',
       response_type: 'token',
@@ -151,7 +151,7 @@ describe('init-redirectless validator', () => {
     }).not.toThrow(Error);
   });
 
-  test('response_type attribute must be present if onGetFlowId attribute is not present', () => {
+  test('response_type attribute must be present if onAuthorizationRequest attribute is not present', () => {
     const configuration = {
       client_id: 'client_id',
       onAuthorizationSuccess: () => { }
@@ -161,7 +161,7 @@ describe('init-redirectless validator', () => {
     }).toThrow(Error);
   });
 
-  test('response_type attribute must not be null if onGetFlowId attribute is not present', () => {
+  test('response_type attribute must not be null if onAuthorizationRequest attribute is not present', () => {
     const configuration = {
       client_id: 'client id',
       response_type: null,
@@ -172,7 +172,7 @@ describe('init-redirectless validator', () => {
     }).toThrow(Error);
   });
 
-  test('response_type attribute must not be empty if onGetFlowId attribute is not present', () => {
+  test('response_type attribute must not be empty if onAuthorizationRequest attribute is not present', () => {
     const configuration = {
       client_id: 'client id',
       response_type: '',
@@ -183,7 +183,7 @@ describe('init-redirectless validator', () => {
     }).toThrow(Error);
   });
 
-  test('response_type attribute must not be integer if onGetFlowId attribute is not present', () => {
+  test('response_type attribute must not be integer if onAuthorizationRequest attribute is not present', () => {
     const configuration = {
       client_id: 'client id',
       response_type: 1,

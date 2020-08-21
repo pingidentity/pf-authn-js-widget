@@ -13,22 +13,22 @@ const redirectlessConfigValidator = (configuration) => {
     throw new Error('onAuthorizationSuccess attribute must be a function.');
   }
 
-  const onGetFlowId = configuration.onGetFlowId;
-  const onGetFlowIdIsPresent = !validator.isEmpty(onGetFlowId)
-  if (onGetFlowIdIsPresent) {
-    validateWithOnGetFlowId(onGetFlowId)
+  const onAuthorizationRequest = configuration.onAuthorizationRequest;
+  const onAuthorizationRequestIsPresent = !validator.isEmpty(onAuthorizationRequest);
+  if (onAuthorizationRequestIsPresent) {
+    validateWithOnAuthorizationRequest(onAuthorizationRequest)
   } else {
-    validateWithoutOnGetFlowId(configuration);
+    validateWithoutOnAuthorizationRequest(configuration);
   }
 }
 
-const validateWithOnGetFlowId = (onGetFlowId) => {
-  if (!validator.isFunction(onGetFlowId)) {
-    throw new Error('onGetFlowId attribute must be a function.');
+const validateWithOnAuthorizationRequest = (onAuthorizationRequest) => {
+  if (!validator.isFunction(onAuthorizationRequest)) {
+    throw new Error('onAuthorizationRequest attribute must be a function.');
   }
 }
 
-const validateWithoutOnGetFlowId = (configuration) => {
+const validateWithoutOnAuthorizationRequest = (configuration) => {
   // validate client_id
   const clientId = configuration.client_id;
   if (validator.isEmpty(clientId)) {

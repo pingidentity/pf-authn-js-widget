@@ -6,6 +6,9 @@
     <p class="icon-feedback__label">Error</p>
   </div>
   <div class="feedback feedback--error">
+    {{#if userMessage}}
+    {{> errors}}
+    {{else}}
     <img class="feedback__icon" src="{{error}}" alt="Error" />
     {{#if msg}}
     <div class="feedback__message">
@@ -13,8 +16,9 @@
     </div>
     {{else}}
     <div class="feedback__message">
-      Something Went Wrong.
+      Something went wrong.
     </div>
+    {{/if}}
     {{/if}}
   </div>
 </div>

@@ -1,10 +1,10 @@
-import FetchUtil from './utils/fetchUtil';
 import Assets from './utils/assets';
 import queryString from 'query-string';
 import 'core-js/stable';
 import 'regenerator-runtime/runtime'; //for async await
 import Store from './store';
 import redirectlessConfigValidator from './validators/redirectless';
+import { completeStateCallback } from './utils/redirectless'
 
 import './scss/main.scss';
 //uncomment to add your personal branding
@@ -63,7 +63,7 @@ export default class AuthnWidget {
     }
     this.captchaDivId = 'invisibleRecaptchaId';
     this.assets = new Assets(options);
-    this.fetchUtil = new FetchUtil(baseUrl);
+    this.baseUrl = baseUrl;
     this.invokeReCaptcha = options && options.invokeReCaptcha;
     this.checkRecaptcha = options && options.checkRecaptcha;
     this.grecaptcha = options && options.grecaptcha;
@@ -82,7 +82,7 @@ export default class AuthnWidget {
     this.eventHandler = new Map();  //state -> eventHandlers
     this.postRenderCallbacks = new Map();
     this.actionModels = new Map();
-    this.store = new Store(this.flowId, this.fetchUtil, this.checkRecaptcha);
+    this.store = new Store(this.flowId, this.baseUrl, this.checkRecaptcha);
     this.store.registerListener(this.render);
     AuthnWidget.CORE_STATES.forEach(state => this.registerState(state));
 
@@ -133,9 +133,12 @@ export default class AuthnWidget {
     try {
       console.log(configuration);
       redirectlessConfigValidator(configuration);
-    } catch(err) {
-      console.error(err);
-      this.generalErrorRenderer(err.message)
+      this.addPostRenderCallback('COMPLETED', (state) => completeStateCallback(state, configuration));
+      this.store
+        .dispatch('INIT_REDIRECTLESS', null, configuration)
+        .catch((err) => this.generalErrorRenderer(err.message));
+    } catch (err) {
+      this.generalErrorRenderer(err.message);
     }
   }
 
@@ -227,8 +230,8 @@ export default class AuthnWidget {
 
   postContinueAuthentication() {
     setTimeout(() => {
-        this.store.dispatch('POST_FLOW', 'continueAuthentication', '{}');
-      }, 1000)
+      this.store.dispatch('POST_FLOW', 'continueAuthentication', '{}');
+    }, 1000)
   }
 
   registerReopenPopUpHandler() {
@@ -363,7 +366,7 @@ export default class AuthnWidget {
 
   render(prevState, state) {
     let currentState = state.status;
-    let template;
+    let template = this.getTemplate('general_error');
     if (currentState) {
       try {
         template = this.getTemplate(currentState);
@@ -377,7 +380,7 @@ export default class AuthnWidget {
     var params = Object.assign(state, this.assets.toTemplateParams())
     widgetDiv.innerHTML = template(params);
     this.registerEventListeners(currentState);
-    if(this.postRenderCallbacks[currentState]){
+    if (this.postRenderCallbacks[currentState]) {
       this.postRenderCallbacks[currentState](state);
     }
     if (this.store.state.showCaptcha && this.grecaptcha) {
