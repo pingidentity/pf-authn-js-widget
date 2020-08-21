@@ -1,10 +1,8 @@
 {{#if userMessage}}
-<div class="feedback feedback--error">
+<div class="feedback feedback--error" data-id="feedback">
+  <span class="feedback__icon pingicon-error-triangle"></span>
   <div class="feedback__message">
-    <div>
-      <img class="feedback__icon" src="{{error}}" alt="Error" />
-      {{userMessage}}
-    </div>
+    {{userMessage}}
   </div>
 </div>
 {{/if}}
