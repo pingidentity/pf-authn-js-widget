@@ -199,11 +199,15 @@ export default class AuthnWidget {
   handleAltAuthSource(evt) {
     evt.preventDefault();
     let source = evt.currentTarget;
-    let authSource = source.dataset['altauthsource'];
-    let data = {
-      "authenticationSource": authSource
-    };
-    this.store.dispatch('POST_FLOW', "useAlternativeAuthenticationSource", JSON.stringify(data));
+    if (source) {
+      let authSource = source.dataset['altauthsource'];
+      let data = {
+        "authenticationSource": authSource
+      };
+      this.store.dispatch('POST_FLOW', "useAlternativeAuthenticationSource", JSON.stringify(data));
+    } else {
+      console.log("ERROR - Unable to dispatch alternate auth source as the target was null");
+    }
   }
 
   resumeToPf() {
