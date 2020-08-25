@@ -13,6 +13,10 @@ export default class Store {
     return this.state;
   }
 
+  getPreviousStore() {
+    return this.prevState;
+  }
+
   dispatchErrors(errors) {
     this.state.userMessages = errors;
     this.notifyListeners();
