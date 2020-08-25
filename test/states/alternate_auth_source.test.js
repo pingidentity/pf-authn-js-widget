@@ -4,7 +4,7 @@ import Store from "../../src/store";
 
 describe('Alternate Auth Source tests', () => {
 
-  jest.mock('../../src/Store');
+  jest.mock('../../src/store');
 
   test('Test handle auth source', () => {
     const authn = new AuthnWidget('https://localhost:9031');
