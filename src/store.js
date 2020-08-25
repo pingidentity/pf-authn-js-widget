@@ -170,6 +170,9 @@ export default class Store {
           if (msg.target) {
             userMessage = userMessage.slice(0, -1).concat(' : ').concat(msg.target);
           }
+          if (!userMessage && msg.code) {
+            userMessage = `Error code "${msg.code}" returned from the authorization server.`
+          }
           errors.userMessage = userMessage;
         });
       }
