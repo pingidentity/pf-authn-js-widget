@@ -4,7 +4,7 @@ import Store from "../../src/store";
 
 describe('REGISTRATION_REQUIRED tests', () => {
 
-  jest.mock('../../src/Store');
+  jest.mock('../../src/store');
 
   test('Test handle auth source', () => {
     document.body.innerHTML = '<form id="AuthnWidgetForm">' +
