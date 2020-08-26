@@ -1,4 +1,4 @@
-var handlebars = require('handlebars');
+let handlebars = require('handlebars');
 
 module.exports = function (field_info) {
   let html = '';
@@ -22,7 +22,7 @@ module.exports = function (field_info) {
         '         name="' + field_info.id + '"' +
         '         placeholder="' + field_info.label + '"' +
         '         value="' + field_value + '"' +
-        ((field_info.readonly) ? "disabled" : "") +
+        ((field_info.readonly) ? " disabled" : "") +
         '  />' +
         '  <label class="float-label__label"' +
         '         for="' + field_info.id + '">' + field_info.label +
@@ -34,6 +34,7 @@ module.exports = function (field_info) {
         '<div class="dropdown float-label">' +
         '  <select id="' + field_info.id + '"' +
         '          name="' + field_info.label + '"' +
+                   ((field_info.readonly) ? " disabled" : "") +
         '          class="' + css_classes + ' dropdown__select float-label__input placeholder-shown">' +
         '    <option disabled="" value="">Select one</option>';
       field_info.options.forEach(option => {
@@ -55,6 +56,7 @@ module.exports = function (field_info) {
         '         id="' + field_info.id + '"' +
         '         name="' + field_info.id + '"' +
                   ((field_value.toLowerCase() === 'true' || field_value.toLowerCase() === 'on') ? 'checked' : '') +
+                  ((field_info.readonly) ? " disabled " : "") +
         '  />' +
         '    <span class="checkbox__standin"></span>' +
         '    <span class="checkbox__label">' + field_info.label + '</span>' +
@@ -71,7 +73,9 @@ module.exports = function (field_info) {
           '           class="' + css_classes + ' checkbox__input"' +
           '           id="' + field_info.id + option + '"' +
           '           name="' + field_info.id + '"' +
-          '           value="' + option + '"/>' +
+          '           value="' + option + '"' +
+                      ((field_info.readonly) ? " disabled" : "") +
+          '/>' +
           '        <span class="checkbox__standin"></span>' +
           '        <span class="checkbox__label">' + option + '</span>' +
           '    </label>' +

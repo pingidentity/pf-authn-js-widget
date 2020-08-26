@@ -500,11 +500,8 @@ export default class AuthnWidget {
 
   handleRegisterUser(event) {
     event.preventDefault();
-    let source = event.target || event.srcElement;
-    let actionId = source.dataset['registrationactionid'];
     let formData = this.getFormData();
     let actionModelProperties = this.actionModels.get('registerUser').properties;
-    console.log(formData);
 
     let payload = {fieldValues: {}};
     Object.keys(formData).forEach((key) => {
@@ -525,6 +522,6 @@ export default class AuthnWidget {
       }
     });
 
-    this.dispatchWithCaptcha(actionId, payload)
+    this.dispatchWithCaptcha("registerUser", payload)
   }
 }
