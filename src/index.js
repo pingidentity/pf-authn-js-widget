@@ -34,7 +34,8 @@ export default class AuthnWidget {
       'ACCOUNT_RECOVERY_OTL_VERIFICATION_REQUIRED', 'RECOVERY_CODE_REQUIRED', 'PASSWORD_RESET_REQUIRED',
       'SUCCESSFUL_PASSWORD_RESET', 'CHALLENGE_RESPONSE_REQUIRED', 'USERNAME_RECOVERY_EMAIL_REQUIRED',
       'USERNAME_RECOVERY_EMAIL_SENT', 'SUCCESSFUL_ACCOUNT_UNLOCK', 'IDENTIFIER_REQUIRED',
-      'EXTERNAL_AUTHENTICATION_COMPLETED', 'EXTERNAL_AUTHENTICATION_FAILED', 'EXTERNAL_AUTHENTICATION_REQUIRED'];
+      'EXTERNAL_AUTHENTICATION_COMPLETED', 'EXTERNAL_AUTHENTICATION_FAILED', 'EXTERNAL_AUTHENTICATION_REQUIRED',
+      'DEVICE_PROFILE_REQUIRED'];
   }
 
   static get COMMUNICATION_ERROR_MSG() {
@@ -79,6 +80,7 @@ export default class AuthnWidget {
     this.postContinueAuthentication = this.postContinueAuthentication.bind(this);
     this.registerReopenPopUpHandler = this.registerReopenPopUpHandler.bind(this);
     this.handleReopenPopUp = this.handleReopenPopUp.bind(this);
+    this.postDeviceProfileAction = this.postDeviceProfileAction.bind(this);
     this.stateTemplates = new Map();  //state -> handlebar templates
     this.eventHandler = new Map();  //state -> eventHandlers
     this.postRenderCallbacks = new Map();
@@ -94,6 +96,7 @@ export default class AuthnWidget {
     this.addPostRenderCallback('RESUME', this.resumeToPf);
     this.addPostRenderCallback('EXTERNAL_AUTHENTICATION_REQUIRED', this.openExternalAuthnPopup);
     this.addPostRenderCallback('EXTERNAL_AUTHENTICATION_FAILED', this.externalAuthnFailure);
+    this.addEventHandler('DEVICE_PROFILE_REQUIRED', this.postDeviceProfileAction);
 
     this.actionModels.set('checkUsernamePassword', { required: ['username', 'password'], properties: ['username', 'password', 'rememberMyUsername', 'thisIsMyDevice', 'captchaResponse'] });
     this.actionModels.set('initiateAccountRecovery', { properties: ['usernameHint'] });
@@ -256,6 +259,18 @@ export default class AuthnWidget {
     }
     clearTimeout(this.checkPopupStatusTimeout)
     this.checkPopupStatus(windowReference);
+  }
+
+  postDeviceProfileAction() {
+    let profilingElement = document.querySelector('[data-profilingtype]');
+    switch (profilingElement.dataset['profilingtype']) {
+      case 'IDW':
+        setTimeout(() => {
+          this.store.dispatch('POST_FLOW', 'continueAuthentication', '{}');
+        },
+        parseInt(profilingElement.dataset['timeout']));
+        break;
+    }
   }
 
   verifyPasswordsMatch() {
