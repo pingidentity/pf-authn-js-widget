@@ -123,6 +123,10 @@ export default class Store {
             this.state.canceledMessage = 'You have cancelled the attempt to retrieve your username. Please close this window.';
             break;
         }
+      } else if (json.status === 'FAILED') {
+        if (this.state.code && !this.state.userMessage) {
+          this.state.userMessage = `The server returned "${this.state.code}" code. Please contact your system administrator.`;
+        }
       }
     } else {
       if (json.code === 'RESOURCE_NOT_FOUND') {
