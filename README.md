@@ -125,7 +125,7 @@ To build the widget:
 
 At minimum you must include:
   - `pf.authn-widget.js` - main javascript library
-  - `https://assets.pingone.com/ux/end-user/0.13.0/end-user.css` - basic CSS from CDN
+  - `https://assets.pingone.com/ux/end-user/0.29.0/end-user.css` - basic CSS from CDN
   - `main-styles.css` - widget CSS
 
 ## Creating the index.html File
@@ -139,7 +139,7 @@ Create a file called `index.html` with the following content and host it in your
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <script src="./pf.authn-widget.js"></script>        
-    <link rel="stylesheet" type="text/css" href="https://assets.pingone.com/ux/end-user/0.13.0/end-user.css">
+    <link rel="stylesheet" type="text/css" href="https://assets.pingone.com/ux/end-user/0.29.0/end-user.css">
     <link rel="stylesheet" type="text/css" href="main-styles.css">
     <script>
       function load() {

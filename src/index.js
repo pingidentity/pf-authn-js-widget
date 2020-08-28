@@ -72,6 +72,8 @@ export default class AuthnWidget {
     this.defaultEventHandler = this.defaultEventHandler.bind(this);
     this.handleIdFirstLinks = this.handleIdFirstLinks.bind(this);
     this.registerIdFirstLinks = this.registerIdFirstLinks.bind(this);
+    this.handleAltAuthSource = this.handleAltAuthSource.bind(this);
+    this.registerAltAuthSourceLinks = this.registerAltAuthSourceLinks.bind(this);
     this.resumeToPf = this.resumeToPf.bind(this);
     this.openExternalAuthnPopup = this.openExternalAuthnPopup.bind(this);
     this.externalAuthnFailure = this.externalAuthnFailure.bind(this);
@@ -88,6 +90,7 @@ export default class AuthnWidget {
     AuthnWidget.CORE_STATES.forEach(state => this.registerState(state));
 
     this.addEventHandler('IDENTIFIER_REQUIRED', this.registerIdFirstLinks);
+    this.addEventHandler('USERNAME_PASSWORD_REQUIRED', this.registerAltAuthSourceLinks);
     this.addEventHandler('EXTERNAL_AUTHENTICATION_COMPLETED', this.postContinueAuthentication);
     this.addEventHandler('EXTERNAL_AUTHENTICATION_REQUIRED', this.registerReopenPopUpHandler);
     this.addPostRenderCallback('RESUME', this.resumeToPf);
@@ -189,6 +192,24 @@ export default class AuthnWidget {
         document.getElementById('existingAccountsSelectionList').style.display = 'none';
         document.getElementById('signonidentifier').style.display = 'block';
         break;
+    }
+  }
+
+  registerAltAuthSourceLinks() {
+    Array.from(document.querySelectorAll('[data-altauthsource]')).forEach(element => element.addEventListener('click', this.handleAltAuthSource))
+  }
+
+  handleAltAuthSource(evt) {
+    evt.preventDefault();
+    let source = evt.currentTarget;
+    if (source) {
+      let authSource = source.dataset['altauthsource'];
+      let data = {
+        "authenticationSource": authSource
+      };
+      this.store.dispatch('POST_FLOW', "useAlternativeAuthenticationSource", JSON.stringify(data));
+    } else {
+      console.log("ERROR - Unable to dispatch alternate auth source as the target was null");
     }
   }
 
