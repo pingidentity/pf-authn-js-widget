@@ -50,7 +50,7 @@ The drop-off endpoint (`/ext/ref/dropoff`) does not support CORS. The authentica
 
 ### Documentation
 
-For the latest documentation, see [Agentless Integration Kit](https://docs.pingidentity.com/bundle/integrations/page/ygj1563994984859.html) in the Ping Identity [Support Home](https://support.pingidentity.com/s/)
+For the latest documentation, see [Agentless Integration Kit](https://docs.pingidentity.com/bundle/integrations/page/ygj1563994984859.html) in the Ping Identity [Support Home](https://support.pingidentity.com)
 
 
 ### Sample applications
