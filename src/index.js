@@ -35,7 +35,7 @@ export default class AuthnWidget {
       'SUCCESSFUL_PASSWORD_RESET', 'CHALLENGE_RESPONSE_REQUIRED', 'USERNAME_RECOVERY_EMAIL_REQUIRED',
       'USERNAME_RECOVERY_EMAIL_SENT', 'SUCCESSFUL_ACCOUNT_UNLOCK', 'IDENTIFIER_REQUIRED',
       'EXTERNAL_AUTHENTICATION_COMPLETED', 'EXTERNAL_AUTHENTICATION_FAILED', 'EXTERNAL_AUTHENTICATION_REQUIRED',
-      'REGISTRATION_REQUIRED'];
+      'DEVICE_PROFILE_REQUIRED', 'REGISTRATION_REQUIRED'];
   }
 
   static get COMMUNICATION_ERROR_MSG() {
@@ -49,7 +49,6 @@ export default class AuthnWidget {
   static get BASE_URL_REQUIRED_MSG() {
     return "PingFederate Base URL is required."
   }
-
   /*
    * Constructs a new AuthnWidget object
    * @param {string} baseUrl Required: PingFederate Base Url
@@ -73,6 +72,8 @@ export default class AuthnWidget {
     this.defaultEventHandler = this.defaultEventHandler.bind(this);
     this.handleIdFirstLinks = this.handleIdFirstLinks.bind(this);
     this.registerIdFirstLinks = this.registerIdFirstLinks.bind(this);
+    this.handleAltAuthSource = this.handleAltAuthSource.bind(this);
+    this.registerAltAuthSourceLinks = this.registerAltAuthSourceLinks.bind(this);
     this.resumeToPf = this.resumeToPf.bind(this);
     this.openExternalAuthnPopup = this.openExternalAuthnPopup.bind(this);
     this.externalAuthnFailure = this.externalAuthnFailure.bind(this);
@@ -81,6 +82,7 @@ export default class AuthnWidget {
     this.handleReopenPopUp = this.handleReopenPopUp.bind(this);
     this.registerRegistrationLinks = this.registerRegistrationLinks.bind(this);
     this.handleRegisterUser = this.handleRegisterUser.bind(this);
+    this.postDeviceProfileAction = this.postDeviceProfileAction.bind(this);
     this.stateTemplates = new Map();  //state -> handlebar templates
     this.eventHandler = new Map();  //state -> eventHandlers
     this.postRenderCallbacks = new Map();
@@ -90,12 +92,14 @@ export default class AuthnWidget {
     AuthnWidget.CORE_STATES.forEach(state => this.registerState(state));
 
     this.addEventHandler('IDENTIFIER_REQUIRED', this.registerIdFirstLinks);
+    this.addEventHandler('USERNAME_PASSWORD_REQUIRED', this.registerAltAuthSourceLinks);
     this.addEventHandler('REGISTRATION_REQUIRED', this.registerRegistrationLinks);
     this.addEventHandler('EXTERNAL_AUTHENTICATION_COMPLETED', this.postContinueAuthentication);
     this.addEventHandler('EXTERNAL_AUTHENTICATION_REQUIRED', this.registerReopenPopUpHandler);
     this.addPostRenderCallback('RESUME', this.resumeToPf);
     this.addPostRenderCallback('EXTERNAL_AUTHENTICATION_REQUIRED', this.openExternalAuthnPopup);
     this.addPostRenderCallback('EXTERNAL_AUTHENTICATION_FAILED', this.externalAuthnFailure);
+    this.addEventHandler('DEVICE_PROFILE_REQUIRED', this.postDeviceProfileAction);
 
     this.actionModels.set('checkUsernamePassword', { required: ['username', 'password'], properties: ['username', 'password', 'rememberMyUsername', 'thisIsMyDevice', 'captchaResponse'] });
     this.actionModels.set('initiateAccountRecovery', { properties: ['usernameHint'] });
@@ -208,6 +212,24 @@ export default class AuthnWidget {
     }
   }
 
+  registerAltAuthSourceLinks() {
+    Array.from(document.querySelectorAll('[data-altauthsource]')).forEach(element => element.addEventListener('click', this.handleAltAuthSource))
+  }
+
+  handleAltAuthSource(evt) {
+    evt.preventDefault();
+    let source = evt.currentTarget;
+    if (source) {
+      let authSource = source.dataset['altauthsource'];
+      let data = {
+        "authenticationSource": authSource
+      };
+      this.store.dispatch('POST_FLOW', "useAlternativeAuthenticationSource", JSON.stringify(data));
+    } else {
+      console.log("ERROR - Unable to dispatch alternate auth source as the target was null");
+    }
+  }
+
   resumeToPf() {
     window.location.replace(this.store.getStore().resumeUrl);
   }
@@ -254,6 +276,18 @@ export default class AuthnWidget {
     }
     clearTimeout(this.checkPopupStatusTimeout)
     this.checkPopupStatus(windowReference);
+  }
+
+  postDeviceProfileAction() {
+    let profilingElement = document.querySelector('[data-profilingtype]');
+    switch (profilingElement.dataset['profilingtype']) {
+      case 'IDW':
+        setTimeout(() => {
+          this.store.dispatch('POST_FLOW', 'continueAuthentication', '{}');
+        },
+        parseInt(profilingElement.dataset['timeout']));
+        break;
+    }
   }
 
   verifyPasswordsMatch() {
