@@ -94,6 +94,8 @@ export default class AuthnWidget {
     this.addEventHandler('IDENTIFIER_REQUIRED', this.registerIdFirstLinks);
     this.addEventHandler('USERNAME_PASSWORD_REQUIRED', this.registerAltAuthSourceLinks);
     this.addEventHandler('REGISTRATION_REQUIRED', this.registerRegistrationLinks);
+    this.addEventHandler('REGISTRATION_REQUIRED', this.registerAltAuthSourceLinks);
+
     this.addEventHandler('EXTERNAL_AUTHENTICATION_COMPLETED', this.postContinueAuthentication);
     this.addEventHandler('EXTERNAL_AUTHENTICATION_REQUIRED', this.registerReopenPopUpHandler);
     this.addPostRenderCallback('RESUME', this.resumeToPf);

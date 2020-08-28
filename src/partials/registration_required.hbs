@@ -9,7 +9,7 @@
   </div>
   {{> errors}}
   {{> spinner}}
-  <form class="form form--spacing-lg" id="AuthnWidgetForm">
+  <form class="form" id="AuthnWidgetForm">
     {{#if showCaptcha}}
       <div class="g-recaptcha" data-sitekey="{{captchaSiteKey}}" data-callback="{{checkRecaptcha}}"
            data-size="invisible"
@@ -51,13 +51,16 @@
             class="button button--primary brand-primary-bg" disabled>
       Save
     </button>
+    {{#with _links as |actions|}}
+      {{#if cancel}}
+        <div class="text-block text-block--small">
+          <div class="text-block__text">Already have an account?
+            <a data-actionId="cancel" href="#">Sign in</a></div>
+        </div>
+      {{/if}}
+      {{#if useAlternativeAuthenticationSource}}
+        {{> alternate_authn_sources @root button-prefix="Register" }}
+      {{/if}}
+    {{/with}}
   </form>
-  {{#with _links as |actions|}}
-    {{#if cancel}}
-      <div class="text-block text-block--small">
-        <div class="text-block__text">Already have an account?
-          <a data-actionId="cancel" href="#">Sign in</a></div>
-      </div>
-    {{/if}}
-  {{/with}}
 </div>
