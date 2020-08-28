@@ -14,14 +14,14 @@ You can modify the JavaScript Widget to allow the Agentless Integration Kit to w
 1. Add an event handler that sends the user credentials to the authentication service. The event handler is triggered when the user submits the form on the template.
 
 	Example constructor additions:
-	```
+	```js
   	this.registerAgentlessHandler = this.registerAgentlessHandler.bind(this);
   	this.handleAgentlessSignOn = this.handleAgentlessSignOn.bind(this);
    
   	this.addEventHandler('REFERENCE_ID_REQUIRED', this.registerAgentlessHandler);
 	```
 	Example functions:
-	```
+	```js
   	registerAgentlessHandler() {
        	Array.from(document.querySelectorAll('[data-agentlessActionid]')).
        	forEach(element => element.addEventListener('click', this.handleAgentlessSignOn));
@@ -34,7 +34,7 @@ You can modify the JavaScript Widget to allow the Agentless Integration Kit to w
     
  1. Add the following to send the new reference ID (`REF`) to PingFederate.
 
-	```
+	```js
   	this.store.dispatch('POST_FLOW', 'checkReferenceId', "{json payload with referenceId}")
 	```
 
