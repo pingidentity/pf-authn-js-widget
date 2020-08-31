@@ -31,12 +31,12 @@ module.exports = function (field_info) {
       return new handlebars.SafeString(html);
     case "dropdown":
       html = '' +
-        '<div class="dropdown float-label">' +
+        '<div class="dropdown float-label dropdown--standard" data-id="dropdown">' +
         '  <select id="' + field_info.id + '"' +
-        '          name="' + field_info.label + '"' +
+        '          name="' + field_info.id + '"' +
                    ((field_info.readonly) ? " disabled" : "") +
-        '          class="' + css_classes + ' dropdown__select float-label__input placeholder-shown">' +
-        '    <option disabled="" value="">Select one</option>';
+        '          class="' + css_classes + ' dropdown__select float-label__input">' +
+        '    <option disabled="" ' + ((field_value) ? '' : ' selected="selected" ') + ' value="">Select one</option>';
       field_info.options.forEach(option => {
         let selected = ((field_value === option) ? 'selected' : "");
         html += '<option value="' + option + '" ' + selected + '>' + option + '</option>';
