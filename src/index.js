@@ -35,7 +35,7 @@ export default class AuthnWidget {
       'SUCCESSFUL_PASSWORD_RESET', 'CHALLENGE_RESPONSE_REQUIRED', 'USERNAME_RECOVERY_EMAIL_REQUIRED',
       'USERNAME_RECOVERY_EMAIL_SENT', 'SUCCESSFUL_ACCOUNT_UNLOCK', 'IDENTIFIER_REQUIRED',
       'EXTERNAL_AUTHENTICATION_COMPLETED', 'EXTERNAL_AUTHENTICATION_FAILED', 'EXTERNAL_AUTHENTICATION_REQUIRED',
-      'DEVICE_PROFILE_REQUIRED', 'REGISTRATION_REQUIRED'];
+      'DEVICE_PROFILE_REQUIRED', 'REGISTRATION_REQUIRED', 'REFERENCE_ID_REQUIRED'];
   }
 
   static get COMMUNICATION_ERROR_MSG() {
@@ -83,6 +83,8 @@ export default class AuthnWidget {
     this.registerRegistrationLinks = this.registerRegistrationLinks.bind(this);
     this.handleRegisterUser = this.handleRegisterUser.bind(this);
     this.postDeviceProfileAction = this.postDeviceProfileAction.bind(this);
+    this.registerAgentlessHandler = this.registerAgentlessHandler.bind(this);
+    this.handleAgentlessSignOn = this.handleAgentlessSignOn.bind(this);
     this.stateTemplates = new Map();  //state -> handlebar templates
     this.eventHandler = new Map();  //state -> eventHandlers
     this.postRenderCallbacks = new Map();
@@ -102,6 +104,7 @@ export default class AuthnWidget {
     this.addPostRenderCallback('EXTERNAL_AUTHENTICATION_REQUIRED', this.openExternalAuthnPopup);
     this.addPostRenderCallback('EXTERNAL_AUTHENTICATION_FAILED', this.externalAuthnFailure);
     this.addEventHandler('DEVICE_PROFILE_REQUIRED', this.postDeviceProfileAction);
+    this.addEventHandler('REFERENCE_ID_REQUIRED', this.registerAgentlessHandler);
 
     this.actionModels.set('checkUsernamePassword', { required: ['username', 'password'], properties: ['username', 'password', 'rememberMyUsername', 'thisIsMyDevice', 'captchaResponse'] });
     this.actionModels.set('initiateAccountRecovery', { properties: ['usernameHint'] });
@@ -290,6 +293,17 @@ export default class AuthnWidget {
         parseInt(profilingElement.dataset['timeout']));
         break;
     }
+  }
+
+  registerAgentlessHandler() {
+    console.log("registering event handlers for 'data-agentlessActionid' elements in 'reference_id_required.hbs'");
+    Array.from(document.querySelectorAll('[data-agentlessActionid]')).
+    forEach(element => element.addEventListener('click', this.handleAgentlessSignOn));
+  }
+
+  handleAgentlessSignOn(evt) {
+    console.log("send credentials to authentication service");
+    console.log("complete state `checkReferenceId` action with new REF ID returned");
   }
 
   verifyPasswordsMatch() {
