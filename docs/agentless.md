@@ -11,28 +11,11 @@ You can modify the JavaScript Widget to allow the Agentless Integration Kit to w
 
 1. Modify the `reference_id_required.hbs` template to include the credential fields that your authentication service requires. The widget renders this handlebar template when it encounters the `REFERENCE_ID_REQUIRED` state.
 
-1. Add an event handler that sends the user credentials to the authentication service. The event handler is triggered when the user submits the form on the template.
+1. Add to the `handleAgentlessSignOn(evt)` event handler, so it sends the user credentials to the authentication service. The event handler is triggered when the user submits the form on the template.
 
-	Example constructor additions:
-	```js
-  	this.registerAgentlessHandler = this.registerAgentlessHandler.bind(this);
-  	this.handleAgentlessSignOn = this.handleAgentlessSignOn.bind(this);
-   
-  	this.addEventHandler('REFERENCE_ID_REQUIRED', this.registerAgentlessHandler);
-	```
-	Example functions:
-	```js
-  	registerAgentlessHandler() {
-       	Array.from(document.querySelectorAll('[data-agentlessActionid]')).
-       	forEach(element => element.addEventListener('click', this.handleAgentlessSignOn));
-  	}
- 	 
-  	handleAgentlessSignOn(evt) {}
-	```
-    
 	The authentication service should validate the credentials, then drop off user attributes with PingFederate. PingFederate will provide it with a new reference ID (`REF`) that is associated with the attributes.
     
- 1. Add the following to send the new reference ID (`REF`) to PingFederate.
+1. Add the following to send the new reference ID (`REF`) to PingFederate.
 
 	```js
   	this.store.dispatch('POST_FLOW', 'checkReferenceId', "{json payload with referenceId}")
