@@ -1,0 +1,66 @@
+<div class="card">
+  <div class="org-logo">
+    <img class="org-logo__image" src="{{logo}}" alt="Company Logo"/>
+  </div>
+  <h1 class="heading">Create Your Profile</h1>
+  <div class="text-block text-block--small">
+    <div class="text-block__text">Enter the information below.
+    </div>
+  </div>
+  {{> errors}}
+  {{> spinner}}
+  <form class="form" id="AuthnWidgetForm">
+    {{#if showCaptcha}}
+      <div class="g-recaptcha" data-sitekey="{{captchaSiteKey}}" data-callback="{{checkRecaptcha}}"
+           data-size="invisible"
+           id="invisibleRecaptchaId">
+      </div>
+    {{/if}}
+    <div class="stack stack--small">
+      {{#each fields as |field|}}
+        {{renderfield field}}
+      {{/each}}
+    </div>
+
+    <div class="stack stack--small">
+      <div class="float-label"><input type="password"
+                                      class="text-input float-label__input required"
+                                      id="password" name="password"
+                                      placeholder="Password"/><label
+              class="float-label__label"
+              for="password">Password</label></div>
+      {{> password_requirements}}
+      <div class="float-label"><input type="password"
+                                      class="text-input float-label__input required"
+                                      id="newpassword" name="newpassword"
+                                      placeholder="Verify Password"/><label
+              class="float-label__label"
+              for="newpassword">Verify New Password</label></div>
+    </div>
+    {{#if showThisIsMyDevice}}
+      <div>
+        <label class="checkbox">
+          <input type="checkbox" class="checkbox__input" name="thisIsMyDevice" {{checkedIf thisIsMyDeviceSelected}}
+                 value="true"/>
+          <span class="checkbox__standin"></span>
+          <span class="checkbox__label">This is my Device</span>
+        </label>
+      </div>
+    {{/if}}
+    <button id="submit" data-registrationactionid="registerUser" type="submit"
+            class="button button--primary brand-primary-bg" disabled>
+      Save
+    </button>
+    {{#with _links as |actions|}}
+      {{#if cancel}}
+        <div class="text-block text-block--small">
+          <div class="text-block__text">Already have an account?
+            <a data-actionId="cancel" href="#">Sign in</a></div>
+        </div>
+      {{/if}}
+      {{#if useAlternativeAuthenticationSource}}
+        {{> alternate_authn_sources @root button-prefix="Register" }}
+      {{/if}}
+    {{/with}}
+  </form>
+</div>

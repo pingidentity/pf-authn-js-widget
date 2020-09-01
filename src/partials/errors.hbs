@@ -1,8 +1,10 @@
-{{#if userMessage}}
+{{#if userMessages}}
 <div class="feedback feedback--error" data-id="feedback">
   <span class="feedback__icon pingicon-error-triangle"></span>
   <div class="feedback__message">
-    {{userMessage}}
+    {{#each userMessages as |userMessage|}}
+      <span>{{userMessage}}</span>
+    {{/each}}
   </div>
 </div>
 {{/if}}

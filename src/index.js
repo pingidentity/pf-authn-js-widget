@@ -35,7 +35,7 @@ export default class AuthnWidget {
       'SUCCESSFUL_PASSWORD_RESET', 'CHALLENGE_RESPONSE_REQUIRED', 'USERNAME_RECOVERY_EMAIL_REQUIRED',
       'USERNAME_RECOVERY_EMAIL_SENT', 'SUCCESSFUL_ACCOUNT_UNLOCK', 'IDENTIFIER_REQUIRED',
       'EXTERNAL_AUTHENTICATION_COMPLETED', 'EXTERNAL_AUTHENTICATION_FAILED', 'EXTERNAL_AUTHENTICATION_REQUIRED',
-      'DEVICE_PROFILE_REQUIRED', 'REFERENCE_ID_REQUIRED'];
+      'DEVICE_PROFILE_REQUIRED', 'REGISTRATION_REQUIRED', 'REFERENCE_ID_REQUIRED'];
   }
 
   static get COMMUNICATION_ERROR_MSG() {
@@ -80,6 +80,8 @@ export default class AuthnWidget {
     this.postContinueAuthentication = this.postContinueAuthentication.bind(this);
     this.registerReopenPopUpHandler = this.registerReopenPopUpHandler.bind(this);
     this.handleReopenPopUp = this.handleReopenPopUp.bind(this);
+    this.registerRegistrationLinks = this.registerRegistrationLinks.bind(this);
+    this.handleRegisterUser = this.handleRegisterUser.bind(this);
     this.postDeviceProfileAction = this.postDeviceProfileAction.bind(this);
     this.registerAgentlessHandler = this.registerAgentlessHandler.bind(this);
     this.handleAgentlessSignOn = this.handleAgentlessSignOn.bind(this);
@@ -93,6 +95,9 @@ export default class AuthnWidget {
 
     this.addEventHandler('IDENTIFIER_REQUIRED', this.registerIdFirstLinks);
     this.addEventHandler('USERNAME_PASSWORD_REQUIRED', this.registerAltAuthSourceLinks);
+    this.addEventHandler('REGISTRATION_REQUIRED', this.registerRegistrationLinks);
+    this.addEventHandler('REGISTRATION_REQUIRED', this.registerAltAuthSourceLinks);
+
     this.addEventHandler('EXTERNAL_AUTHENTICATION_COMPLETED', this.postContinueAuthentication);
     this.addEventHandler('EXTERNAL_AUTHENTICATION_REQUIRED', this.registerReopenPopUpHandler);
     this.addPostRenderCallback('RESUME', this.resumeToPf);
@@ -112,6 +117,7 @@ export default class AuthnWidget {
     this.actionModels.set('checkChallengeResponse', { required: ['challengeResponse'], properties: ['challengeResponse'] });
     this.actionModels.set('submitIdentifier', { required: ['identifier'], properties: ['identifier'] });
     this.actionModels.set('clearIdentifier', { required: ['identifier'], properties: ['identifier'] });
+    this.actionModels.set('registerUser', {required: ['password', 'fieldValues'], properties: ['password', 'captchaResponse', 'fieldValues', 'thisIsMyDevice']})
   }
 
   init() {
@@ -155,6 +161,16 @@ export default class AuthnWidget {
     if (nodes) {
       nodes.forEach(n => n.addEventListener('input', this.enableSubmit));
     }
+
+    let dropdowns = document.querySelectorAll(`#${this.divId} select`);
+    this.checkDropdownSelected = this.checkDropdownSelected.bind(this);
+    if (dropdowns) {
+      dropdowns.forEach(dropdown => {
+        dropdown.addEventListener('change', this.onChangeDropdown);
+        this.checkDropdownSelected(dropdown);
+      });
+    }
+
     let element = nodes[0];
     if (element) {
       let event = new CustomEvent('input');
@@ -173,8 +189,11 @@ export default class AuthnWidget {
   }
 
   registerIdFirstLinks() {
-    Array.from(document.querySelectorAll('[data-idfirstaction]')).
-      forEach(element => element.addEventListener('click', this.handleIdFirstLinks));
+    Array.from(document.querySelectorAll('[data-idfirstaction]')).forEach(element => element.addEventListener('click', this.handleIdFirstLinks));
+  }
+
+  registerRegistrationLinks() {
+    Array.from(document.querySelectorAll('[data-registrationactionid]')).forEach(element => element.addEventListener('click', this.handleRegisterUser));
   }
 
   handleIdFirstLinks(evt) {
@@ -184,7 +203,7 @@ export default class AuthnWidget {
     let identifier = source.dataset['identifier'];
     let data = {
       identifier
-    }
+    };
     console.log(actionId + ' : ' + identifier);
     switch (actionId) {
       case 'submitIdentifier':
@@ -293,15 +312,14 @@ export default class AuthnWidget {
     if (pass1.value !== pass2.value) {
       this.store.dispatchErrors('New passwords do not match.');
       return false;
-    }
-    else {
+    } else {
       this.store.clearErrors();
     }
     return true;
   }
 
   enableSubmit() {
-    let nodes = (document.querySelectorAll('input[type=text], input[type=password], input[type=email]'));
+    let nodes = (document.querySelectorAll('input.required[type=text]:not(:disabled), input.required[type=password]:not(:disabled), input.required[type=email]:not(:disabled)'));
     let disabled = false;
     if (nodes) {
       nodes.forEach(input => {
@@ -360,6 +378,10 @@ export default class AuthnWidget {
       return;
     }
 
+    this.dispatchWithCaptcha(actionId, formData)
+  }
+
+  dispatchWithCaptcha(actionId, formData) {
     if (this.store.state.showCaptcha && this.needsCaptchaResponse(actionId) &&
       this.store.state.captchaSiteKey && this.invokeReCaptcha) {
       this.store.savePendingState('POST_FLOW', actionId, formData);
@@ -389,14 +411,33 @@ export default class AuthnWidget {
     if (formElement) {
       let formData = new FormData(formElement);
       let object = {};
-      var formDataEntries = formData.entries(), formDataEntry = formDataEntries.next(), pair;
-      while (!formDataEntry.done) {
-        pair = formDataEntry.value;
-        object[pair[0]] = pair[1];
-        formDataEntry = formDataEntries.next();
+
+      for(let key of formData.keys()) {
+        let values = formData.getAll(key);
+        if(this.isMultiValueField(formElement, key))
+          object[key] = values;
+        else
+          object[key] = values[0]
       }
+
       return object;
     }
+  }
+
+  isMultiValueField(formElement, name) {
+    let inputs = formElement.querySelectorAll("input[name='" + name + "']");
+    console.log(inputs);
+    let count = 0;
+
+    if (inputs) {
+      inputs.forEach(element => {
+        if (element.name === name) {
+          count++;
+        }
+      });
+    }
+
+    return count > 1;
   }
 
   render(prevState, state) {
@@ -405,8 +446,7 @@ export default class AuthnWidget {
     if (currentState) {
       try {
         template = this.getTemplate(currentState);
-      }
-      catch (e) {
+      } catch (e) {
         console.log(`Failed to load template: ${currentState}.`);
         template = this.getTemplate('general_error');
       }
@@ -496,5 +536,42 @@ export default class AuthnWidget {
         document.querySelector('#externalAuthnId').style.display = 'block';
       }
     }
+  }
+
+  onChangeDropdown(event) {
+    event.target.classList.remove("placeholder-shown");
+  }
+
+  checkDropdownSelected(field) {
+    let selected_options = field.querySelectorAll(`option[selected]`);
+    if(selected_options.length > 0)
+      field.classList.remove("placeholder-shown");
+  }
+
+  handleRegisterUser(event) {
+    event.preventDefault();
+    let formData = this.getFormData();
+    let actionModelProperties = this.actionModels.get('registerUser').properties;
+
+    let payload = {fieldValues: {}};
+    Object.keys(formData).forEach((key) => {
+      if(actionModelProperties.indexOf(key) >= 0)
+        payload[key] = formData[key];
+      else {
+        let field_value = formData[key];
+
+        if(Array.isArray(field_value)) {
+          let values = {};
+          field_value.forEach(option => {
+            values[option] = true;
+          });
+          field_value = values;
+        }
+
+        payload.fieldValues[key] = field_value;
+      }
+    });
+
+    this.dispatchWithCaptcha("registerUser", payload)
   }
 }

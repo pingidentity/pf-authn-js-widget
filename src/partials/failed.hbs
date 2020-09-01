@@ -8,7 +8,9 @@
   </div>
   <div class="text-block text-block--small" data-id="textblock">
     <div class="text-block--overflow-wrap">
-      <p>{{userMessage}}</p>
+      {{#each userMessages as |userMessage|}}
+        <p>{{userMessage}}</p>
+      {{/each}}
     </div>
   </div>
 </div>
