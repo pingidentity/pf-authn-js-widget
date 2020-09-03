@@ -1,0 +1,15 @@
+<div class="card">
+  <div class="org-logo">
+    <img class="org-logo__image" src="{{logo}}" alt="Company Logo" />
+  </div>
+  {{> errors}}
+  <div id="spinnerId" style="display:block">
+   <img class="spinner" src="{{spinner}}" alt="" />
+  </div>
+  <h1 class="heading">Profiling Device</h1>
+  {{#ifEq deviceProfilingType "IDW"}}
+  <div data-profilingtype="{{deviceProfilingType}}" data-timeout={{deviceProfilingTimeoutMillis}}>
+    <script type="text/javascript" src="{{deviceProfilingScriptUrl}}"></script>
+  </div>
+  {{/ifEq}}
+</div>

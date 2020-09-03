@@ -1,0 +1,12 @@
+{{#each alternativeAuthenticationSources as |authSource|}}
+  <button class="social-button__button {{authSource.name}}" data-id="social-button" data-altauthsource="{{authSource.name}}" type="button">
+    <div class="social-button__container">
+      <div class="social-button__logo">
+      </div>
+      <div class="social-button__label">{{../button-prefix}} with {{authSource.name}}</div>
+      <div class="social-button__spacer"></div>
+    </div>
+  </button>
+{{/each}}
+
+

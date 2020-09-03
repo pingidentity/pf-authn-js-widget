@@ -1,14 +1,32 @@
 [![Build Status](https://travis-ci.org/pingidentity/pf-authn-js-widget.svg?branch=master)](https://travis-ci.org/pingidentity/pf-authn-js-widget)
 # JavaScript Widget for the PingFederate Authentication API
 
-The JavaScript Widget for the PingFederate Authentication API is a customizable JavaScript library that provides the capabilities of the [HTML form Adapter](https://support.pingidentity.com/s/document-item?bundleId=pingfederate-93&topicId=xvy1564003022890.html)
-and the [Identifier First Adapter](https://support.pingidentity.com/s/document-item?bundleId=pingfederate-93&topicId=iek1564003022460.html)
+**Table of Contents**
+- [JavaScript Widget for the PingFederate Authentication API](#javascript-widget-for-the-pingfederate-authentication-api)
+  - [PingFederate Configuration](#pingfederate-configuration)
+- [Installation](#installation)
+  - [Option 1: Building the Widget](#option-1-building-the-widget)
+  - [Option 2: Adding the Widget as a Node Module](#option-2-adding-the-widget-as-a-node-module)
+  - [Widget Configuration](#widget-configuration)
+- [Technical Notes](#technical-notes)
+  - [Building the Latest Version of the Widget](#building-the-latest-version-of-the-widget)
+  - [Adding the Widget to an Application](#adding-the-widget-to-an-application)
+  - [Creating the index.html File](#creating-the-indexhtml-file)
+  - [Customizing the Widget](#customizing-the-widget)
+  - [Enabling Captcha](#enabling-captcha)
+  - [Using Risk-Based Authentication With the Widget](/docs/riskAuthentication.md)
+- [Browser Compatibility](#browser-compatibility)
+- [Bug Reports](#bug-reports)
+- [License](#license)
+
+The JavaScript Widget for the PingFederate Authentication API is a customizable JavaScript library that provides the capabilities of the [HTML form Adapter](https://support.pingidentity.com/s/document-item?bundleId=pingfederate-93&topicId=xvy1564003022890.html), the [Identifier First Adapter](https://support.pingidentity.com/s/document-item?bundleId=pingfederate-93&topicId=iek1564003022460.html), and the [ID DataWeb Integration Kit](https://docs.pingidentity.com/bundle/integrations/page/ndg1577481773402.html)
 via [Authentication APIs](https://support.pingidentity.com/s/document-item?bundleId=pingfederate-93&topicId=qsl1564002999029.html), including:
  - user login
  - trouble signing in
  - trouble with username
  - password reset
  - authenticate with identifier
+ - risk-based authentication
 
 The widget is a ready-to-use drop-in bundle with a CSS and customizable templates. This alternative to PingFederate templates provides a sign-in experience as a single page application.
 
@@ -47,7 +65,7 @@ This will start the webpack development server on https://localhost:8443 (as spe
 
 If you need to modify the base URL from `localhost:9031`, you can modify it in `demo-server/templates/index-template.handlebars` or pass a `BASEURL` command line parameter (see [Technical Notes](#tech-notes)).
 
-Click the start SSO link on an SP Connection in PingFederate or start an OAuth flow from OAuth playground, which will redirect to the widget.
+Click the start SSO link on the IdP Connection in PingFederate or start an OAuth flow from OAuth playground, which will redirect to the widget.
 
 Note: A 'flowId' value is required for the widget to interact with PingFederate, which is created when PingFederate redirects to the widget.
 
@@ -107,7 +125,7 @@ To build the widget:
 
 At minimum you must include:
   - `pf.authn-widget.js` - main javascript library
-  - `https://assets.pingone.com/ux/end-user/0.13.0/end-user.css` - basic CSS from CDN
+  - `https://assets.pingone.com/ux/end-user/0.29.0/end-user.css` - basic CSS from CDN
   - `main-styles.css` - widget CSS
 
 ## Creating the index.html File
@@ -121,7 +139,7 @@ Create a file called `index.html` with the following content and host it in your
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <script src="./pf.authn-widget.js"></script>        
-    <link rel="stylesheet" type="text/css" href="https://assets.pingone.com/ux/end-user/0.13.0/end-user.css">
+    <link rel="stylesheet" type="text/css" href="https://assets.pingone.com/ux/end-user/0.29.0/end-user.css">
     <link rel="stylesheet" type="text/css" href="main-styles.css">
     <script>
       function load() {
@@ -199,6 +217,10 @@ function onloadCallback() {
 ```
 It is crucial that `api.js` is loaded before the widget is instantiated. Therefore we are using a callback function to load the widget. The `grecaptcha` object
 will be available after the `api.js` is loaded. For more information, see [Captcha documentations](https://developers.google.com/recaptcha/docs/display).
+
+## Using Risk-Based Authentication With the Widget
+
+Please refer to the [guide for using risk-based authentication with the widget](/docs/riskAuthentication.md) for more infomation on how to set up the widget with risk-based authentication adapters.
 
 # Browser Compatibility
 

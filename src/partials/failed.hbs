@@ -1,14 +1,16 @@
 <div class="card">
   <div class="org-logo">
-    <img class="org-logo__image" src="{{logo}}" alt="Company Logo" />
+    <img class="org-logo__image" src="{{logo}}" alt="Company Logo"/>
   </div>
   <div class="icon-feedback icon-feedback--error">
+    <span class="icon-feedback__icon pingicon-ghost-error icon-feedback--error"></span>
     <p class="icon-feedback__label">Error</p>
   </div>
-  <div class="feedback feedback--error">
-    <img class="feedback__icon" src="{{error}}" alt="Error" />
-    <div class="feedback__message">
-      <div>{{userMessage}}</div>
+  <div class="text-block text-block--small" data-id="textblock">
+    <div class="text-block--overflow-wrap">
+      {{#each userMessages as |userMessage|}}
+        <p>{{userMessage}}</p>
+      {{/each}}
     </div>
   </div>
 </div>

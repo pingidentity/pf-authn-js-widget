@@ -22,12 +22,12 @@ export default class Store {
   }
 
   dispatchErrors(errors) {
-    this.state.userMessage = errors;
+    this.state.userMessages = errors;
     this.notifyListeners();
   }
 
   clearErrors() {
-    delete this.state.userMessage;
+    delete this.state.userMessages;
   }
 
   async dispatch(method, actionId, payload) {
@@ -36,7 +36,7 @@ export default class Store {
     if (this.prevState.username && !this.state.username) {
       this.state.username = this.prevState.username;
     }
-    console.log('dispatching actionId: ' + actionId)
+    console.log('dispatching actionId: ' + actionId);
     console.log(this.state);
     this.notifyListeners();
   }
@@ -102,7 +102,7 @@ export default class Store {
     }
 
     let combinedData = this.state;
-    delete combinedData.userMessage;  //clear previous error shown
+    delete combinedData.userMessages;  //clear previous error shown
     if (json.status) {
       this.flowId = json.id;
       combinedData = json;
@@ -136,7 +136,7 @@ export default class Store {
         let errors = this.getErrorDetails(json);
         delete combinedData.failedValidators;
         delete combinedData.satisfiedValidators;
-        delete combinedData.userMessage;
+        delete combinedData.userMessages;
         combinedData = { ...errors, ...this.state };
       }
     }
@@ -157,11 +157,11 @@ export default class Store {
 
   getErrorDetails(json) {
     let errors = {
-      userMessage: undefined,
+      userMessages: [],
       failedValidators: [],
       satisfiedValidators: []
     };
-    if (json.code && json.code == 'VALIDATION_ERROR') {
+    if (json.code && json.code === 'VALIDATION_ERROR' || json.code === "REGISTRATION_FAILED") {
       if (json.details) {
         json.details.forEach(msg => {
           if (msg.failedValidators) {
@@ -177,15 +177,15 @@ export default class Store {
           if (!userMessage && msg.code) {
             userMessage = `Error code "${msg.code}" returned from the authorization server.`
           }
-          errors.userMessage = userMessage;
+          errors.userMessages.push(userMessage);
         });
       }
       else {
-        errors.userMessage = json.userMessage;
+        errors.userMessages = json.userMessage;
       }
     }
     else if (json.code === 'RESOURCE_NOT_FOUND') {
-      errors.userMessage = json.message;
+      errors.userMessages = json.message;
     }
     return errors;
   }
