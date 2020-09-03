@@ -65,8 +65,18 @@
         function initWidget(widget) {
           {{#if redirectless}}
           var config = {
-            onAuthorizationSuccess: function(response) {
+            // client_id: '', // redirectless requires this configuration
+            // response_type: 'token', // redirectless requires this configuration
+            onAuthorizationSuccess: function (response) {
               // success callback function
+              var resultContianer = document.createElement('div');
+              resultContianer.classList.add('card');
+              resultContianer.style.overflowWrap = 'break-word';
+              resultContianer.style.marginTop = '20px';
+              resultContianer.style.fontFamily = 'monospace';
+              resultContianer.innerHTML = "";
+              resultContianer.appendChild(document.createTextNode(JSON.stringify(response)));
+              document.getElementById('authnwidget').appendChild(resultContianer);
             }
           };
           widget.initRedirectless(config);
