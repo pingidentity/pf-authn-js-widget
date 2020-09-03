@@ -224,7 +224,7 @@ will be available after the `api.js` is loaded. For more information, see [Captc
 Please refer to the [guide for using risk-based authentication with the widget](/docs/riskAuthentication.md) for more infomation on how to set up the widget with risk-based authentication adapters.
 
 ## Redirectless Support 
-Please refer to the [Redirectless Support](/docs/redirectless.md) for more infomation on how to configure PingFederate and how to use widget's redirectless feature.
+Please refer to the [Redirectless Support](/docs/redirectless.md) guide for more infomation on how to configure PingFederate and how to use widget's redirectless feature.
 
 # Browser Compatibility
 
