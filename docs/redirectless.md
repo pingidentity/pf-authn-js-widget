@@ -73,7 +73,7 @@ The present key-value pairs will be appended to the authorization request URL, t
 
 ## Configuration object examples
 ### OAuth 2.0 implicit
-This code snipet demonstrates a simple OAuth 2.0 configuration used by the Authentication API widget redirectless flow.
+This code snippet demonstrates a simple OAuth 2.0 configuration used by the Authentication API widget redirectless flow.
 ```javascript
 var config = {
   client_id: 'test',
@@ -85,7 +85,7 @@ var config = {
 };
 ```
 ### OpenID Connect
-This code snipet demonstrates a simple OpenID Connect configuration used by the Authentication API widget redirectless flow.
+This code snippet demonstrates a simple OpenID Connect configuration used by the Authentication API widget redirectless flow.
 ```javascript
 var config = {
   scope: ['openid', 'profile', 'email', 'address', 'phone'],
