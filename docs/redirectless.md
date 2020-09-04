@@ -25,7 +25,7 @@ var config = {
     console.log(response);
   }
 };
-widget.initRedirectless(config);
+authnWidget.initRedirectless(config);
 ```
 ## Configuration object
 There are two ways to create a configuration to initiate the redirectless flow:
