@@ -102,7 +102,7 @@ Please follow these instructions to configure and start the webpack-dev-server w
 
 1. Update the demo server's [index template](../demo-server/templates/index-template.handlebars) file with a configuration object. Configuration object examples are available at the [Configuration object examples](#configuration-object-examples) section of this document.
 1. The following command should be executed to start the webpack-dev-server and initialize the widget in redirectless mode:
-```bash
-OPERATIONMODE=redirectless npm run start
-```
-1. Use your browser to go to https://localhost:8080 to see the widget in action.
+    ```bash
+    OPERATIONMODE=redirectless npm run start
+    ```
+1. Use your browser to go to https://localhost:8443 to see the widget in action.
