@@ -11,7 +11,7 @@ Single-page web applications can also use redirectless mode if administrators co
 
 ## Usage
 To make use of the redirectless flow the following steps must be taken:
-- Create an instance of the widget by providing the base URL and the necessary options
+- Create an instance of the widget by providing PingFederate's base URL and the necessary options.
 - Create a `configuration` object to provide the necessary redirectless settings. 
 - Call `initRedirectless` and pass the `configuration` object as an argument.
 
@@ -28,7 +28,7 @@ var config = {
 authnWidget.initRedirectless(config);
 ```
 ## Configuration object
-There are two ways to create a configuration to initiate the redirectless flow:
+There are two ways to create the configuration object to instanciate the redirectless flow:
 1. The configuration object contains `onAuthorizationSuccess` and the required attributes (e.g. `client_id`, `response_type`, etc.) used by the internal authorization request function.
 1. The configuration object contains `onAuthorizationRequest` and `onAuthorizationSuccess` functions.
 

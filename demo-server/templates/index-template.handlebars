@@ -69,14 +69,14 @@
             // response_type: 'token', // redirectless requires this configuration
             onAuthorizationSuccess: function (response) {
               // success callback function
-              var resultContianer = document.createElement('div');
-              resultContianer.classList.add('card');
-              resultContianer.style.overflowWrap = 'break-word';
-              resultContianer.style.marginTop = '20px';
-              resultContianer.style.fontFamily = 'monospace';
-              resultContianer.innerHTML = "";
-              resultContianer.appendChild(document.createTextNode(JSON.stringify(response)));
-              document.getElementById('authnwidget').appendChild(resultContianer);
+              var resultContainer = document.createElement('div');
+              resultContainer.classList.add('card');
+              resultContainer.style.overflowWrap = 'break-word';
+              resultContainer.style.marginTop = '20px';
+              resultContainer.style.fontFamily = 'monospace';
+              resultContainer.innerHTML = "";
+              resultContainer.appendChild(document.createTextNode(JSON.stringify(response)));
+              document.getElementById('authnwidget').appendChild(resultContainer);
             }
           };
           widget.initRedirectless(config);
