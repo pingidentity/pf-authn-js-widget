@@ -28,7 +28,7 @@ var config = {
 authnWidget.initRedirectless(config);
 ```
 ## Configuration object
-There are two ways to create the configuration object to instanciate the redirectless flow:
+There are two ways to create the configuration object to initiate the redirectless flow:
 1. The configuration object contains `onAuthorizationSuccess` and the required attributes (e.g. `client_id`, `response_type`, etc.) used by the internal authorization request function.
 1. The configuration object contains `onAuthorizationRequest` and `onAuthorizationSuccess` functions.
 
