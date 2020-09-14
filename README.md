@@ -39,10 +39,10 @@ The widget is a ready-to-use drop-in bundle with a CSS and customizable template
 PingFederate acts as the server interacting with the widget via APIs to authenticate the user.
 
 To configure PingFederate for the widget:
-  1. Enable the authentication API: Identity Provider > Authentication Applications > Enable Authentication API.
-  1. Add an application: Add Authentication Application > Name: TestApp, URL:  `https://localhost:8443` > Save > Save.
+  1. Enable the authentication API: Authentication > Authentication API Applications > Enable Authentication API.
+  1. Add an application: Add Authentication Application > Name: TestApp, URL:  `https://localhost:8443` > Save.
   1. Create a Password Credential Validator, HTML Form Adapter, and an IdP Connection that uses the adapter for SSO. Alternatively, use OAuth Playground flows to authenticate using the HTML Form Adapter.
-  1. Create a policy: Policies > Create (or update an existing policy) that uses the HTML Form Adapter > Authentication Application > Select the previously created app from the dropdown.
+  1. Create a policy: Authentication > Policies > Create (or update an existing policy) that uses the HTML Form Adapter > Authentication Application > Select the previously created app from the dropdown.
   1. Start SSO flow where you will get redirected to the app.
 
 The redirect URL of the [Authentication Applications](https://support.pingidentity.com/s/document-item?bundleId=pingfederate-93&topicId=ldc1564002999116.html) must point to where the single page application is hosted.
