@@ -1,10 +1,14 @@
+import { initRedirectless } from './utils/redirectless';
+import FetchUtil from './utils/fetchUtil';
+
 export default class Store {
-  constructor(flowId, fetchUtil, checkRecaptcha) {
+  constructor(flowId, baseUrl, checkRecaptcha) {
     this.listeners = [];
     this.prevState = {};
     this.state = {};
     this.flowId = flowId;
-    this.fetchUtil = fetchUtil;
+    this.baseUrl = baseUrl
+    this.fetchUtil = new FetchUtil(baseUrl);
     this.checkRecaptcha = checkRecaptcha;
     this.pendingState = {};
   }
@@ -79,6 +83,9 @@ export default class Store {
       case 'GET_FLOW':
         result = await this.fetchUtil.getFlow(this.flowId);
         break;
+      case 'INIT_REDIRECTLESS':
+        result = await initRedirectless(this.baseUrl, payload);
+        break;
       case 'POST_FLOW':
       default:
         result = await this.fetchUtil.postFlow(this.flowId, actionid, payload);
@@ -97,6 +104,7 @@ export default class Store {
     let combinedData = this.state;
     delete combinedData.userMessages;  //clear previous error shown
     if (json.status) {
+      this.flowId = json.id;
       combinedData = json;
       this.state = json;
       if (json.status === 'CANCELED') {
@@ -114,6 +122,10 @@ export default class Store {
             this.state.canceledTitle = 'Account Recovery ';
             this.state.canceledMessage = 'You have cancelled the attempt to retrieve your username. Please close this window.';
             break;
+        }
+      } else if (json.status === 'FAILED') {
+        if (this.state.code && !this.state.userMessage) {
+          this.state.userMessage = `The server returned "${this.state.code}" code. Please contact your system administrator.`;
         }
       }
     } else {
@@ -161,6 +173,9 @@ export default class Store {
           let userMessage = msg.userMessage;
           if (msg.target) {
             userMessage = userMessage.slice(0, -1).concat(' : ').concat(msg.target);
+          }
+          if (!userMessage && msg.code) {
+            userMessage = `Error code "${msg.code}" returned from the authorization server.`
           }
           errors.userMessages.push(userMessage);
         });

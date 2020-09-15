@@ -15,6 +15,7 @@
   - [Customizing the Widget](#customizing-the-widget)
   - [Enabling Captcha](#enabling-captcha)
   - [Using Risk-Based Authentication With the Widget](/docs/riskAuthentication.md)
+  - [Redirectless Support](/docs/redirectless.md)
 - [Browser Compatibility](#browser-compatibility)
 - [Bug Reports](#bug-reports)
 - [License](#license)
@@ -221,6 +222,9 @@ will be available after the `api.js` is loaded. For more information, see [Captc
 ## Using Risk-Based Authentication With the Widget
 
 Please refer to the [guide for using risk-based authentication with the widget](/docs/riskAuthentication.md) for more infomation on how to set up the widget with risk-based authentication adapters.
+
+## Redirectless Support 
+Please refer to the [Redirectless Support](/docs/redirectless.md) guide for more infomation on how to configure PingFederate and how to use widget's redirectless feature.
 
 # Browser Compatibility
 

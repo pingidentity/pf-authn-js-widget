@@ -8,7 +8,7 @@ describe('AuthnWidget index', () => {
 
   test('Test valid constructor without options', () => {
     const authn = new AuthnWidget('https://localhost:9031');
-    expect(authn.fetchUtil.baseUrl).toBe('https://localhost:9031');
+    expect(authn.baseUrl).toBe('https://localhost:9031');
     expect(authn.actionModels.has('checkUsernamePassword')).toBeTruthy();
     expect(AuthnWidget.CORE_STATES).toContain('USERNAME_PASSWORD_REQUIRED');
     expect(authn.store !== null).toBeTruthy();
