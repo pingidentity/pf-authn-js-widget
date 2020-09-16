@@ -44,7 +44,7 @@ To configure PingFederate for the widget:
   3. Click "Save".
   
   **Caution:** setting your Authentication Application as the "Default Authentication Application" will make it the default authentication for all of your existing connections. This is the easiest way to configure your connections, but it
-  is not very precise. For more precision, configure the desired adapter to us your Authentication API Application.
+  is not very precise. For more precision, configure the desired adapter to use your Authentication API Application.
   
   4. Select your newly created Authentication Application ("TestApp" if you used the example above) in the drop-down in the Default Authentication Application section.
   5. Start the SSO flow as you would normally, for example by clicking on an existing IdP Connection, and you will be redirected to your "JavaScript Widget for the PingFederate Authentication API" application.
