@@ -300,33 +300,33 @@ export default class AuthnWidget {
   }
 
   postDeviceProfileAction() {
-    let profilingElement = document.querySelector('[data-profilingtype]');
-    switch (profilingElement.dataset['profilingtype']) {
+    let data = this.store.getStore();
+    switch (data.deviceProfilingType) {
       case 'IDW':
       case 'TMX-WEB':
         var script = document.createElement('script');
-        script.src = profilingElement.dataset['src'];
+        script.src = data.deviceProfilingScriptUrl;
         document.head.appendChild(script);
 
         setTimeout(() => {
           this.store.dispatch('POST_FLOW', 'continueAuthentication', '{}');
         },
-        parseInt(profilingElement.dataset['timeout']));
+        parseInt(data.deviceProfilingTimeoutMillis));
         break;
       case 'TMX-SDK':
         var script = document.createElement('script');
         script.src = this.scriptLocation;
         script.onload = function() {
-          pinghelper.run_sid_provided(profilingElement.dataset['profilingdomain'],
-            profilingElement.dataset['orgid'],
-            profilingElement.dataset['risksessionid']);
+          pinghelper.run_sid_provided(data.profilingDomain,
+            data.orgId,
+            data.riskSessionId);
         }
         document.head.appendChild(script);
 
         setTimeout(() => {
           this.store.dispatch('POST_FLOW', 'continueAuthentication', '{}');
         },
-        parseInt(profilingElement.dataset['timeout']));
+        parseInt(data.deviceProfilingTimeoutMillis));
         break;
     }
   }
