@@ -70,6 +70,7 @@ export default class AuthnWidget {
     this.invokeReCaptcha = options && options.invokeReCaptcha;
     this.checkRecaptcha = options && options.checkRecaptcha;
     this.grecaptcha = options && options.grecaptcha;
+    this.scriptLocation = options && options.scriptLocation;
     this.dispatch = this.dispatch.bind(this);
     this.render = this.render.bind(this);
     this.defaultEventHandler = this.defaultEventHandler.bind(this);
@@ -320,6 +321,26 @@ export default class AuthnWidget {
     let profilingElement = document.querySelector('[data-profilingtype]');
     switch (profilingElement.dataset['profilingtype']) {
       case 'IDW':
+      case 'TMX-WEB':
+        var script = document.createElement('script');
+        script.src = profilingElement.dataset['src'];
+        document.head.appendChild(script);
+
+        setTimeout(() => {
+          this.store.dispatch('POST_FLOW', 'continueAuthentication', '{}');
+        },
+        parseInt(profilingElement.dataset['timeout']));
+        break;
+      case 'TMX-SDK':
+        var script = document.createElement('script');
+        script.src = this.scriptLocation;
+        script.onload = function() {
+          pinghelper.run_sid_provided(profilingElement.dataset['profilingdomain'],
+            profilingElement.dataset['orgid'],
+            profilingElement.dataset['risksessionid']);
+        }
+        document.head.appendChild(script);
+
         setTimeout(() => {
           this.store.dispatch('POST_FLOW', 'continueAuthentication', '{}');
         },
