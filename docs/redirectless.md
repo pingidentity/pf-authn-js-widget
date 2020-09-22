@@ -3,19 +3,19 @@ In PingFederate, you can configure mobile applications to authenticate through R
 
 Single-page web applications can also use redirectless mode if administrators configure them in PingFederate as authentication applications.
 ## PingFederate configuration
-1. Follow the instructions at [README.md](../README.md#pingfederate-configuration) to configure Authentication API in PingFederate.
-1. Create a new OAuth 2.0 client at Application > OAuth > Clients
-1. Allow 'allow authentication API OAuth initiation' on the newly created OAuth 2.0 client.
-1. Select 'restricted common scopes' required by the client.
-1. Select appropriate grant types.
+1. Follow the instructions at [README.md](../README.md#pingfederate-configuration) to configure the Authentication API in PingFederate.
+1. In the administrative console, go to Applications > OAuth > Clients and add a new OAuth 2.0 client.
+1. On the new client, select the 'Allow Authentication API OAuth Initiation' check box.
+1. Select the 'Restrict Common Scopes' check box and the client's restricted scopes.
+1. Select the client's 'Allowed Grant Types'.
 
 ## Usage
-To make use of the redirectless flow the following steps must be taken:
+To use the redirectless flow:
 - Create an instance of the widget by providing PingFederate's base URL and the necessary options.
 - Create a `configuration` object to provide the necessary redirectless settings. 
 - Call `initRedirectless` and pass the `configuration` object as an argument.
 
-An example is show below: 
+Here's an example: 
 ```javascript
 var authnWidget = new PfAuthnWidget("https://localhost", { divId: 'authnwidget' });
 var config = {
@@ -28,14 +28,14 @@ var config = {
 authnWidget.initRedirectless(config);
 ```
 ## Configuration object
-There are two ways to create the configuration object to initiate the redirectless flow:
-1. The configuration object contains `onAuthorizationSuccess` and the required attributes (e.g. `client_id`, `response_type`, etc.) used by the internal authorization request function.
-1. The configuration object contains `onAuthorizationRequest` and `onAuthorizationSuccess` functions.
+There are two options for creating the configuration object to initiate the redirectless flow:
+1. Create a configuration object that contains the `onAuthorizationSuccess` function and the required attributes (such as `client_id`, `response_type`, etc.) used by the internal authorization request function.
+1. Create a configuration object that contains the `onAuthorizationRequest` and `onAuthorizationSuccess` functions.
 
-Most deployments should use the first option. The second option is there for advanced use-cases.
+Use option 1 for most deployments. Use option 2 for advanced use-cases.
 
 ### `onAuthorizationRequest` function
-This callback function is going to be called during the authorization request. It doesn't have any arguments and it's expected to return a JavaScript `Promise` which completes the authorization request call to PingFederate.
+This callback function is called during the authorization request. It has no arguments and it's expected to return a JavaScript `Promise`, which completes the authorization request call to PingFederate.
 
 Here's an example:
 ```javascript
@@ -50,10 +50,10 @@ var config = {
   }
 }
 ```
-The `credentials: 'include'` Options attribute is required to make sure PingFederate's session cookie is handled correctly by the browser.
+The `options` attribute `credentials: 'include'` is required to ensure the browser correctly handles PingFederate's session cookie.
 
 ### `onAuthorizationSuccess` function
-This callback function is designed to return the result of the transaction to the webpage containing the authentication API widget. The protocol response is passed to this function as the first argument when called by the authentication API widget.
+This callback function returns the result of the transaction to the webpage containing the Authentication API widget. The protocol response is passed to this function as the first argument when the Authentication API widget calls it.
 
 Here is an example: 
 ```js
@@ -65,11 +65,11 @@ var config = {
 ```
 
 ### Supported attributes
-The following attributes are supported by the internal onAuthorizationRequest function: `client_id`, `response_type`, `code_challenge`, `code_challenge_method`, `redirect_uri`, `scope`, `state`, `idp`, `pfidpadapterid`, `access_token_manager_id`, `aud`, `nonce`, `prompt`, `acr_values`, `max_age`, `login_hint`, `ui_locales`, `id_token_hint`, `claims_locales`. 
+The internal `onAuthorizationRequest` function supports the following attributes: `client_id`, `response_type`, `code_challenge`, `code_challenge_method`, `redirect_uri`, `scope`, `state`, `idp`, `pfidpadapterid`, `access_token_manager_id`, `aud`, `nonce`, `prompt`, `acr_values`, `max_age`, `login_hint`, `ui_locales`, `id_token_hint`, `claims_locales`. 
 
 The `client_id` and `response_type` attributes are required if `onAuthorizationRequest` is not present. 
 
-The present key-value pairs will be appended to the authorization request URL, the value will be URL encoded and arrays will be concatenated and URL encoded into one string.
+The key-value pairs will be appended to the authorization request URL, their values will be URL encoded, and arrays will be concatenated and URL encoded into one string.
 
 ## Configuration object examples
 ### OAuth 2.0 implicit
@@ -98,11 +98,10 @@ var config = {
 };
 ```
 ## Starting webpack-dev-server with redirectless support
-Please follow these instructions to configure and start the webpack-dev-server with the redirectless support:
-
-1. Update the demo server's [index template](../demo-server/templates/index-template.handlebars) file with a configuration object. Configuration object examples are available at the [Configuration object examples](#configuration-object-examples) section of this document.
-1. The following command should be executed to start the webpack-dev-server and initialize the widget in redirectless mode:
+To configure and start the webpack-dev-server with redirectless support:
+1. Update the demo server's [index template](../demo-server/templates/index-template.handlebars) file with a configuration object. Configuration object examples are available in the [Configuration object examples](#configuration-object-examples) section of this document.
+1. Execute the following command to start the webpack-dev-server and initialize the widget in redirectless mode:
     ```bash
     OPERATIONMODE=redirectless npm run start
     ```
-1. Use your browser to go to https://localhost:8443 to see the widget in action.
+1. In your browser, go to https://localhost:8443 to see the widget in action.
