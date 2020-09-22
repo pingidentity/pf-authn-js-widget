@@ -41,17 +41,17 @@ PingFederate acts as the server interacting with the widget via APIs to authenti
 
 To configure PingFederate for the widget:
   1. First enable the authentication API: Authentication > Authentication API Applications > Enable Authentication API.
-  2. Then, add an application by clicking the "Add Authentication Application" button and entering the appropriate values. For example: **Name:** TestApp, **URL:** `https://localhost:8443`
+  2. Then, add an application by clicking the "Add Authentication Application" button and entering the appropriate values. For example: **Name:** TestApp, **URL:** `https://localhost:8443`.
   3. Click "Save".
   
   **Caution:** setting your Authentication Application as the "Default Authentication Application" will make it the default authentication for all of your existing connections. This is the easiest way to configure your connections, but it
-  is not very precise. For more precision, configure the desired adapter to use your Authentication API Application.
+  is not very precise. For more precision, configure the desired authentication policies to use your Authentication API Application.
   
-  4. Select your newly created Authentication Application ("TestApp" if you used the example above) in the drop-down in the Default Authentication Application section.
-  5. Start the SSO flow as you would normally, for example by clicking on an existing IdP Connection, and you will be redirected to your "JavaScript Widget for the PingFederate Authentication API" application.
+  4. Select your newly created Authentication Application ("TestApp" if you used the example above) in the drop-down in the "Default Authentication Application" section.
+  5. Start the SSO flow as you would normally. For example, by clicking on an existing IdP Connection, and you will be redirected to your "JavaScript Widget for the PingFederate Authentication API" application.
 
-The redirect URL of the [Authentication Applications](https://support.pingidentity.com/s/document-item?bundleId=pingfederate-93&topicId=ldc1564002999116.html) must point to where the single page application is hosted.
-If you do not want to use the development server provided by webpack, change the URL of the authentication application to point the correct URL.
+**Note:** The redirect URL of the [Authentication Applications](https://support.pingidentity.com/s/document-item?bundleId=pingfederate-93&topicId=ldc1564002999116.html) must point to where the JavaScript Widget for the PingFederate Authentication API is hosted.
+If you do not wish to use the development server provided by webpack, change the URL of the authentication application to point the correct hosted URL.
 
 # Installation
 
