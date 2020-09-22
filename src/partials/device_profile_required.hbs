@@ -3,13 +3,27 @@
     <img class="org-logo__image" src="{{logo}}" alt="Company Logo" />
   </div>
   {{> errors}}
-  <div id="spinnerId" style="display:block">
-   <img class="spinner" src="{{spinner}}" alt="" />
+  <div class="spinner" id="spinnerId">
+    <div class="spinner__icon" data-id="spinner"></div>
   </div>
   <h1 class="heading">Profiling Device</h1>
+
   {{#ifEq deviceProfilingType "IDW"}}
-  <div data-profilingtype="{{deviceProfilingType}}" data-timeout={{deviceProfilingTimeoutMillis}}>
-    <script type="text/javascript" src="{{deviceProfilingScriptUrl}}"></script>
+  <div data-profilingtype="{{deviceProfilingType}}" data-timeout={{deviceProfilingTimeoutMillis}}
+    data-src="{{deviceProfilingScriptUrl}}">
   </div>
   {{/ifEq}}
+
+  {{#ifEq deviceProfilingType "TMX-WEB"}}
+  <div data-profilingtype="{{deviceProfilingType}}" data-timeout={{deviceProfilingTimeoutMillis}} 
+    data-src="{{deviceProfilingScriptUrl}}">
+  </div>
+  {{/ifEq}}
+
+  {{#ifEq deviceProfilingType "TMX-SDK"}}
+  <div data-profilingtype="{{deviceProfilingType}}" data-timeout={{deviceProfilingTimeoutMillis}}
+    data-profilingdomain="{{profilingDomain}}" data-orgid="{{orgId}}" data-risksessionid="{{riskSessionId}}">
+  </div>
+  {{/ifEq}}
+
 </div>
