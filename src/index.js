@@ -317,8 +317,8 @@ export default class AuthnWidget {
         var script = document.createElement('script');
         script.src = this.scriptLocation;
         script.onload = function() {
-          pinghelper.run_sid_provided(data.profilingDomain,
-            data.orgId,
+          pinghelper.run_sid_provided(data.deviceProfilingDomain,
+            data.riskOrgId,
             data.riskSessionId);
         }
         document.head.appendChild(script);
