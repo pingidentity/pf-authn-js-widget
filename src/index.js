@@ -328,8 +328,7 @@ export default class AuthnWidget {
 
         setTimeout(() => {
           this.store.dispatch('POST_FLOW', 'continueAuthentication', '{}');
-        },
-        parseInt(data.deviceProfilingTimeoutMillis));
+        }, parseInt(data.deviceProfilingTimeoutMillis));
         break;
       case 'TMX-SDK':
         var script = document.createElement('script');
@@ -343,8 +342,7 @@ export default class AuthnWidget {
 
         setTimeout(() => {
           this.store.dispatch('POST_FLOW', 'continueAuthentication', '{}');
-        },
-        parseInt(data.deviceProfilingTimeoutMillis));
+        }, parseInt(data.deviceProfilingTimeoutMillis));
         break;
     }
   }
