@@ -27,9 +27,9 @@ If you have configured the adapter so that the `Device Profiling Method` is set 
 
 ### Setup
 
-If you have configured the adapter so that the `Device Profiling Method` is set to `Captured by this adapter` and `Device Profiling Script Source` is set to `ThreatMetrix Web` then no extra setup is required. However if `Device Profiling Script Source` is set to `ThreatMetrix SDK`, you will need to make sure `scriptLocation` is included when `PfAuthnWidget` is initialized.
+If you have configured the adapter so that the `Device Profiling Method` is set to `Captured by this adapter` and `Device Profiling Script Source` is set to `ThreatMetrix Web` then no extra setup is required. However if `Device Profiling Script Source` is set to `ThreatMetrix SDK`, you will need to make sure `deviceProfileScript` is included when `PfAuthnWidget` is initialized.
 ```javascript
-var authnWidget = new PfAuthnWidget('https://localhost:9031', { divId: 'authnwidget', scriptLocation: './assets/tmx_sdk_profiling.js' });
+var authnWidget = new PfAuthnWidget('https://localhost:9031', { divId: 'authnwidget', deviceProfileScript: './assets/tmx_sdk_profiling.js' });
 authnWidget.init();
 ```
 

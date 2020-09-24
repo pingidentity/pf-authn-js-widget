@@ -68,7 +68,7 @@ export default class AuthnWidget {
     this.invokeReCaptcha = options && options.invokeReCaptcha;
     this.checkRecaptcha = options && options.checkRecaptcha;
     this.grecaptcha = options && options.grecaptcha;
-    this.scriptLocation = options && options.scriptLocation;
+    this.deviceProfileScript = options && options.deviceProfileScript;
     this.dispatch = this.dispatch.bind(this);
     this.render = this.render.bind(this);
     this.defaultEventHandler = this.defaultEventHandler.bind(this);
@@ -314,7 +314,7 @@ export default class AuthnWidget {
         break;
       case 'TMX-SDK':
         var script = document.createElement('script');
-        script.src = this.scriptLocation;
+        script.src = this.deviceProfileScript;
         script.onload = function() {
           pinghelper.run_sid_provided(data.deviceProfilingDomain,
             data.riskOrgId,
