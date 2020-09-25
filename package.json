@@ -54,7 +54,7 @@
     "babel-plugin-add-module-exports": "^1.0.0",
     "babel-plugin-transform-remove-console": "^6.9.4",
     "babel-preset-minify": "^0.5.1",
-    "copy-webpack-plugin": "^4.5.1",
+    "copy-webpack-plugin": "^6.1.1",
     "cross-env": "^5.2.1",
     "css-loader": "^3.2.0",
     "eslint": "^5.16.0",
@@ -71,10 +71,10 @@
     "sass-loader": "^6.0.7",
     "source-map-loader": "^0.2.4",
     "style-loader": "^0.20.3",
-    "webpack": "^4.41.0",
+    "webpack": "^4.44.2",
     "webpack-bundle-analyzer": "^3.5.2",
     "webpack-cli": "^3.3.9",
-    "webpack-dev-server": "3.7.2",
+    "webpack-dev-server": "^3.11.0",
     "webpack-merge": "4.2.1"
   },
   "dependencies": {
