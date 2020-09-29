@@ -1,6 +1,6 @@
 {
   "name": "@ping-identity/pf-authn-js-widget",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "description": "JavaScript Widget for the PingFederate Authentication API",
   "main": "./dist/pf.authn-widget.js",
   "scripts": {
