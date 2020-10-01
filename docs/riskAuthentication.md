@@ -14,10 +14,13 @@ Extra steps may be required to set up the widget when using adapters with risk-b
 
 ### Setup
 
-If you have configured the adapter so that the `Device Profiling Method` is set to `Captured by this adapter`, no extra setup is required as the widget will be able to run the device profiling script with information provided by the adapter. However if you have chosen `Captured by a previous adapter` you will need to place the device profiling script that came with the kit (`id_dataweb_device_profiling.js`) to where your application will be hosted and attach the following script in the index.html that you have created. 
+If the `Device Profiling Method` setting in your adapter configuration is set to `Captured by a previous adapter`:
+1. Copy the `id_dataweb_device_profiling.js` file from the integration `.zip` file to a location that your application can access.
+2. Add the following to the sign-on page. Adjust the path to the script file.
 ```html
 <script type="text/javascript" src="id_dataweb_device_profiling.js"></script>
 ```
+If the `Device Profiling Method` setting in your adapter configuration is set to `Captured by this adapter`, no extra steps are needed.
 
 ## ThreatMetrix Integration Kit
 
@@ -27,13 +30,16 @@ If you have configured the adapter so that the `Device Profiling Method` is set 
 
 ### Setup
 
-If you have configured the adapter so that the `Device Profiling Method` is set to `Captured by this adapter` and `Device Profiling Script Source` is set to `ThreatMetrix Web` then no extra setup is required. However if `Device Profiling Script Source` is set to `ThreatMetrix SDK`, you will need to make sure `deviceProfileScript` is included when `PfAuthnWidget` is initialized.
+If the `Device Profiling Method` setting in your adapter configuration is set to `Captured by a previous adapter`:
+1. Depending on the `Device Profiling Script Source`, copy the `tmx_sdk_profiling.js` or `tmx_web_profiling.js` file from the integration `.zip` file to a location that your application can access.
+2. Add the following to the sign-on page. Adjust the path and file name of the script file.
+```html
+<script type="text/javascript" src="tmx_<xxx>_profiling.js"></script>
+```
+If the `Device Profiling Method` setting in your adapter configuration is set to `Captured by this adapter` and `Device Profiling Script Source` is set to `ThreatMetrix SDK`:
+- Make sure `deviceProfileScript` is included when your application initializes `PfAuthnWidget`.
 ```javascript
 var authnWidget = new PfAuthnWidget('https://localhost:9031', { divId: 'authnwidget', deviceProfileScript: './assets/tmx_sdk_profiling.js' });
 authnWidget.init();
 ```
-
-If you have chosen `Captured by a previous adapter` you will need to place the device profiling script that came with the kit (`tmx_sdk_profiling.js` or `tmx_web_profiling.js`) to where your application will be hosted and attach the following script in the index.html that you have created. 
-```html
-<script type="text/javascript" src="tmx_sdk_profiling.js"></script>
-```
+If the `Device Profiling Method` setting in your adapter configuration is set to `Captured by this adapter` and `Device Profiling Script Source` is set to `ThreatMetrix Web`, no extra steps are needed.
