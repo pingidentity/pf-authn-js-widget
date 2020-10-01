@@ -1,6 +1,6 @@
-# Guide for Using Risk-Based Authentication With the Widget
+# Using Risk-Based Authentication Adapters with the Authentication Widget
 
-Extra steps may be required to set up the widget when using adapters with risk-based authentication ability.
+Depending on your adapter configuration, you might need to take additional steps to use the Authentication Widget.
 
 **Table of Contents**
 - [ID DataWeb Integration Kit](#id-dataweb-integration-kit)
@@ -37,7 +37,7 @@ If the `Device Profiling Method` setting in your adapter configuration is set to
 <script type="text/javascript" src="tmx_<xxx>_profiling.js"></script>
 ```
 If the `Device Profiling Method` setting in your adapter configuration is set to `Captured by this adapter` and `Device Profiling Script Source` is set to `ThreatMetrix SDK`:
-1. Depending on the `Device Profiling Script Source`, copy the `tmx_sdk_profiling.js` file from the integration `.zip` file to a location that your application can access.
+1. Copy the `tmx_sdk_profiling.js` file from the integration `.zip` file to a location that your application can access.
 2. Where your web application initializes `PfAuthnWidget`, adjust the path (`deviceProfileScript`) to the script file.
 ```javascript
 var authnWidget = new PfAuthnWidget('https://localhost:9031', { divId: 'authnwidget', deviceProfileScript: './tmx_sdk_profiling.js' });
