@@ -301,10 +301,11 @@ export default class AuthnWidget {
 
   postDeviceProfileAction() {
     let data = this.store.getStore();
+    let script;
     switch (data.deviceProfilingType) {
       case 'IDW':
       case 'TMX-WEB':
-        var script = document.createElement('script');
+        script = document.createElement('script');
         script.src = data.deviceProfilingScriptUrl;
         document.head.appendChild(script);
 
@@ -313,7 +314,7 @@ export default class AuthnWidget {
         }, parseInt(data.deviceProfilingTimeoutMillis));
         break;
       case 'TMX-SDK':
-        var script = document.createElement('script');
+        script = document.createElement('script');
         script.src = this.deviceProfileScript;
         script.onload = function() {
           pinghelper.run_sid_provided(data.deviceProfilingDomain,
@@ -326,6 +327,23 @@ export default class AuthnWidget {
           this.store.dispatch('POST_FLOW', 'continueAuthentication', '{}');
         }, parseInt(data.deviceProfilingTimeoutMillis));
         break;
+      case 'PINGONE-RISK': {
+        script = document.createElement('script');
+        script.src = this.deviceProfileScript;
+        const onCompletion = (components) => {
+          const deviceProfile = transformComponentsToDeviceProfile(components);
+          this.store.dispatch('POST_FLOW', 'submitDeviceProfile', JSON.stringify(deviceProfile));
+        };
+        script.onload = () => {
+          profileDevice(onCompletion);
+        }
+        document.head.appendChild(script);
+
+        setTimeout(() => {
+          this.store.dispatch('POST_FLOW', 'submitDeviceProfile');
+        }, parseInt(data.deviceProfilingTimeoutMillis));
+        break;
+      }
     }
   }
 
