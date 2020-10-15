@@ -1,0 +1,19 @@
+<div class="card">
+  <div class="org-logo">
+    <img class="org-logo__image" src="{{logo}}" alt="Company Logo" />
+  </div>
+  <h1 class="heading">Device Selection</h1>
+  <div class="text-block">
+    <div class="text-block__text">Select MFA device below</div>
+  </div>
+  {{> errors}}
+  {{> spinner}}
+  {{#each devices as |device|}}
+    {{#if device.usable}}
+      <button class="otp-button otp-{{device.type}}" data-otpsource="{{device.id}}"
+              type="button">
+        {{device.target}}
+      </button>
+    {{/if}}
+  {{/each}}
+</div>

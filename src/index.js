@@ -36,7 +36,8 @@ export default class AuthnWidget {
       'SUCCESSFUL_PASSWORD_RESET', 'CHALLENGE_RESPONSE_REQUIRED', 'USERNAME_RECOVERY_EMAIL_REQUIRED',
       'USERNAME_RECOVERY_EMAIL_SENT', 'SUCCESSFUL_ACCOUNT_UNLOCK', 'IDENTIFIER_REQUIRED',
       'EXTERNAL_AUTHENTICATION_COMPLETED', 'EXTERNAL_AUTHENTICATION_FAILED', 'EXTERNAL_AUTHENTICATION_REQUIRED',
-      'DEVICE_PROFILE_REQUIRED', 'REGISTRATION_REQUIRED', 'REFERENCE_ID_REQUIRED'];
+      'DEVICE_PROFILE_REQUIRED', 'REGISTRATION_REQUIRED', 'REFERENCE_ID_REQUIRED', 'AUTHENTICATION_REQUIRED',
+      'DEVICE_SELECTION_REQUIRED', 'MFA_COMPLETED', 'OTP_REQUIRED'];
   }
 
   static get COMMUNICATION_ERROR_MSG() {
@@ -86,6 +87,9 @@ export default class AuthnWidget {
     this.postDeviceProfileAction = this.postDeviceProfileAction.bind(this);
     this.registerAgentlessHandler = this.registerAgentlessHandler.bind(this);
     this.handleAgentlessSignOn = this.handleAgentlessSignOn.bind(this);
+    this.postEmptyAuthentication = this.postEmptyAuthentication.bind(this);
+    this.handleOtpDeviceSelection = this.handleOtpDeviceSelection.bind(this);
+    this.registerOtpEventHandler = this.registerOtpEventHandler.bind(this);
     this.stateTemplates = new Map();  //state -> handlebar templates
     this.eventHandler = new Map();  //state -> eventHandlers
     this.postRenderCallbacks = new Map();
@@ -106,6 +110,9 @@ export default class AuthnWidget {
     this.addPostRenderCallback('EXTERNAL_AUTHENTICATION_FAILED', this.externalAuthnFailure);
     this.addEventHandler('DEVICE_PROFILE_REQUIRED', this.postDeviceProfileAction);
     this.addEventHandler('REFERENCE_ID_REQUIRED', this.registerAgentlessHandler);
+    this.addPostRenderCallback('AUTHENTICATION_REQUIRED', this.postEmptyAuthentication);
+    this.addPostRenderCallback('MFA_COMPLETED', this.postContinueAuthentication);
+    this.addEventHandler('DEVICE_SELECTION_REQUIRED', this.registerOtpEventHandler);
 
     this.actionModels.set('checkUsernamePassword', { required: ['username', 'password'], properties: ['username', 'password', 'rememberMyUsername', 'thisIsMyDevice', 'captchaResponse'] });
     this.actionModels.set('initiateAccountRecovery', { properties: ['usernameHint'] });
@@ -118,7 +125,8 @@ export default class AuthnWidget {
     this.actionModels.set('checkChallengeResponse', { required: ['challengeResponse'], properties: ['challengeResponse'] });
     this.actionModels.set('submitIdentifier', { required: ['identifier'], properties: ['identifier'] });
     this.actionModels.set('clearIdentifier', { required: ['identifier'], properties: ['identifier'] });
-    this.actionModels.set('registerUser', {required: ['password', 'fieldValues'], properties: ['password', 'captchaResponse', 'fieldValues', 'thisIsMyDevice']})
+    this.actionModels.set('registerUser', {required: ['password', 'fieldValues'], properties: ['password', 'captchaResponse', 'fieldValues', 'thisIsMyDevice']});
+    this.actionModels.set('checkOtp', {required: ['otp']});
   }
 
   init() {
@@ -309,6 +317,34 @@ export default class AuthnWidget {
         break;
     }
   }
+
+  postEmptyAuthentication() {
+    this.store.dispatch('POST_FLOW', 'authenticate', '{}');
+  }
+
+  registerOtpEventHandler() {
+    Array.from(document.querySelectorAll('[data-otpsource]'))
+      .forEach(element => element.addEventListener('click', this.handleOtpDeviceSelection));
+  }
+
+  handleOtpDeviceSelection(evt) {
+    evt.preventDefault();
+    let source = evt.currentTarget;
+    console.log(source);
+    if (source) {
+      let deviceId = source.dataset['otpsource'];
+      console.log(deviceId)
+      let data = {
+        "deviceRef": {
+          "id": deviceId
+        }
+      };
+      this.store.dispatch('POST_FLOW', "selectDevice", JSON.stringify(data));
+    } else {
+      console.log("ERROR - Unable to dispatch device selection as the target was null");
+    }
+  }
+
 
   registerAgentlessHandler() {
     console.log("registering event handlers for 'data-agentlessActionid' elements in 'reference_id_required.hbs'");
