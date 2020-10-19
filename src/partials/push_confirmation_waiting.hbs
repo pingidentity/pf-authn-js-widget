@@ -1,14 +1,11 @@
 <div class="card">
   <div class="org-logo">
-    <img class="org-logo__image" src="{{logo}}" alt="Company Logo" />
+    <img class="org-logo__image" src="{{logo}}" alt="Company Logo"/>
   </div>
-  <h1 class="heading">Select Authentication Method</h1>
-  <div class="text-block">
-    <div class="text-block__text">Select the authentication method you want to use with your account</div>
-  </div>
+  {{> device_selection_header header='Push Notification Sent to '}}
   {{> errors}}
   {{> spinner}}
-  <div id="device-selection">
+  <div id="device-selection" style="display: none">
     <div class="tile-selector tile-selector--stacked">
       {{> device_selection}}
     </div>

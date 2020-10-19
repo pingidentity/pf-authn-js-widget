@@ -21,6 +21,11 @@ export default class Store {
     return this.prevState;
   }
 
+  async getState() {
+    let result = await this.fetchUtil.getFlow(this.flowId);
+    return await result.json();
+  }
+
   dispatchErrors(errors) {
     this.state.userMessages = errors;
     this.notifyListeners();

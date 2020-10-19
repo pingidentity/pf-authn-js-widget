@@ -37,7 +37,8 @@ export default class AuthnWidget {
       'USERNAME_RECOVERY_EMAIL_SENT', 'SUCCESSFUL_ACCOUNT_UNLOCK', 'IDENTIFIER_REQUIRED',
       'EXTERNAL_AUTHENTICATION_COMPLETED', 'EXTERNAL_AUTHENTICATION_FAILED', 'EXTERNAL_AUTHENTICATION_REQUIRED',
       'DEVICE_PROFILE_REQUIRED', 'REGISTRATION_REQUIRED', 'REFERENCE_ID_REQUIRED', 'AUTHENTICATION_REQUIRED',
-      'DEVICE_SELECTION_REQUIRED', 'MFA_COMPLETED', 'OTP_REQUIRED'];
+      'DEVICE_SELECTION_REQUIRED', 'MFA_COMPLETED', 'MFA_FAILED', 'OTP_REQUIRED',
+      'PUSH_CONFIRMATION_REJECTED', 'PUSH_CONFIRMATION_TIMED_OUT', 'PUSH_CONFIRMATION_WAITING'];
   }
 
   static get COMMUNICATION_ERROR_MSG() {
@@ -90,6 +91,7 @@ export default class AuthnWidget {
     this.postEmptyAuthentication = this.postEmptyAuthentication.bind(this);
     this.handleOtpDeviceSelection = this.handleOtpDeviceSelection.bind(this);
     this.registerOtpEventHandler = this.registerOtpEventHandler.bind(this);
+    this.postPushNotificationWait = this.postPushNotificationWait.bind(this);
     this.stateTemplates = new Map();  //state -> handlebar templates
     this.eventHandler = new Map();  //state -> eventHandlers
     this.postRenderCallbacks = new Map();
@@ -112,7 +114,12 @@ export default class AuthnWidget {
     this.addEventHandler('REFERENCE_ID_REQUIRED', this.registerAgentlessHandler);
     this.addPostRenderCallback('AUTHENTICATION_REQUIRED', this.postEmptyAuthentication);
     this.addPostRenderCallback('MFA_COMPLETED', this.postContinueAuthentication);
+    this.addPostRenderCallback('PUSH_CONFIRMATION_WAITING', this.postPushNotificationWait);
     this.addEventHandler('DEVICE_SELECTION_REQUIRED', this.registerOtpEventHandler);
+    this.addEventHandler('PUSH_CONFIRMATION_WAITING', this.registerOtpEventHandler);
+    this.addEventHandler('PUSH_CONFIRMATION_TIMED_OUT', this.registerOtpEventHandler);
+    this.addEventHandler('PUSH_CONFIRMATION_REJECTED', this.registerOtpEventHandler);
+    this.addPostRenderCallback('MOBILE_PAIRING_REQUIRED', this.postContinueAuthentication);
 
     this.actionModels.set('checkUsernamePassword', { required: ['username', 'password'], properties: ['username', 'password', 'rememberMyUsername', 'thisIsMyDevice', 'captchaResponse'] });
     this.actionModels.set('initiateAccountRecovery', { properties: ['usernameHint'] });
@@ -323,7 +330,7 @@ export default class AuthnWidget {
   }
 
   registerOtpEventHandler() {
-    Array.from(document.querySelectorAll('[data-otpsource]'))
+    Array.from(document.querySelectorAll('[data-mfa]'))
       .forEach(element => element.addEventListener('click', this.handleOtpDeviceSelection));
   }
 
@@ -332,7 +339,7 @@ export default class AuthnWidget {
     let source = evt.currentTarget;
     console.log(source);
     if (source) {
-      let deviceId = source.dataset['otpsource'];
+      let deviceId = source.dataset['mfa'];
       console.log(deviceId)
       let data = {
         "deviceRef": {
@@ -345,6 +352,24 @@ export default class AuthnWidget {
     }
   }
 
+  async postPushNotificationWait() {
+    if (document.querySelector("#spinnerId")) {
+      document.querySelector('#spinnerId').style.display = 'block';
+    }
+
+    let pollState = await this.store.getState();
+    if (this.store.getStore().status === pollState.status) {
+      // continue waiting
+      this.pollPushNoticationState = setTimeout(() => {
+        this.postPushNotificationWait();
+      }, 500);
+    } else {
+      clearTimeout(this.pollPushNoticationState);
+      this.store
+        .dispatch('GET_FLOW')
+        .catch(() => this.generalErrorRenderer(AuthnWidget.COMMUNICATION_ERROR_MSG));
+    }
+  }
 
   registerAgentlessHandler() {
     console.log("registering event handlers for 'data-agentlessActionid' elements in 'reference_id_required.hbs'");
