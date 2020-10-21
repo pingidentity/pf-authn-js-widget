@@ -68,6 +68,7 @@ export default class AuthnWidget {
     this.invokeReCaptcha = options && options.invokeReCaptcha;
     this.checkRecaptcha = options && options.checkRecaptcha;
     this.grecaptcha = options && options.grecaptcha;
+    this.deviceProfileScript = options && options.deviceProfileScript;
     this.dispatch = this.dispatch.bind(this);
     this.render = this.render.bind(this);
     this.defaultEventHandler = this.defaultEventHandler.bind(this);
@@ -299,13 +300,31 @@ export default class AuthnWidget {
   }
 
   postDeviceProfileAction() {
-    let profilingElement = document.querySelector('[data-profilingtype]');
-    switch (profilingElement.dataset['profilingtype']) {
+    let data = this.store.getStore();
+    switch (data.deviceProfilingType) {
       case 'IDW':
+      case 'TMX-WEB':
+        var script = document.createElement('script');
+        script.src = data.deviceProfilingScriptUrl;
+        document.head.appendChild(script);
+
         setTimeout(() => {
           this.store.dispatch('POST_FLOW', 'continueAuthentication', '{}');
-        },
-        parseInt(profilingElement.dataset['timeout']));
+        }, parseInt(data.deviceProfilingTimeoutMillis));
+        break;
+      case 'TMX-SDK':
+        var script = document.createElement('script');
+        script.src = this.deviceProfileScript;
+        script.onload = function() {
+          pinghelper.run_sid_provided(data.deviceProfilingDomain,
+            data.riskOrgId,
+            data.riskSessionId);
+        }
+        document.head.appendChild(script);
+
+        setTimeout(() => {
+          this.store.dispatch('POST_FLOW', 'continueAuthentication', '{}');
+        }, parseInt(data.deviceProfilingTimeoutMillis));
         break;
     }
   }
