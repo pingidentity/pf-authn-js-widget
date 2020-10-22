@@ -4,6 +4,9 @@
   </div>
   <h1 class="heading">MFA Failed!</h1>
   {{> errors}}
+  <div class="text-block">
+    <div class="text-block__text">{{ userMessage }}</div>
+  </div>
   <form class="form form--margin-small" id="AuthnWidgetForm">
     <button data-actionId="cancelAuthentication" class="button">Cancel</button>
   </form>

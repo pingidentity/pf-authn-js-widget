@@ -2,16 +2,22 @@
   <div class="org-logo">
     <img class="org-logo__image" src="{{logo}}" alt="Company Logo" />
   </div>
-  {{> device_selection_header header='One Time Password Sent To '}}
+  {{> device_selection_header headerEnd=' Authentication'}}
   <div class="text-block">
-    <div class="text-block__text">Enter One-Time Password</div>
+    <div class="text-block__text">
+      Enter the passcode that you received to complete authentication.
+    </div>
   </div>
   {{> errors}}
   <form class="form" id="AuthnWidgetForm">
-    <input type="text" class="text-input float-label__input required" id="otp" name="otp" placeholder="passcode" autofocus />
+    <div class="float-label">
+        <input type="text" class="text-input float-label__input required" id="otp" name="otp" placeholder="passcode" autofocus/>
+        <label class="float-label__label" for="otp">Passcode</label>
+    </div>
+    {{> device_selection_information}}
     <button id="submit" data-actionId="checkOtp" type="submit" class="button button--primary brand-primary-bg" disabled>
-      Submit Code
+      Sign On
     </button>
-    <button data-mfa="cancelAuthentication" class="button">Cancel</button>
+    <button data-actionId="cancelAuthentication" class="button">Cancel</button>
   </form>
 </div>

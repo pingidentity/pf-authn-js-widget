@@ -1,11 +1,11 @@
 {{#each devices as |device|}}
   {{#ifEq device.id ../selectedDeviceRef.id}}
-    {{#ifEq device.type "SMS"}}
-      <h1 class="heading">{{header}} {{device.type}}</h1>
-    {{else ifEq device.type "Email"}}
-      <h1 class="heading">{{header}} {{device.type}}</h1>
+    {{#ifEq device.type "Android"}}
+      <h1 class="heading">{{../headerStart}} {{device.name}} {{../headerEnd}}</h1>
+    {{else ifEq device.type "iPhone"}}
+      <h1 class="heading">{{../headerStart}} {{device.name}} {{../headerEnd}}</h1>
     {{else}}
-      <h1 class="heading">{{header}} {{device.name}}</h1>
+      <h1 class="heading">{{../headerStart}} {{device.type}} {{../headerEnd}}</h1>
     {{/ifEq}}
   {{/ifEq}}
 {{/each}}

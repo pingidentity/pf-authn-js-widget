@@ -4,16 +4,15 @@
   </div>
   <h1 class="heading">Select Authentication Method</h1>
   <div class="text-block">
-    <div class="text-block__text">Select the authentication method you want to use with your account</div>
+    <div class="text-block__text">Select the authentication method you want to use with your account.</div>
   </div>
   {{> errors}}
-  {{> spinner}}
   <div id="device-selection">
     <div class="tile-selector tile-selector--stacked">
       {{> device_selection}}
     </div>
   </div>
   <form class="form form--margin-small" id="AuthnWidgetForm">
-    <button data-mfa="cancelAuthentication" class="button">Cancel</button>
+    <button data-actionId="cancelAuthentication" class="button">Cancel</button>
   </form>
 </div>

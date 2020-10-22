@@ -1,0 +1,18 @@
+{{#each devices as |device|}}
+  {{#ifEq device.id ../selectedDeviceRef.id}}
+    <div class="form-aside">
+      <p class="text-block text-block--small"  style="margin-bottom: 5px;">
+        <span class="text-block__text">{{../bodyText}}</span>
+      </p>
+      <p class="text-block text-block--large">
+      {{#ifEq device.type "Android"}}
+        <span class="text-block__text">{{device.name}}</span>
+      {{else ifEq device.type "iPhone"}}
+        <span class="text-block__text">{{device.name}}</span>
+      {{else}}
+        <span class="text-block__text">{{device.type}}</span>
+      {{/ifEq}}
+      </p>
+    </div>
+  {{/ifEq}}
+{{/each}}

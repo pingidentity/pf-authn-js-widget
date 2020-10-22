@@ -2,15 +2,16 @@
   <div class="org-logo">
     <img class="org-logo__image" src="{{logo}}" alt="Company Logo"/>
   </div>
-  {{> device_selection_header header='Push Notification Sent to '}}
   {{> errors}}
   {{> spinner}}
-  <div id="device-selection" style="display: none">
-    <div class="tile-selector tile-selector--stacked">
-      {{> device_selection}}
+  <h1 class="heading">Authenticating</h1>
+  {{> device_selection_body bodyText='Request sent to:'}}
+  <div class="text-block">
+    <div class="text-block__text">
+      <a id="changeDevice">Change device</a>
     </div>
   </div>
   <form class="form form--margin-small" id="AuthnWidgetForm">
-    <button data-mfa="cancelAuthentication" class="button">Cancel</button>
+    <button data-actionId="cancelAuthentication" class="button">Cancel</button>
   </form>
 </div>

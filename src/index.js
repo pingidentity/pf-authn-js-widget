@@ -91,6 +91,8 @@ export default class AuthnWidget {
     this.postEmptyAuthentication = this.postEmptyAuthentication.bind(this);
     this.handleOtpDeviceSelection = this.handleOtpDeviceSelection.bind(this);
     this.registerOtpEventHandler = this.registerOtpEventHandler.bind(this);
+    this.registerOtpChangeDeviceEventHandler = this.registerOtpChangeDeviceEventHandler.bind(this);
+    this.handleOtpDeviceChange = this.handleOtpDeviceChange.bind(this);
     this.postPushNotificationWait = this.postPushNotificationWait.bind(this);
     this.stateTemplates = new Map();  //state -> handlebar templates
     this.eventHandler = new Map();  //state -> eventHandlers
@@ -116,9 +118,10 @@ export default class AuthnWidget {
     this.addPostRenderCallback('MFA_COMPLETED', this.postContinueAuthentication);
     this.addPostRenderCallback('PUSH_CONFIRMATION_WAITING', this.postPushNotificationWait);
     this.addEventHandler('DEVICE_SELECTION_REQUIRED', this.registerOtpEventHandler);
-    this.addEventHandler('PUSH_CONFIRMATION_WAITING', this.registerOtpEventHandler);
-    this.addEventHandler('PUSH_CONFIRMATION_TIMED_OUT', this.registerOtpEventHandler);
-    this.addEventHandler('PUSH_CONFIRMATION_REJECTED', this.registerOtpEventHandler);
+    this.addEventHandler('OTP_REQUIRED', this.registerOtpChangeDeviceEventHandler);
+    this.addEventHandler('PUSH_CONFIRMATION_WAITING', this.registerOtpChangeDeviceEventHandler);
+    this.addEventHandler('PUSH_CONFIRMATION_TIMED_OUT', this.registerOtpChangeDeviceEventHandler);
+    this.addEventHandler('PUSH_CONFIRMATION_REJECTED', this.registerOtpChangeDeviceEventHandler);
     this.addPostRenderCallback('MOBILE_PAIRING_REQUIRED', this.postContinueAuthentication);
 
     this.actionModels.set('checkUsernamePassword', { required: ['username', 'password'], properties: ['username', 'password', 'rememberMyUsername', 'thisIsMyDevice', 'captchaResponse'] });
@@ -330,16 +333,15 @@ export default class AuthnWidget {
   }
 
   registerOtpEventHandler() {
-    Array.from(document.querySelectorAll('[data-mfa]'))
+    Array.from(document.querySelectorAll('[data-mfa-selection]'))
       .forEach(element => element.addEventListener('click', this.handleOtpDeviceSelection));
   }
 
   handleOtpDeviceSelection(evt) {
     evt.preventDefault();
     let source = evt.currentTarget;
-    console.log(source);
     if (source) {
-      let deviceId = source.dataset['mfa'];
+      let deviceId = source.dataset['mfaSelection'];
       console.log(deviceId)
       let data = {
         "deviceRef": {
@@ -350,6 +352,18 @@ export default class AuthnWidget {
     } else {
       console.log("ERROR - Unable to dispatch device selection as the target was null");
     }
+  }
+
+  registerOtpChangeDeviceEventHandler() {
+    Array.from(document.querySelectorAll('#changeDevice'))
+      .forEach(element => element.addEventListener('click', this.handleOtpDeviceChange));
+  }
+
+  async handleOtpDeviceChange(evt) {
+    evt.preventDefault();
+    let state = await this.store.getState();
+    state.status = 'DEVICE_SELECTION_REQUIRED';
+    this.render(this.store.getPreviousStore(), state);
   }
 
   async postPushNotificationWait() {

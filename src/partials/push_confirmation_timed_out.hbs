@@ -2,14 +2,14 @@
   <div class="org-logo">
     <img class="org-logo__image" src="{{logo}}" alt="Company Logo" />
   </div>
-  <h1 class="heading">Push Notification Timed Out</h1>
+  {{> device_selection_header headerStart='Authentication timed out on '}}
   {{> errors}}
-  <div id="device-selection" style="display: none">
-    <div class="tile-selector tile-selector--stacked">
-      {{> device_selection}}
+  <div class="text-block">
+    <div class="text-block__text">
+      <a id="changeDevice">Change device</a>
     </div>
   </div>
   <form class="form form--margin-small" id="AuthnWidgetForm">
-    <button data-mfa="cancelAuthentication" class="button">Cancel</button>
+    <button data-actionId="cancelAuthentication" class="button">Cancel</button>
   </form>
 </div>
