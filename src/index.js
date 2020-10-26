@@ -344,6 +344,20 @@ export default class AuthnWidget {
           this.store.dispatch('POST_FLOW', 'continueAuthentication', '{}');
         }, parseInt(data.deviceProfilingTimeoutMillis));
         break;
+      case 'TMX-SDK':
+        var script = document.createElement('script');
+        script.src = this.deviceProfileScript;
+        script.onload = function() {
+          pinghelper.run_sid_provided(data.deviceProfilingDomain,
+            data.riskOrgId,
+            data.riskSessionId);
+        }
+        document.head.appendChild(script);
+
+        setTimeout(() => {
+          this.store.dispatch('POST_FLOW', 'continueAuthentication', '{}');
+        }, parseInt(data.deviceProfilingTimeoutMillis));
+        break;
     }
   }
 
