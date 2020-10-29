@@ -2,24 +2,5 @@
   <div class="org-logo">
     <img class="org-logo__image" src="{{logo}}" alt="Company Logo"/>
   </div>
-  <div class="icon-feedback icon-feedback--error">
-    <span class="icon-feedback__icon pingicon-ghost-error icon-feedback--error"></span>
-    <p class="icon-feedback__label">Error</p>
-  </div>
-  <div class="feedback feedback--error">
-    {{#if userMessages}}
-    {{> errors}}
-    {{else}}
-    <div class="text-block text-block--small" data-id="textblock">
-      <div class="text-block--overflow-wrap">
-        <p>
-          {{#if msg}}
-            {{msg}}
-          {{else}}
-            Something Went Wrong.
-          {{/if}}</p>
-      </div>
-    </div>
-    {{/if}}
-  </div>
+  {{> error}}
 </div>

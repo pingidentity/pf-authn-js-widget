@@ -166,7 +166,7 @@ export default class Store {
       failedValidators: [],
       satisfiedValidators: []
     };
-    if (json.code && json.code === 'VALIDATION_ERROR' || json.code === "REGISTRATION_FAILED") {
+    if (json.code && json.code === 'VALIDATION_ERROR' || json.code === "REGISTRATION_FAILED" || json.code === 'REQUEST_FAILED') {
       if (json.details) {
         json.details.forEach(msg => {
           if (msg.failedValidators) {

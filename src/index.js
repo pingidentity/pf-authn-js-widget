@@ -90,10 +90,10 @@ export default class AuthnWidget {
     this.registerAgentlessHandler = this.registerAgentlessHandler.bind(this);
     this.handleAgentlessSignOn = this.handleAgentlessSignOn.bind(this);
     this.postEmptyAuthentication = this.postEmptyAuthentication.bind(this);
-    this.handleOtpDeviceSelection = this.handleOtpDeviceSelection.bind(this);
-    this.registerOtpEventHandler = this.registerOtpEventHandler.bind(this);
-    this.registerOtpChangeDeviceEventHandler = this.registerOtpChangeDeviceEventHandler.bind(this);
-    this.handleOtpDeviceChange = this.handleOtpDeviceChange.bind(this);
+    this.handleMfaDeviceSelection = this.handleMfaDeviceSelection.bind(this);
+    this.registerMfaEventHandler = this.registerMfaEventHandler.bind(this);
+    this.registerMfaChangeDeviceEventHandler = this.registerMfaChangeDeviceEventHandler.bind(this);
+    this.handleMfaDeviceChange = this.handleMfaDeviceChange.bind(this);
     this.postPushNotificationWait = this.postPushNotificationWait.bind(this);
     this.stateTemplates = new Map();  //state -> handlebar templates
     this.eventHandler = new Map();  //state -> eventHandlers
@@ -117,12 +117,13 @@ export default class AuthnWidget {
     this.addEventHandler('REFERENCE_ID_REQUIRED', this.registerAgentlessHandler);
     this.addPostRenderCallback('AUTHENTICATION_REQUIRED', this.postEmptyAuthentication);
     this.addPostRenderCallback('MFA_COMPLETED', this.postContinueAuthentication);
+    this.addEventHandler('DEVICE_SELECTION_REQUIRED', this.registerMfaEventHandler);
+    this.addEventHandler('OTP_REQUIRED', this.registerMfaEventHandler);
+    this.addEventHandler('OTP_REQUIRED', this.registerMfaChangeDeviceEventHandler);
     this.addPostRenderCallback('PUSH_CONFIRMATION_WAITING', this.postPushNotificationWait);
-    this.addEventHandler('DEVICE_SELECTION_REQUIRED', this.registerOtpEventHandler);
-    this.addEventHandler('OTP_REQUIRED', this.registerOtpChangeDeviceEventHandler);
-    this.addEventHandler('PUSH_CONFIRMATION_WAITING', this.registerOtpChangeDeviceEventHandler);
-    this.addEventHandler('PUSH_CONFIRMATION_TIMED_OUT', this.registerOtpChangeDeviceEventHandler);
-    this.addEventHandler('PUSH_CONFIRMATION_REJECTED', this.registerOtpChangeDeviceEventHandler);
+    this.addEventHandler('PUSH_CONFIRMATION_WAITING', this.registerMfaChangeDeviceEventHandler);
+    this.addEventHandler('PUSH_CONFIRMATION_TIMED_OUT', this.registerMfaEventHandler);
+    this.addEventHandler('PUSH_CONFIRMATION_TIMED_OUT', this.registerMfaChangeDeviceEventHandler);
     this.addPostRenderCallback('MOBILE_PAIRING_REQUIRED', this.postContinueAuthentication);
 
     this.actionModels.set('checkUsernamePassword', { required: ['username', 'password'], properties: ['username', 'password', 'rememberMyUsername', 'thisIsMyDevice', 'captchaResponse'] });
@@ -351,12 +352,12 @@ export default class AuthnWidget {
     this.store.dispatch('POST_FLOW', 'authenticate', '{}');
   }
 
-  registerOtpEventHandler() {
+  registerMfaEventHandler() {
     Array.from(document.querySelectorAll('[data-mfa-selection]'))
-      .forEach(element => element.addEventListener('click', this.handleOtpDeviceSelection));
+      .forEach(element => element.addEventListener('click', this.handleMfaDeviceSelection));
   }
 
-  handleOtpDeviceSelection(evt) {
+  handleMfaDeviceSelection(evt) {
     evt.preventDefault();
     let source = evt.currentTarget;
     if (source) {
@@ -373,12 +374,12 @@ export default class AuthnWidget {
     }
   }
 
-  registerOtpChangeDeviceEventHandler() {
+  registerMfaChangeDeviceEventHandler() {
     Array.from(document.querySelectorAll('#changeDevice'))
-      .forEach(element => element.addEventListener('click', this.handleOtpDeviceChange));
+      .forEach(element => element.addEventListener('click', this.handleMfaDeviceChange));
   }
 
-  async handleOtpDeviceChange(evt) {
+  async handleMfaDeviceChange(evt) {
     evt.preventDefault();
     let state = await this.store.getState();
     state.status = 'DEVICE_SELECTION_REQUIRED';
@@ -391,11 +392,11 @@ export default class AuthnWidget {
     }
 
     let pollState = await this.store.getState();
-    if (this.store.getStore().status === pollState.status) {
+    if (pollState.status === 'PUSH_CONFIRMATION_WAITING') {
       // continue waiting
       this.pollPushNoticationState = setTimeout(() => {
         this.postPushNotificationWait();
-      }, 500);
+      }, 1000);
     } else {
       clearTimeout(this.pollPushNoticationState);
       this.store
@@ -439,6 +440,11 @@ export default class AuthnWidget {
         if (input.type === 'email') {
           let isValidEmail = input.checkValidity();
           if (!isValidEmail) {
+            disabled = true;
+          }
+        }
+        if (input.type === 'text' && input.id === 'otp') {
+          if (input.value.length !== 6) {
             disabled = true;
           }
         }

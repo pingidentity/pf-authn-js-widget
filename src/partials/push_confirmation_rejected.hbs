@@ -1,10 +1,14 @@
 <div class="card">
   <div class="org-logo">
-    <img class="org-logo__image" src="{{logo}}" alt="Company Logo" />
+    <img class="org-logo__image" src="{{logo}}" alt="Company Logo"/>
   </div>
-  {{> device_selection_header headerStart='Authentication rejected on '}}
-  {{> errors }}
+  {{> error msg=" " errorHeader="Blocked"}}
   <form class="form form--margin-small" id="AuthnWidgetForm">
-    <button data-actionId="cancelAuthentication" class="button">Cancel</button>
+    <div class="text-block" data-id="textblock">
+      <div class="text-block--overflow-wrap">
+        <a tabindex="0" data-actionId="cancelAuthentication" target="_self" class="anchor">
+          Cancel</a>
+      </div>
+    </div>
   </form>
 </div>

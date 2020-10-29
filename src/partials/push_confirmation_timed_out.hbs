@@ -1,15 +1,27 @@
 <div class="card">
+  {{> back_button}}
   <div class="org-logo">
-    <img class="org-logo__image" src="{{logo}}" alt="Company Logo" />
+    <img class="org-logo__image" src="{{logo}}" alt="Company Logo"/>
   </div>
-  {{> device_selection_header headerStart='Authentication timed out on '}}
-  {{> errors}}
-  <div class="text-block">
-    <div class="text-block__text">
-      <a id="changeDevice">Change device</a>
-    </div>
+  <div class="icon-feedback icon-feedback--timeout  icon-feedback--warning"><span
+          class="icon-feedback__icon pingicon-ghost-timed-out"></span>
+    <p class="icon-feedback__label">
+    <p class="icon-feedback--warning">Timed Out</p>
+    </p>
   </div>
+
   <form class="form form--margin-small" id="AuthnWidgetForm">
-    <button data-actionId="cancelAuthentication" class="button">Cancel</button>
+    <div class="tile-selector tile-selector--stacked">
+      <button class="button button--primary brand-primary-bg" data-id="button"
+              type="button" data-mfa-selection="{{selectedDeviceRef.id}}">
+        Retry
+      </button>
+      <div class="text-block" data-id="textblock">
+        <div class="text-block--overflow-wrap">
+          <a tabindex="0" data-actionId="cancelAuthentication" target="_self" class="anchor">
+            Cancel</a>
+        </div>
+      </div>
+    </div>
   </form>
 </div>

@@ -2,17 +2,22 @@
   <div class="org-logo">
     <img class="org-logo__image" src="{{logo}}" alt="Company Logo" />
   </div>
+  {{> errors}}
   <h1 class="heading">Select Authentication Method</h1>
   <div class="text-block">
     <div class="text-block__text">Select the authentication method you want to use with your account.</div>
   </div>
-  {{> errors}}
-  <div id="device-selection">
-    <div class="tile-selector tile-selector--stacked">
-      {{> device_selection}}
-    </div>
+  <div class="tile-selector tile-selector--stacked">
+    {{> device_selection}}
+    <form class="form form--margin-small" id="AuthnWidgetForm">
+      <div class="text-block" data-id="textblock">
+        <div class="text-block--overflow-wrap">
+          <a tabindex="0" data-actionId="cancelAuthentication" target="_self" class="anchor">
+            Cancel</a>
+        </div>
+      </div>
+
+    </form>
   </div>
-  <form class="form form--margin-small" id="AuthnWidgetForm">
-    <button data-actionId="cancelAuthentication" class="button">Cancel</button>
-  </form>
+
 </div>
