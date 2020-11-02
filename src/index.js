@@ -361,7 +361,6 @@ export default class AuthnWidget {
     let source = evt.currentTarget;
     if (source) {
       let deviceId = source.dataset['mfaSelection'];
-      console.log(deviceId)
       let data = {
         "deviceRef": {
           "id": deviceId
@@ -374,8 +373,8 @@ export default class AuthnWidget {
   }
 
   registerMfaChangeDeviceEventHandler() {
-    Array.from(document.querySelectorAll('#changeDevice'))
-      .forEach(element => element.addEventListener('click', this.handleMfaDeviceChange));
+    document.getElementById('changeDevice')
+            .addEventListener('click', this.handleMfaDeviceChange);
   }
 
   async handleMfaDeviceChange(evt) {
