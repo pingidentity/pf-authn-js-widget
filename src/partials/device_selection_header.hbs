@@ -4,6 +4,12 @@
       <h1 class="heading">{{../headerStart}} {{device.name}} {{../headerEnd}}</h1>
     {{else ifEq device.type "iPhone"}}
       <h1 class="heading">{{../headerStart}} {{device.name}} {{../headerEnd}}</h1>
+    {{else ifEq device.type "TOTP"}}
+      {{#if device.nickname}}
+        <h1 class="heading">{{../headerStart}} {{device.nickname}} {{../headerEnd}}</h1>
+      {{else}}
+        <h1 class="heading">{{../headerStart}} {{device.type}} {{../headerEnd}}</h1>
+      {{/if}}
     {{else}}
       <h1 class="heading">{{../headerStart}} {{device.type}} {{../headerEnd}}</h1>
     {{/ifEq}}

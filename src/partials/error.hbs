@@ -1,10 +1,12 @@
 <div class="icon-feedback icon-feedback--error">
   <span class="icon-feedback__icon pingicon-ghost-error icon-feedback--error"></span>
-{{#if errorHeader}}
-  <p class="icon-feedback__error">{{errorHeader}}</p>
-{{else}}
-  <p class="icon-feedback__error">Error</p>
-{{/if}}
+  <div class="icon-feedback__label">
+    {{#if errorHeader}}
+      <p class="icon-feedback--error">{{errorHeader}}</p>
+    {{else}}
+      <p class="icon-feedback--error">Error</p>
+    {{/if}}
+  </div>
 </div>
 <div class="feedback--error">
   {{#if userMessages}}

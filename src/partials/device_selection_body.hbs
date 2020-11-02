@@ -1,7 +1,7 @@
 {{#each devices as |device|}}
   {{#ifEq device.id ../selectedDeviceRef.id}}
-    <div class="form-aside">
-      <p class="text-block text-block--small"  style="margin-bottom: 5px;">
+    <span class="form-aside">
+      <p class="text-block text-block--small">
         <span class="text-block__text">{{../bodyText}}</span>
       </p>
       <p class="text-block text-block--large">
@@ -9,10 +9,16 @@
         <span class="text-block__text">{{device.name}}</span>
       {{else ifEq device.type "iPhone"}}
         <span class="text-block__text">{{device.name}}</span>
+      {{else ifEq device.type "TOTP"}}
+        {{#if device.nickname}}
+          <span class="text-block__text">{{device.nickname}}</span>
+        {{else}}
+          <span class="text-block__text">{{device.type}}</span>
+        {{/if}}
       {{else}}
         <span class="text-block__text">{{device.type}}</span>
       {{/ifEq}}
       </p>
-    </div>
+    </span>
   {{/ifEq}}
 {{/each}}
