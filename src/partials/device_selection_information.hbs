@@ -2,6 +2,7 @@
   {{#ifEq device.id ../selectedDeviceRef.id}}
     <div class="form-aside">
       <div class="stack" data-id="stack">
+        {{#ifNotEq device.type "TOTP"}}
         <div class="stack stack--small" data-id="stack">
           <div class="text-block" data-id="textblock">
             <div class="text-block--overflow-wrap">
@@ -22,6 +23,7 @@
             </button>
           </div>
         </div>
+        {{/ifNotEq}}
       </div>
     </div>
   {{/ifEq}}

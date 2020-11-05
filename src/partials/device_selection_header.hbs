@@ -5,13 +5,22 @@
     {{else ifEq device.type "iPhone"}}
       <h1 class="heading">{{../headerStart}} {{device.name}} {{../headerEnd}}</h1>
     {{else ifEq device.type "TOTP"}}
-      {{#if device.nickname}}
-        <h1 class="heading">{{../headerStart}} {{device.nickname}} {{../headerEnd}}</h1>
-      {{else}}
-        <h1 class="heading">{{../headerStart}} {{device.type}} {{../headerEnd}}</h1>
-      {{/if}}
+        <h1 class="heading">Authenticator App</h1>
     {{else}}
       <h1 class="heading">{{../headerStart}} {{device.type}} {{../headerEnd}}</h1>
     {{/ifEq}}
+    {{#ifNotEq device.type "TOTP"}}
+      <div class="text-block" data-id="textblock">
+        <div class="text-block--overflow-wrap">
+          Enter the passcode displayed in your app to complete authentication
+        </div>
+      </div>
+    {{else}}
+      <div class="text-block" data-id="textblock">
+        <div class="text-block--overflow-wrap">
+          Enter the passcode that you received to complete authentication.
+        </div>
+      </div>
+    {{/ifNotEq}}
   {{/ifEq}}
 {{/each}}
