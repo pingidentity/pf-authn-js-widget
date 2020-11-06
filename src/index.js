@@ -294,6 +294,9 @@ export default class AuthnWidget {
   }
 
   postContinueAuthentication() {
+    if (document.querySelector("#spinnerId")) {
+      document.querySelector('#spinnerId').style.display = 'block';
+    }
     setTimeout(() => {
       this.store.dispatch('POST_FLOW', 'continueAuthentication', '{}');
     }, 1000)
@@ -348,6 +351,9 @@ export default class AuthnWidget {
   }
 
   postEmptyAuthentication() {
+    if (document.querySelector("#spinnerId")) {
+      document.querySelector('#spinnerId').style.display = 'block';
+    }
     this.store.dispatch('POST_FLOW', 'authenticate', '{}');
   }
 
