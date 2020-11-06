@@ -160,6 +160,7 @@ export default class AuthnWidget {
     let params = this.assets.toTemplateParams();
     let widgetDiv = document.getElementById(this.divId);
     widgetDiv.innerHTML = template(params);
+    document.querySelector('#spinnerId').style.display = 'block';
   }
 
   initRedirectless(configuration) {
