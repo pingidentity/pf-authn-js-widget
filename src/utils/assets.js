@@ -2,7 +2,7 @@
 export default class Assets {
 
   constructor(options) {
-    this.logo = (options && options.logo) || 'https://assets.pingone.com/ux/end-user/0.32.0/images/ping-logo.svg';
+    this.logo = (options && options.logo) || 'https://assets.pingone.com/ux/end-user/0.33.0/images/ping-logo.svg';
   }
 
   toTemplateParams() {

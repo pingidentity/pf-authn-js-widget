@@ -8,9 +8,8 @@
     <div class="stack stack--small" data-id="stack">
       {{> device_selection_header headerEnd=' Authentication'}}
     </div>
-    <div class="float-label">
-      <input type="text" class="text-input float-label__input required" id="otp" name="otp" placeholder="passcode" maxlength="6" autofocus/>
-      <label class="float-label__label" for="otp">Passcode</label>
+    <div class="text-input__icon">
+      <input id="otp" name="otp" type="text" class="text-input text-input--primary" maxlength="6" value=""/>
     </div>
     {{> device_selection_information}}
     <button id="submit" data-actionId="checkOtp" type="submit" class="button button--primary brand-primary-bg" disabled>
