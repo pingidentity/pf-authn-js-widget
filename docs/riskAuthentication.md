@@ -66,16 +66,16 @@ If the `Device Profiling Method` setting in your adapter configuration is set to
 <script type="text/javascript" src="fingerprint2-2.1.4.min.js"></script>
 ```
 If the `Device Profiling Method` setting in your adapter configuration is set to `Captured by a previous adapter`:
-1. Copy the `pingone_risk_management_profiling.js` and `pingone_risk_management_embedded.js` files from the integration `.zip` file to a location that your application can access.
+1. Copy the `pingone-risk-management-profiling.js` and `pingone-risk-management-embedded.js` files from the integration `.zip` file to a location that your application can access.
 2. Add the following to the sign-on page. Adjust the path to the script files.
 ```html
-<script type="text/javascript" src="pingone_risk_management_profiling.js"></script>
-<script type="text/javascript" src="pingone_risk_management_embedded.js"></script>
+<script type="text/javascript" src="pingone-risk-management-profiling.js"></script>
+<script type="text/javascript" src="pingone-risk-management-embedded.js"></script>
 ```
 If the `Device Profiling Method` setting in your adapter configuration is set to `Captured by this adapter`:
-1. Copy the `pingone_risk_management_profiling.js` file from the integration `.zip` file to a location that your application can access.
+1. Copy the `pingone-risk-management-profiling.js` file from the integration `.zip` file to a location that your application can access.
 2. Where your web application initializes `PfAuthnWidget`, adjust the path (`deviceProfileScript`) to the script file.
 ```javascript
-var authnWidget = new PfAuthnWidget('https://localhost:9031', { divId: 'authnwidget', deviceProfileScript: './pingone_risk_management_profiling.js' });
+var authnWidget = new PfAuthnWidget('https://localhost:9031', { divId: 'authnwidget', deviceProfileScript: './pingone-risk-management-profiling.js' });
 authnWidget.init();
 ```
