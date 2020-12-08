@@ -7,7 +7,7 @@
   <script src="./pf.authn-widget.js"></script>
   <script type='application/json' src="./pf.authn-widget.map"></script>
 
-  <link rel="stylesheet" type="text/css" href="https://assets.pingone.com/ux/end-user/0.13.0/end-user.css">
+  <link rel="stylesheet" type="text/css" href="https://assets.pingone.com/ux/end-user/0.29.0/end-user.css">
   <link rel="stylesheet" type="text/css" href="main-styles.css">
 
 <!--  Enable the below script to use Captcha v2 -->
@@ -46,7 +46,7 @@
             });
             // let customLogo = 'https://www.pingidentity.com/content/dam/ping-6-2-assets/images/home/9001-home-logos/Cisco@2x.png.png'
             // authnWidget = new PfAuthnWidget("https://localhost:9031", {divId: 'authnwidget', logo: customLogo});
-            authnWidget.init();
+            initWidget(authnWidget);
         }
 
         /**  --------------------------------------------------
@@ -55,7 +55,34 @@
         **/
         function load() {
             var authnWidget = new PfAuthnWidget("{{baseUrl}}", { divId: 'authnwidget' });
-            authnWidget.init()
+            // decide how to init the widget based on the mode option
+            initWidget(authnWidget);
+        }
+
+        /**
+         * initialize the widget based on the operation mode
+         */
+        function initWidget(widget) {
+          {{#if redirectless}}
+          var config = {
+            // client_id: '', // redirectless requires this configuration
+            // response_type: 'token', // redirectless requires this configuration
+            onAuthorizationSuccess: function (response) {
+              // success callback function
+              var resultContainer = document.createElement('div');
+              resultContainer.classList.add('card');
+              resultContainer.style.overflowWrap = 'break-word';
+              resultContainer.style.marginTop = '20px';
+              resultContainer.style.fontFamily = 'monospace';
+              resultContainer.innerHTML = "";
+              resultContainer.appendChild(document.createTextNode(JSON.stringify(response)));
+              document.getElementById('authnwidget').appendChild(resultContainer);
+            }
+          };
+          widget.initRedirectless(config);
+          {{else}}
+          widget.init();
+          {{/if}}
         }
         window.onload = load;
     </script>

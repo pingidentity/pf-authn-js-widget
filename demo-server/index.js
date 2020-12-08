@@ -1,4 +1,3 @@
-const path = require('path');
 const templates = require('./templates');
 
 module.exports = function (app, server, options = {}) {

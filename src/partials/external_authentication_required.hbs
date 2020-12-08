@@ -1,0 +1,20 @@
+<div class="card">
+  <div class="org-logo">
+    <img class="org-logo__image" src="{{logo}}" alt="Company Logo"/>
+  </div>
+  <div id="externalAuthnHeaderId" style="display: none">
+    <h1 class="heading">Authenticate In Popup</h1>
+  </div>
+  <div class="spinner" id="spinnerId">
+    <div class="spinner__icon" data-id="spinner"></div>
+  </div>
+  <div id="externalAuthnId" style="display: none">
+    <div class="text-block">
+      <div class="text-block__text">Popup closed, do you want to cancel or try again?</div>
+    </div>
+    <button data-externalAuthActionId="reopenPopUp" class="button">Try Again</button>
+  </div>
+  <form class="form form--margin-small" id="AuthnWidgetForm">
+    <button data-actionId="cancelAuthentication" class="button">Cancel</button>
+  </form>
+</div>

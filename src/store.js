@@ -1,10 +1,14 @@
+import { initRedirectless } from './utils/redirectless';
+import FetchUtil from './utils/fetchUtil';
+
 export default class Store {
-  constructor(flowId, fetchUtil, checkRecaptcha) {
+  constructor(flowId, baseUrl, checkRecaptcha) {
     this.listeners = [];
     this.prevState = {};
     this.state = {};
     this.flowId = flowId;
-    this.fetchUtil = fetchUtil;
+    this.baseUrl = baseUrl
+    this.fetchUtil = new FetchUtil(baseUrl);
     this.checkRecaptcha = checkRecaptcha;
     this.pendingState = {};
   }
@@ -13,13 +17,17 @@ export default class Store {
     return this.state;
   }
 
+  getPreviousStore() {
+    return this.prevState;
+  }
+
   dispatchErrors(errors) {
-    this.state.userMessage = errors;
+    this.state.userMessages = errors;
     this.notifyListeners();
   }
 
   clearErrors() {
-    delete this.state.userMessage;
+    delete this.state.userMessages;
   }
 
   async dispatch(method, actionId, payload) {
@@ -28,7 +36,7 @@ export default class Store {
     if (this.prevState.username && !this.state.username) {
       this.state.username = this.prevState.username;
     }
-    console.log('dispatching actionId: ' + actionId)
+    console.log('dispatching actionId: ' + actionId);
     console.log(this.state);
     this.notifyListeners();
   }
@@ -75,6 +83,9 @@ export default class Store {
       case 'GET_FLOW':
         result = await this.fetchUtil.getFlow(this.flowId);
         break;
+      case 'INIT_REDIRECTLESS':
+        result = await initRedirectless(this.baseUrl, payload);
+        break;
       case 'POST_FLOW':
       default:
         result = await this.fetchUtil.postFlow(this.flowId, actionid, payload);
@@ -91,8 +102,9 @@ export default class Store {
     }
 
     let combinedData = this.state;
-    delete combinedData.userMessage;  //clear previous error shown
+    delete combinedData.userMessages;  //clear previous error shown
     if (json.status) {
+      this.flowId = json.id;
       combinedData = json;
       this.state = json;
       if (json.status === 'CANCELED') {
@@ -111,6 +123,10 @@ export default class Store {
             this.state.canceledMessage = 'You have cancelled the attempt to retrieve your username. Please close this window.';
             break;
         }
+      } else if (json.status === 'FAILED') {
+        if (this.state.code && !this.state.userMessage) {
+          this.state.userMessage = `The server returned "${this.state.code}" code. Please contact your system administrator.`;
+        }
       }
     } else {
       if (json.code === 'RESOURCE_NOT_FOUND') {
@@ -120,7 +136,7 @@ export default class Store {
         let errors = this.getErrorDetails(json);
         delete combinedData.failedValidators;
         delete combinedData.satisfiedValidators;
-        delete combinedData.userMessage;
+        delete combinedData.userMessages;
         combinedData = { ...errors, ...this.state };
       }
     }
@@ -141,11 +157,11 @@ export default class Store {
 
   getErrorDetails(json) {
     let errors = {
-      userMessage: undefined,
+      userMessages: [],
       failedValidators: [],
       satisfiedValidators: []
     };
-    if (json.code && json.code == 'VALIDATION_ERROR') {
+    if (json.code && json.code === 'VALIDATION_ERROR' || json.code === "REGISTRATION_FAILED") {
       if (json.details) {
         json.details.forEach(msg => {
           if (msg.failedValidators) {
@@ -158,15 +174,18 @@ export default class Store {
           if (msg.target) {
             userMessage = userMessage.slice(0, -1).concat(' : ').concat(msg.target);
           }
-          errors.userMessage = userMessage;
+          if (!userMessage && msg.code) {
+            userMessage = `Error code "${msg.code}" returned from the authorization server.`
+          }
+          errors.userMessages.push(userMessage);
         });
       }
       else {
-        errors.userMessage = json.userMessage;
+        errors.userMessages = json.userMessage;
       }
     }
     else if (json.code === 'RESOURCE_NOT_FOUND') {
-      errors.userMessage = json.message;
+      errors.userMessages = json.message;
     }
     return errors;
   }
