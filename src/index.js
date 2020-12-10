@@ -425,7 +425,9 @@ export default class AuthnWidget {
     let pass1 = document.querySelector('#newpassword');
     let pass2 = document.querySelector('#verifypassword');
     if (pass1.value !== pass2.value) {
-      this.store.dispatchErrors('New passwords do not match.');
+      let errors = [];
+      errors.push('New passwords do not match.');
+      this.store.dispatchErrors(errors);
       return false;
     } else {
       this.store.clearErrors();
