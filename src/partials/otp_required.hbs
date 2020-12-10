@@ -1,0 +1,25 @@
+<div class="card">
+  {{> back_button}}
+  <div class="org-logo">
+    <img class="org-logo__image" src="{{logo}}" alt="Company Logo"/>
+  </div>
+  <form class="form" id="AuthnWidgetForm">
+    {{> errors}}
+    <div class="stack stack--small" data-id="stack">
+      {{> device_selection_header headerEnd=' Authentication'}}
+    </div>
+    <div class="text-input__icon">
+      <input id="otp" name="otp" type="text" class="text-input text-input--primary input--otp" maxlength="6" value=""/>
+    </div>
+    {{> device_selection_information}}
+    <button id="submit" data-actionId="checkOtp" type="submit" class="button button--primary brand-primary-bg" disabled>
+      Sign On
+    </button>
+    <div class="text-block" data-id="textblock">
+      <div class="text-block--overflow-wrap">
+        <a tabindex="0" data-actionId="cancelAuthentication" target="_self" class="anchor">
+          Cancel</a>
+      </div>
+    </div>
+  </form>
+</div>
