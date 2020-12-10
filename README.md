@@ -31,7 +31,7 @@ and other integrations via [Authentication APIs](https://docs.pingidentity.com/c
  - social login
  - multi-factor authentication
  
- A full list of the supported integration can be found [here](/docs/supportedIntegrations.md).
+ A full list of the supported integrations can be found [here](/docs/supportedIntegrations.md).
 
 The widget is a ready-to-use drop-in bundle with a CSS and customizable templates. This alternative to PingFederate templates provides a sign-in experience as a single page application.
 
