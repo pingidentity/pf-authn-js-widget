@@ -20,14 +20,18 @@
 - [Bug Reports](#bug-reports)
 - [License](#license)
 
-The JavaScript Widget for the PingFederate Authentication API is a customizable JavaScript library that provides the capabilities of the [HTML form Adapter](https://support.pingidentity.com/s/document-item?bundleId=pingfederate-93&topicId=xvy1564003022890.html), the [Identifier First Adapter](https://support.pingidentity.com/s/document-item?bundleId=pingfederate-93&topicId=iek1564003022460.html), and the [ID DataWeb Integration Kit](https://docs.pingidentity.com/bundle/integrations/page/ndg1577481773402.html)
-via [Authentication APIs](https://support.pingidentity.com/s/document-item?bundleId=pingfederate-93&topicId=qsl1564002999029.html), including:
+The JavaScript Widget for the PingFederate Authentication API is a customizable JavaScript library that provides the capabilities of the [HTML form Adapter](https://docs.pingidentity.com/csh?Product=pf-latest&topicname=xvy1564003022890.html) 
+and other integrations via [Authentication APIs](https://docs.pingidentity.com/csh?Product=pf-latest&topicname=qsl1564002999029.html), including:
  - user login
  - trouble signing in
  - trouble with username
  - password reset
  - authenticate with identifier
  - risk-based authentication
+ - social login
+ - multi-factor authentication
+ 
+ A full list of the supported integration can be found [here](/docs/supportedIntegrations.md).
 
 The widget is a ready-to-use drop-in bundle with a CSS and customizable templates. This alternative to PingFederate templates provides a sign-in experience as a single page application.
 
@@ -50,7 +54,7 @@ To configure PingFederate for the widget:
   4. Select your newly created Authentication Application ("TestApp" if you used the example above) in the drop-down in the "Default Authentication Application" section.
   5. Start the SSO flow as you would normally. For example, by clicking on an existing IdP Connection, and you will be redirected to your "JavaScript Widget for the PingFederate Authentication API" application.
 
-**Note:** The redirect URL of the [Authentication Applications](https://support.pingidentity.com/s/document-item?bundleId=pingfederate-93&topicId=ldc1564002999116.html) must point to where the JavaScript Widget for the PingFederate Authentication API is hosted.
+**Note:** The redirect URL of the [Authentication Applications](https://docs.pingidentity.com/csh?Product=pf-latest&topicname=ldc1564002999116.html) must point to where the JavaScript Widget for the PingFederate Authentication API is hosted.
 If you do not wish to use the development server provided by webpack, change the URL of the authentication application to point the correct hosted URL.
 
 # Installation
