@@ -2,7 +2,7 @@
 
 The table below provides a comprehensive list of the integrations and PingFederate features that are currently supported by the widget.
 
->**_Tip:_** For integrations that have authentication API support, but are not yet supported by the widget, it is possible to write your own code to include that functionality into the widget.
+>**Tip:** For integrations that have authentication API support, but are not yet supported by the widget, it is possible to write your own code to include that functionality into the widget.
 
 The widget is regularly updated to support more integrations.
 
