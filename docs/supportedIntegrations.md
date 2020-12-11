@@ -15,6 +15,7 @@ The widget is regularly updated to support more integrations.
 | [End User Registration](https://docs.pingidentity.com/csh?Product=pf-latest&topicname=aga1564003007414.html)                  | :heavy_check_mark:    | :heavy_check_mark:  |
 | [Identifier First](https://docs.pingidentity.com/csh?Product=pf-latest&topicname=iek1564003022460.html)                       | :heavy_check_mark:    | :heavy_check_mark:  |
 | [Facebook Cloud Identity Connector](https://docs.pingidentity.com/bundle/integrations/page/bza1563995011780.html)             | :heavy_check_mark:    | :heavy_check_mark:  |
+| [GitHub Cloud Identity Connector](https://docs.pingidentity.com/bundle/integrations/page/iyj1569865047191.html)               | :heavy_check_mark:    | :heavy_check_mark:  |
 | [Google Cloud Identity Connector](https://docs.pingidentity.com/bundle/integrations/page/hxg1563995015946.html)               | :heavy_check_mark:    | :heavy_check_mark:  |
 | [HTML Form Login](https://docs.pingidentity.com/csh?Product=pf-latest&topicname=xvy1564003022890.html)                        | :heavy_check_mark:    | :heavy_check_mark:  |
 | [ID DataWeb Integration Kit](https://docs.pingidentity.com/bundle/integrations/page/ndg1577481773402.html)                    | :heavy_check_mark:    | :heavy_check_mark:  |
