@@ -199,3 +199,24 @@ input:read-only {
     }
   }
 }
+
+.spinner--margin-bottom-small {
+  margin-bottom: 35px;
+}
+
+.input--otp {
+  width: 100%;
+  max-width: 190px;
+  margin: 0 auto;
+}
+
+.back-button {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  padding: 5px;
+  position: absolute;
+  min-height: 0;
+  top: 15px;
+  left: 15px
+}
