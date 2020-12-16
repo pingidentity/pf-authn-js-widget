@@ -36,7 +36,9 @@ export default class AuthnWidget {
       'SUCCESSFUL_PASSWORD_RESET', 'CHALLENGE_RESPONSE_REQUIRED', 'USERNAME_RECOVERY_EMAIL_REQUIRED',
       'USERNAME_RECOVERY_EMAIL_SENT', 'SUCCESSFUL_ACCOUNT_UNLOCK', 'IDENTIFIER_REQUIRED',
       'EXTERNAL_AUTHENTICATION_COMPLETED', 'EXTERNAL_AUTHENTICATION_FAILED', 'EXTERNAL_AUTHENTICATION_REQUIRED',
-      'DEVICE_PROFILE_REQUIRED', 'REGISTRATION_REQUIRED', 'REFERENCE_ID_REQUIRED'];
+      'DEVICE_PROFILE_REQUIRED', 'REGISTRATION_REQUIRED', 'REFERENCE_ID_REQUIRED',
+      'DEVICE_SELECTION_REQUIRED', 'MFA_COMPLETED', 'MFA_FAILED', 'OTP_REQUIRED',
+      'PUSH_CONFIRMATION_REJECTED', 'PUSH_CONFIRMATION_TIMED_OUT', 'PUSH_CONFIRMATION_WAITING'];
   }
 
   static get COMMUNICATION_ERROR_MSG() {
@@ -88,6 +90,12 @@ export default class AuthnWidget {
     this.postDeviceProfileAction = this.postDeviceProfileAction.bind(this);
     this.registerAgentlessHandler = this.registerAgentlessHandler.bind(this);
     this.handleAgentlessSignOn = this.handleAgentlessSignOn.bind(this);
+    this.postEmptyAuthentication = this.postEmptyAuthentication.bind(this);
+    this.handleMfaDeviceSelection = this.handleMfaDeviceSelection.bind(this);
+    this.registerMfaEventHandler = this.registerMfaEventHandler.bind(this);
+    this.registerMfaChangeDeviceEventHandler = this.registerMfaChangeDeviceEventHandler.bind(this);
+    this.handleMfaDeviceChange = this.handleMfaDeviceChange.bind(this);
+    this.postPushNotificationWait = this.postPushNotificationWait.bind(this);
     this.stateTemplates = new Map();  //state -> handlebar templates
     this.eventHandler = new Map();  //state -> eventHandlers
     this.postRenderCallbacks = new Map();
@@ -100,7 +108,6 @@ export default class AuthnWidget {
     this.addEventHandler('USERNAME_PASSWORD_REQUIRED', this.registerAltAuthSourceLinks);
     this.addEventHandler('REGISTRATION_REQUIRED', this.registerRegistrationLinks);
     this.addEventHandler('REGISTRATION_REQUIRED', this.registerAltAuthSourceLinks);
-
     this.addEventHandler('EXTERNAL_AUTHENTICATION_COMPLETED', this.postContinueAuthentication);
     this.addEventHandler('EXTERNAL_AUTHENTICATION_REQUIRED', this.registerReopenPopUpHandler);
     this.addPostRenderCallback('RESUME', this.resumeToPf);
@@ -108,6 +115,16 @@ export default class AuthnWidget {
     this.addPostRenderCallback('EXTERNAL_AUTHENTICATION_FAILED', this.externalAuthnFailure);
     this.addEventHandler('DEVICE_PROFILE_REQUIRED', this.postDeviceProfileAction);
     this.addEventHandler('REFERENCE_ID_REQUIRED', this.registerAgentlessHandler);
+    this.addPostRenderCallback('AUTHENTICATION_REQUIRED', this.postEmptyAuthentication);
+    this.addPostRenderCallback('MFA_COMPLETED', this.postContinueAuthentication);
+    this.addEventHandler('DEVICE_SELECTION_REQUIRED', this.registerMfaEventHandler);
+    this.addEventHandler('OTP_REQUIRED', this.registerMfaEventHandler);
+    this.addEventHandler('OTP_REQUIRED', this.registerMfaChangeDeviceEventHandler);
+    this.addPostRenderCallback('PUSH_CONFIRMATION_WAITING', this.postPushNotificationWait);
+    this.addEventHandler('PUSH_CONFIRMATION_WAITING', this.registerMfaChangeDeviceEventHandler);
+    this.addEventHandler('PUSH_CONFIRMATION_TIMED_OUT', this.registerMfaEventHandler);
+    this.addEventHandler('PUSH_CONFIRMATION_TIMED_OUT', this.registerMfaChangeDeviceEventHandler);
+    this.addPostRenderCallback('MOBILE_PAIRING_REQUIRED', this.postContinueAuthentication);
 
     this.actionModels.set('checkUsernamePassword', { required: ['username', 'password'], properties: ['username', 'password', 'rememberMyUsername', 'thisIsMyDevice', 'captchaResponse'] });
     this.actionModels.set('initiateAccountRecovery', { properties: ['usernameHint'] });
@@ -120,7 +137,8 @@ export default class AuthnWidget {
     this.actionModels.set('checkChallengeResponse', { required: ['challengeResponse'], properties: ['challengeResponse'] });
     this.actionModels.set('submitIdentifier', { required: ['identifier'], properties: ['identifier'] });
     this.actionModels.set('clearIdentifier', { required: ['identifier'], properties: ['identifier'] });
-    this.actionModels.set('registerUser', {required: ['password', 'fieldValues'], properties: ['password', 'captchaResponse', 'fieldValues', 'thisIsMyDevice']})
+    this.actionModels.set('registerUser', {required: ['password', 'fieldValues'], properties: ['password', 'captchaResponse', 'fieldValues', 'thisIsMyDevice']});
+    this.actionModels.set('checkOtp', {required: ['otp']});
   }
 
   init() {
@@ -143,6 +161,7 @@ export default class AuthnWidget {
     let params = this.assets.toTemplateParams();
     let widgetDiv = document.getElementById(this.divId);
     widgetDiv.innerHTML = template(params);
+    document.querySelector('#spinnerId').style.display = 'block';
   }
 
   initRedirectless(configuration) {
@@ -277,6 +296,9 @@ export default class AuthnWidget {
   }
 
   postContinueAuthentication() {
+    if (document.querySelector("#spinnerId")) {
+      document.querySelector('#spinnerId').style.display = 'block';
+    }
     setTimeout(() => {
       this.store.dispatch('POST_FLOW', 'continueAuthentication', '{}');
     }, 1000)
@@ -302,10 +324,11 @@ export default class AuthnWidget {
 
   postDeviceProfileAction() {
     let data = this.store.getStore();
+    let script;
     switch (data.deviceProfilingType) {
       case 'IDW':
       case 'TMX-WEB':
-        var script = document.createElement('script');
+        script = document.createElement('script');
         script.src = data.deviceProfilingScriptUrl;
         document.head.appendChild(script);
 
@@ -314,7 +337,7 @@ export default class AuthnWidget {
         }, parseInt(data.deviceProfilingTimeoutMillis));
         break;
       case 'TMX-SDK':
-        var script = document.createElement('script');
+        script = document.createElement('script');
         script.src = this.deviceProfileScript;
         script.onload = function() {
           pinghelper.run_sid_provided(data.deviceProfilingDomain,
@@ -327,6 +350,82 @@ export default class AuthnWidget {
           this.store.dispatch('POST_FLOW', 'continueAuthentication', '{}');
         }, parseInt(data.deviceProfilingTimeoutMillis));
         break;
+      case 'PINGONE-RISK': {
+        script = document.createElement('script');
+        script.src = this.deviceProfileScript;
+        const onCompletion = (components) => {
+          const deviceProfile = transformComponentsToDeviceProfile(components);
+          this.store.dispatch('POST_FLOW', 'submitDeviceProfile', JSON.stringify(deviceProfile));
+        };
+        script.onload = () => {
+          profileDevice(onCompletion);
+        }
+        document.head.appendChild(script);
+
+        setTimeout(() => {
+          this.store.dispatch('POST_FLOW', 'submitDeviceProfile');
+        }, parseInt(data.deviceProfilingTimeoutMillis));
+        break;
+      }
+    }
+  }
+
+  postEmptyAuthentication() {
+    if (document.querySelector("#spinnerId")) {
+      document.querySelector('#spinnerId').style.display = 'block';
+    }
+    this.store.dispatch('POST_FLOW', 'authenticate', '{}');
+  }
+
+  registerMfaEventHandler() {
+    Array.from(document.querySelectorAll('[data-mfa-selection]'))
+      .forEach(element => element.addEventListener('click', this.handleMfaDeviceSelection));
+  }
+
+  handleMfaDeviceSelection(evt) {
+    evt.preventDefault();
+    let source = evt.currentTarget;
+    if (source) {
+      let deviceId = source.dataset['mfaSelection'];
+      let data = {
+        "deviceRef": {
+          "id": deviceId
+        }
+      };
+      this.store.dispatch('POST_FLOW', "selectDevice", JSON.stringify(data));
+    } else {
+      console.log("ERROR - Unable to dispatch device selection as the target was null");
+    }
+  }
+
+  registerMfaChangeDeviceEventHandler() {
+    document.getElementById('changeDevice')
+            .addEventListener('click', this.handleMfaDeviceChange);
+  }
+
+  async handleMfaDeviceChange(evt) {
+    evt.preventDefault();
+    let state = await this.store.getState();
+    state.status = 'DEVICE_SELECTION_REQUIRED';
+    this.render(this.store.getPreviousStore(), state);
+  }
+
+  async postPushNotificationWait() {
+    if (document.querySelector("#spinnerId")) {
+      document.querySelector('#spinnerId').style.display = 'block';
+    }
+
+    let pollState = await this.store.getState();
+    if (pollState.status === 'PUSH_CONFIRMATION_WAITING') {
+      // continue waiting
+      this.pollPushNoticationState = setTimeout(() => {
+        this.postPushNotificationWait();
+      }, 1000);
+    } else {
+      clearTimeout(this.pollPushNoticationState);
+      this.store
+        .dispatch('GET_FLOW')
+        .catch(() => this.generalErrorRenderer(AuthnWidget.COMMUNICATION_ERROR_MSG));
     }
   }
 
@@ -367,6 +466,11 @@ export default class AuthnWidget {
         if (input.type === 'email') {
           let isValidEmail = input.checkValidity();
           if (!isValidEmail) {
+            disabled = true;
+          }
+        }
+        if (input.type === 'text' && input.id === 'otp') {
+          if (input.value.length !== 6) {
             disabled = true;
           }
         }
