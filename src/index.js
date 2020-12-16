@@ -4,7 +4,8 @@ import 'core-js/stable';
 import 'regenerator-runtime/runtime'; //for async await
 import Store from './store';
 import redirectlessConfigValidator from './validators/redirectless';
-import { completeStateCallback } from './utils/redirectless'
+import { completeStateCallback } from './utils/redirectless';
+import FetchUtil from './utils/fetchUtil';
 
 import './scss/main.scss';
 //uncomment to add your personal branding
@@ -66,7 +67,8 @@ export default class AuthnWidget {
     }
     this.captchaDivId = 'invisibleRecaptchaId';
     this.assets = new Assets(options);
-    this.fetchUtil = new FetchUtil(baseUrl, options.useActionParam);
+    var useActionParams = (options && options.useActionParam) || false;
+    this.fetchUtil = new FetchUtil(baseUrl, useActionParams);
     this.baseUrl = baseUrl;
     this.invokeReCaptcha = options && options.invokeReCaptcha;
     this.checkRecaptcha = options && options.checkRecaptcha;
