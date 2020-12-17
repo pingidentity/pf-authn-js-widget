@@ -22,5 +22,6 @@ The widget is regularly updated to support more integrations.
 | [LinkedIn Cloud Identity Connector](https://docs.pingidentity.com/bundle/integrations/page/pwm1563995028175.html)             | :heavy_check_mark:    | :heavy_check_mark:  |
 | [One-Time Passcode Integration Kit](https://docs.pingidentity.com/bundle/integrations/page/hdv1589402808052.html)             | :heavy_check_mark:    |   |
 | [PingOne MFA Integration Kit](https://docs.pingidentity.com/bundle/integrations/page/cal1599060087050.html)                   | :heavy_check_mark:    | :heavy_check_mark:  |
+| [PingOne Risk Management Integration Kit](https://docs.pingidentity.com/bundle/integrations/page/fnd1592583282135.html)       | :heavy_check_mark:    | :heavy_check_mark:  |
 | [ThreatMetrix Integration Kit](https://docs.pingidentity.com/bundle/integrations/page/nnx1593461471877.html)                  | :heavy_check_mark:    | :heavy_check_mark:  |
 | [Twitter Cloud Identity Connector](https://docs.pingidentity.com/bundle/integrations/page/cav1563995059579.html)              | :heavy_check_mark:    | :heavy_check_mark:  |
