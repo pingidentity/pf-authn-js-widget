@@ -5,7 +5,6 @@ import 'regenerator-runtime/runtime'; //for async await
 import Store from './store';
 import redirectlessConfigValidator from './validators/redirectless';
 import { completeStateCallback } from './utils/redirectless';
-import FetchUtil from './utils/fetchUtil';
 
 import './scss/main.scss';
 //uncomment to add your personal branding
@@ -67,8 +66,6 @@ export default class AuthnWidget {
     }
     this.captchaDivId = 'invisibleRecaptchaId';
     this.assets = new Assets(options);
-    var useActionParams = (options && options.useActionParam) || false;
-    this.fetchUtil = new FetchUtil(baseUrl, useActionParams);
     this.baseUrl = baseUrl;
     this.invokeReCaptcha = options && options.invokeReCaptcha;
     this.checkRecaptcha = options && options.checkRecaptcha;
@@ -102,7 +99,7 @@ export default class AuthnWidget {
     this.eventHandler = new Map();  //state -> eventHandlers
     this.postRenderCallbacks = new Map();
     this.actionModels = new Map();
-    this.store = new Store(this.flowId, this.baseUrl, this.checkRecaptcha);
+    this.store = new Store(this.flowId, this.baseUrl, this.checkRecaptcha, options);
     this.store.registerListener(this.render);
     AuthnWidget.CORE_STATES.forEach(state => this.registerState(state));
 

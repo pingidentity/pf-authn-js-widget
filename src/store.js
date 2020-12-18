@@ -2,13 +2,14 @@ import { initRedirectless } from './utils/redirectless';
 import FetchUtil from './utils/fetchUtil';
 
 export default class Store {
-  constructor(flowId, baseUrl, checkRecaptcha) {
+  constructor(flowId, baseUrl, checkRecaptcha, options) {
     this.listeners = [];
     this.prevState = {};
     this.state = {};
     this.flowId = flowId;
-    this.baseUrl = baseUrl
-    this.fetchUtil = new FetchUtil(baseUrl);
+    this.baseUrl = baseUrl;
+    var useActionParam = (options && options.useActionParam) || false;
+    this.fetchUtil = new FetchUtil(baseUrl, useActionParam);
     this.checkRecaptcha = checkRecaptcha;
     this.pendingState = {};
   }
