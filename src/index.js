@@ -38,7 +38,8 @@ export default class AuthnWidget {
       'EXTERNAL_AUTHENTICATION_COMPLETED', 'EXTERNAL_AUTHENTICATION_FAILED', 'EXTERNAL_AUTHENTICATION_REQUIRED',
       'DEVICE_PROFILE_REQUIRED', 'REGISTRATION_REQUIRED', 'REFERENCE_ID_REQUIRED','CURRENT_CREDENTIALS_REQUIRED',
       'DEVICE_SELECTION_REQUIRED', 'MFA_COMPLETED', 'MFA_FAILED', 'OTP_REQUIRED',
-      'PUSH_CONFIRMATION_REJECTED', 'PUSH_CONFIRMATION_TIMED_OUT', 'PUSH_CONFIRMATION_WAITING'];
+      'PUSH_CONFIRMATION_REJECTED', 'PUSH_CONFIRMATION_TIMED_OUT', 'PUSH_CONFIRMATION_WAITING',
+      'ID_VERIFICATION_FAILED', 'ID_VERIFICATION_REQUIRED', 'ID_VERIFICATION_TIMED_OUT'];
   }
 
   static get COMMUNICATION_ERROR_MSG() {
@@ -95,6 +96,9 @@ export default class AuthnWidget {
     this.registerMfaChangeDeviceEventHandler = this.registerMfaChangeDeviceEventHandler.bind(this);
     this.handleMfaDeviceChange = this.handleMfaDeviceChange.bind(this);
     this.postPushNotificationWait = this.postPushNotificationWait.bind(this);
+    this.registerIdVerificationRequiredEventHandler = this.registerIdVerificationRequiredEventHandler.bind(this);
+    this.handleIdVerificationInProgress = this.handleIdVerificationInProgress.bind(this);
+    this.handleIdVerificationFailed = this.handleIdVerificationFailed.bind(this);
     this.stateTemplates = new Map();  //state -> handlebar templates
     this.eventHandler = new Map();  //state -> eventHandlers
     this.postRenderCallbacks = new Map();
@@ -124,6 +128,10 @@ export default class AuthnWidget {
     this.addEventHandler('PUSH_CONFIRMATION_TIMED_OUT', this.registerMfaEventHandler);
     this.addEventHandler('PUSH_CONFIRMATION_TIMED_OUT', this.registerMfaChangeDeviceEventHandler);
     this.addPostRenderCallback('MOBILE_PAIRING_REQUIRED', this.postContinueAuthentication);
+    this.addEventHandler('ID_VERIFICATION_REQUIRED', this.registerIdVerificationRequiredEventHandler);
+    this.addPostRenderCallback('ID_VERIFICATION_IN_PROGRESS', this.handleIdVerificationInProgress);
+    this.addPostRenderCallback('ID_VERIFICATION_COMPLETED', this.postContinueAuthentication);
+    this.addEventHandler('ID_VERIFICATION_FAILED', this.handleIdVerificationFailed);
 
     this.actionModels.set('checkUsernamePassword', { required: ['username', 'password'], properties: ['username', 'password', 'rememberMyUsername', 'thisIsMyDevice', 'captchaResponse'] });
     this.actionModels.set('initiateAccountRecovery', { properties: ['usernameHint'] });
@@ -478,6 +486,84 @@ export default class AuthnWidget {
     }
 
     document.querySelector('#submit').disabled = disabled;
+  }
+
+  async registerIdVerificationRequiredEventHandler() {
+    let data = this.store.getStore();
+    document.getElementById('copy')
+            .addEventListener('click', this.copyCode);
+
+    if (data.errorDetails !== undefined)
+    {
+      document.getElementById("requiredDescription").style.display = "none";
+      document.getElementById("errorDescription").style.display = "block";
+
+      document.getElementById("errorBlock").style.display = "flex";
+      document.getElementById("errorMessage").innerHTML = this.makeIdVerificationErrorMessage(data.errorDetails);
+    }
+    else
+    {
+      document.getElementById("requiredDescription").style.display = "block";
+      document.getElementById("errorDescription").style.display = "none";
+
+      document.getElementById("errorBlock").style.display = "none";
+    }
+
+    const options = {
+      method: 'GET'
+    }
+    let qrUrlRespone = await fetch(data.qrUrl, options);
+    let qrCode = await qrUrlRespone.text();
+    document.getElementById('qrCode').src = qrCode;
+    document.getElementById('qrCodeBlock').style.display = 'block';
+
+    this.pollAction(5000);
+  }
+
+  handleIdVerificationInProgress() {
+    this.pollAction(5000);
+  }
+
+  handleIdVerificationFailed() {
+    let data = this.store.getStore();
+
+    if (data.errorDetails !== undefined)
+    {
+      document.getElementById("errorMessage").innerHTML = this.makeIdVerificationErrorMessage(data.errorDetails);
+    }
+  }
+
+  copyCode(event) {
+    event.preventDefault();
+    let range = document.createRange();
+    range.selectNode(document.getElementById('verificationCode'));
+    window.getSelection().removeAllRanges();
+    window.getSelection().addRange(range);
+    document.execCommand('copy');
+    window.getSelection().removeAllRanges();
+  }
+
+  pollAction(timeout) {
+    setTimeout(() => {
+      this.store.dispatch('POST_FLOW', 'poll', '{}');
+    }, timeout)
+  }
+
+  makeIdVerificationErrorMessage(errorDetails) {
+    var errorMessage = '';
+
+    errorDetails.forEach(errorDetail => 
+      {
+        if (errorMessage === '') {
+          errorMessage = errorDetail.userMessage
+        }
+        else {
+          var append = '<br>' + errorDetail.userMessage
+          errorMessage += append
+        }
+      })
+
+    return errorMessage;
   }
 
   /**
