@@ -97,6 +97,7 @@ export default class AuthnWidget {
     this.handleMfaDeviceChange = this.handleMfaDeviceChange.bind(this);
     this.postPushNotificationWait = this.postPushNotificationWait.bind(this);
     this.registerIdVerificationRequiredEventHandler = this.registerIdVerificationRequiredEventHandler.bind(this);
+    this.postIdVerificationRequired = this.postIdVerificationRequired.bind(this);
     this.handleIdVerificationInProgress = this.handleIdVerificationInProgress.bind(this);
     this.handleIdVerificationFailed = this.handleIdVerificationFailed.bind(this);
     this.stateTemplates = new Map();  //state -> handlebar templates
@@ -129,6 +130,7 @@ export default class AuthnWidget {
     this.addEventHandler('PUSH_CONFIRMATION_TIMED_OUT', this.registerMfaChangeDeviceEventHandler);
     this.addPostRenderCallback('MOBILE_PAIRING_REQUIRED', this.postContinueAuthentication);
     this.addEventHandler('ID_VERIFICATION_REQUIRED', this.registerIdVerificationRequiredEventHandler);
+    this.addPostRenderCallback('ID_VERIFICATION_REQUIRED', this.postIdVerificationRequired);
     this.addPostRenderCallback('ID_VERIFICATION_IN_PROGRESS', this.handleIdVerificationInProgress);
     this.addPostRenderCallback('ID_VERIFICATION_COMPLETED', this.postContinueAuthentication);
     this.addEventHandler('ID_VERIFICATION_FAILED', this.handleIdVerificationFailed);
@@ -490,8 +492,6 @@ export default class AuthnWidget {
 
   async registerIdVerificationRequiredEventHandler() {
     let data = this.store.getStore();
-    document.getElementById('copy')
-            .addEventListener('click', this.copyCode);
 
     if (data.errorDetails !== undefined)
     {
@@ -517,6 +517,13 @@ export default class AuthnWidget {
     document.getElementById('qrCode').src = qrCode;
     document.getElementById('qrCodeBlock').style.display = 'block';
 
+    var verificationCodeToken = data.verificationCode.match(/.{1,4}/g);
+    document.getElementById('verificationCode').innerHTML = verificationCodeToken.join(' ');
+  }
+
+  postIdVerificationRequired() {
+    document.getElementById('copy')
+            .addEventListener('click', this.copyCode);
     this.pollAction(5000);
   }
 
@@ -669,19 +676,28 @@ export default class AuthnWidget {
 
   render(prevState, state) {
     let currentState = state.status;
-    let template = this.getTemplate('general_error');
-    if (currentState) {
-      try {
-        template = this.getTemplate(currentState);
-      } catch (e) {
-        console.log(`Failed to load template: ${currentState}.`);
-        template = this.getTemplate('general_error');
+
+    let idVerificationNoRefresh = 
+      (currentState === 'ID_VERIFICATION_REQUIRED') &&
+      (state.verificationCode === prevState.verificationCode);
+
+    if (!idVerificationNoRefresh)
+    {
+      let template = this.getTemplate('general_error');
+      if (currentState) {
+        try {
+          template = this.getTemplate(currentState);
+        } catch (e) {
+          console.log(`Failed to load template: ${currentState}.`);
+          template = this.getTemplate('general_error');
+        }
       }
+      let widgetDiv = document.getElementById(this.divId);
+      var params = Object.assign(state, this.assets.toTemplateParams())
+      widgetDiv.innerHTML = template(params);
+      this.registerEventListeners(currentState);
     }
-    let widgetDiv = document.getElementById(this.divId);
-    var params = Object.assign(state, this.assets.toTemplateParams())
-    widgetDiv.innerHTML = template(params);
-    this.registerEventListeners(currentState);
+    
     if (this.postRenderCallbacks[currentState]) {
       this.postRenderCallbacks[currentState](state);
     }
