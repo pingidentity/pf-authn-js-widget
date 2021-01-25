@@ -497,16 +497,11 @@ export default class AuthnWidget {
     {
       document.getElementById("requiredDescription").style.display = "none";
       document.getElementById("errorDescription").style.display = "block";
-
-      document.getElementById("errorBlock").style.display = "flex";
-      document.getElementById("errorMessage").innerHTML = this.makeIdVerificationErrorMessage(data.errorDetails);
     }
     else
     {
       document.getElementById("requiredDescription").style.display = "block";
       document.getElementById("errorDescription").style.display = "none";
-
-      document.getElementById("errorBlock").style.display = "none";
     }
 
     const options = {

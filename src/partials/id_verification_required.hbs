@@ -12,10 +12,11 @@
         To retry verification, scan the QR code or enter the verification code.
       </h4>
     </div>
-    <div id="errorBlock" class="feedback feedback--error" style="display: none; justify-content: center" data-id="feedback">
-      <span class="feedback__icon pingicon-error-triangle"></span>
-      <div id="errorMessage" style="width: auto" class="feedback__message">Error Message</div>
+    {{#if userMessages}}
+    <div class="feedback" style="justify-content: center">
+      {{> errors}}
     </div>
+    {{/if}}
     <div id="qrCodeBlock" class="text-block" style="display: none">
       <img id="qrCode" height="150px" width="150px" alt="QR Code" src=""/>
     </div>
