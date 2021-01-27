@@ -100,6 +100,7 @@ export default class AuthnWidget {
     this.postIdVerificationRequired = this.postIdVerificationRequired.bind(this);
     this.handleIdVerificationInProgress = this.handleIdVerificationInProgress.bind(this);
     this.handleIdVerificationFailed = this.handleIdVerificationFailed.bind(this);
+    this.pollCheckGet = this.pollCheckGet.bind(this);
     this.stateTemplates = new Map();  //state -> handlebar templates
     this.eventHandler = new Map();  //state -> eventHandlers
     this.postRenderCallbacks = new Map();
@@ -519,11 +520,14 @@ export default class AuthnWidget {
   postIdVerificationRequired() {
     document.getElementById('copy')
             .addEventListener('click', this.copyCode);
-    this.pollAction(5000);
+    
+    this.pollCheckGet(this.store.getStore().verificationCode, 5000);
   }
 
   handleIdVerificationInProgress() {
-    this.pollAction(5000);
+    setTimeout(() => {
+      this.store.dispatch('POST_FLOW', 'poll', '{}');
+    }, 5000)
   }
 
   handleIdVerificationFailed() {
@@ -545,12 +549,27 @@ export default class AuthnWidget {
     window.getSelection().removeAllRanges();
   }
 
-  pollAction(timeout) {
-    setTimeout(() => {
-      this.store.dispatch('POST_FLOW', 'poll', '{}');
-    }, timeout)
-  }
+  async pollCheckGet(currentVerificationCode, timeout) {
+    let fetchUtil = this.store.fetchUtil;
+    let result = await fetchUtil.postFlow(this.flowId, 'poll', '{}');
+    let newState = await result.json();
 
+    let pollAgain = 
+      (newState.status === 'ID_VERIFICATION_REQUIRED') && 
+      (newState.verificationCode === currentVerificationCode);
+
+    if (!pollAgain) {
+      this.store
+        .dispatch('GET_FLOW')
+        .catch(() => this.generalErrorRenderer(AuthnWidget.COMMUNICATION_ERROR_MSG));
+    }
+    else {
+      setTimeout(() => {
+        this.pollCheckGet(currentVerificationCode, timeout);
+      }, timeout)
+    }
+  }
+  
   makeIdVerificationErrorMessage(errorDetails) {
     var errorMessage = '';
 
@@ -671,28 +690,19 @@ export default class AuthnWidget {
 
   render(prevState, state) {
     let currentState = state.status;
-
-    let idVerificationNoRefresh = 
-      (currentState === 'ID_VERIFICATION_REQUIRED') &&
-      (state.verificationCode === prevState.verificationCode);
-
-    if (!idVerificationNoRefresh)
-    {
-      let template = this.getTemplate('general_error');
-      if (currentState) {
-        try {
-          template = this.getTemplate(currentState);
-        } catch (e) {
-          console.log(`Failed to load template: ${currentState}.`);
-          template = this.getTemplate('general_error');
-        }
+    let template = this.getTemplate('general_error');
+    if (currentState) {
+      try {
+        template = this.getTemplate(currentState);
+      } catch (e) {
+        console.log(`Failed to load template: ${currentState}.`);
+        template = this.getTemplate('general_error');
       }
-      let widgetDiv = document.getElementById(this.divId);
-      var params = Object.assign(state, this.assets.toTemplateParams())
-      widgetDiv.innerHTML = template(params);
-      this.registerEventListeners(currentState);
     }
-    
+    let widgetDiv = document.getElementById(this.divId);
+    var params = Object.assign(state, this.assets.toTemplateParams())
+    widgetDiv.innerHTML = template(params);
+    this.registerEventListeners(currentState);
     if (this.postRenderCallbacks[currentState]) {
       this.postRenderCallbacks[currentState](state);
     }
