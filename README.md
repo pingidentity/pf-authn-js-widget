@@ -30,6 +30,7 @@ and other integrations via [Authentication APIs](https://docs.pingidentity.com/c
  - risk-based authentication
  - social login
  - multi-factor authentication
+ - identity verification
  
  A full list of the supported integrations can be found [here](/docs/supportedIntegrations.md).
 

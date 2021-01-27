@@ -25,3 +25,4 @@ The widget is regularly updated to support more integrations.
 | [PingOne Risk Management Integration Kit](https://docs.pingidentity.com/bundle/integrations/page/fnd1592583282135.html)       | :heavy_check_mark:    | :heavy_check_mark:  |
 | [ThreatMetrix Integration Kit](https://docs.pingidentity.com/bundle/integrations/page/nnx1593461471877.html)                  | :heavy_check_mark:    | :heavy_check_mark:  |
 | [Twitter Cloud Identity Connector](https://docs.pingidentity.com/bundle/integrations/page/cav1563995059579.html)              | :heavy_check_mark:    | :heavy_check_mark:  |
+| [PingOne Verify Integration Kit](https://docs.pingidentity.com/bundle/integrations/page/elk1607471062724.html)              | :heavy_check_mark:    | :heavy_check_mark:  |
