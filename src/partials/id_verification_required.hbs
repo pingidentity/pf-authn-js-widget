@@ -1,0 +1,38 @@
+<div class="card">
+  <div class="org-logo">
+    <img class="org-logo__image" src="{{logo}}" alt="Company Logo"/>
+  </div>
+  <form class="form form--spacing-lg" id="AuthnWidgetForm">
+    <div class="stack stack--small">
+      <h1 class="heading" data-id="heading">Verification Required</h1>
+      <h4 id="requiredDescription" class="heading heading--4 text-block" data-id="heading">
+        Download the <b>{{verifyAppName}}</b> app for iOS or Android, then scan this QR code, or enter the verification code to verify yourself.
+      </h4>
+      <h4 id="errorDescription" class="heading heading--4 text-block" data-id="heading" style="display: none">
+        To retry verification, scan the QR code or enter the verification code.
+      </h4>
+    </div>
+    {{#if userMessages}}
+    <div class="feedback" style="justify-content: center">
+      {{> errors}}
+    </div>
+    {{/if}}
+    <div id="qrCodeBlock" class="text-block" style="display: none">
+      <img id="qrCode" height="150px" width="150px" alt="QR Code" src=""/>
+    </div>
+    <div class="text-block stack stack--small" data-id="textblock">
+      <div class="text-block stack stack--xsmall">
+        <div class="heading heading--4 text-block" data-id="heading">Verification code:</div>
+        <div id="verificationCode" class="heading" data-id="heading">
+          {{verificationCode}}
+        </div>
+      </div>
+      <button id="copy" class="button button--tertiary">Copy</button>
+    </div>
+    <div class="text-block">
+      <div class="text-block--overflow-wrap">
+        <a tabindex="0" data-actionId="cancelAuthentication" target="_self" class="anchor">Cancel</a>
+      </div>
+    </div>
+  </form>
+</div>
