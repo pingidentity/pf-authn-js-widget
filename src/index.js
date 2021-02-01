@@ -520,7 +520,7 @@ export default class AuthnWidget {
   postIdVerificationRequired() {
     document.getElementById('copy')
             .addEventListener('click', this.copyCode);
-    
+
     this.pollCheckGet(this.store.getStore().verificationCode, 5000);
   }
 
@@ -554,8 +554,8 @@ export default class AuthnWidget {
     let result = await fetchUtil.postFlow(this.flowId, 'poll', '{}');
     let newState = await result.json();
 
-    let pollAgain = 
-      (newState.status === 'ID_VERIFICATION_REQUIRED') && 
+    let pollAgain =
+      (newState.status === 'ID_VERIFICATION_REQUIRED') &&
       (newState.verificationCode === currentVerificationCode);
 
     if (!pollAgain) {
@@ -569,11 +569,11 @@ export default class AuthnWidget {
       }, timeout)
     }
   }
-  
+
   makeIdVerificationErrorMessage(errorDetails) {
     var errorMessage = '';
 
-    errorDetails.forEach(errorDetail => 
+    errorDetails.forEach(errorDetail =>
       {
         if (errorMessage === '') {
           errorMessage = errorDetail.userMessage
@@ -658,9 +658,18 @@ export default class AuthnWidget {
     let formElement = this.getForm();
     if (formElement) {
       let formData = new FormData(formElement);
+      let convertedData = {};
       let object = {};
 
-      for(let key of formData.keys()) {
+      // Convert formData to a map. IE11 has incredibly limited support for the FormData type and corresponding methods.
+      let formDataEntries = formData.entries(), formDataEntry = formDataEntries.next(), pair;
+      while (!formDataEntry.done) {
+        pair = formDataEntry.value;
+        convertedData[pair[0]] = pair[1];
+        formDataEntry = formDataEntries.next();
+      }
+
+      for(let key in convertedData) {
         let values = formData.getAll(key);
         if(this.isMultiValueField(formElement, key))
           object[key] = values;
