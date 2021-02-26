@@ -6,12 +6,20 @@
   <form class="form" id="AuthnWidgetForm">
     {{> errors}}
     <div class="stack stack--small" data-id="stack">
-      {{> device_selection_header headerEnd=' Authentication'}}
+      {{#each devices as |device|}}
+        {{#ifEq device.id ../selectedDeviceRef.id}}
+          {{> device_selection_header headerEnd=' Authentication' device=device}}
+        {{/ifEq}}
+      {{/each}}
     </div>
     <div class="text-input__icon">
-      <input id="otp" name="otp" type="text" class="text-input text-input--primary input--otp" maxlength="6" value=""/>
+      <input id="otp" name="otp" type="text" class="text-input text-input--primary input--otp required" maxlength="6" value=""/>
     </div>
-    {{> device_selection_information}}
+    {{#each devices as |device|}}
+      {{#ifEq device.id ../selectedDeviceRef.id}}
+        {{> device_selection_information device=device}}
+      {{/ifEq}}
+    {{/each}}
     <button id="submit" data-actionId="checkOtp" type="submit" class="button button--primary brand-primary-bg" disabled>
       Sign On
     </button>
