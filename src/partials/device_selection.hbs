@@ -7,11 +7,13 @@
         <div class="device-icon">
           {{#ifEq device.type "SMS"}}
             <svg viewBox="0 0 24 24" role="presentation" style="width: 3rem; height: 3rem;">
-              <path d="M20,2A2,2 0 0,1 22,4V16A2,2 0 0,1 20,18H6L2,22V4C2,2.89 2.9,2 4,2H20M4,4V17.17L5.17,16H20V4H4M6,7H18V9H6V7M6,11H15V13H6V11Z" style="fill: rgb(61, 69, 77);"></path>
+              <path d="M20,2A2,2 0 0,1 22,4V16A2,2 0 0,1 20,18H6L2,22V4C2,2.89 2.9,2 4,2H20M4,4V17.17L5.17,16H20V4H4M6,7H18V9H6V7M6,11H15V13H6V11Z"
+                    style="fill: rgb(61, 69, 77);"></path>
             </svg>
           {{else ifEq device.type "Email"}}
             <svg viewBox="0 0 24 24" role="presentation" style="width: 3rem; height: 3rem;">
-              <path d="M22 6C22 4.9 21.1 4 20 4H4C2.9 4 2 4.9 2 6V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6M20 6L12 11L4 6H20M20 18H4V8L12 13L20 8V18Z" style="fill: rgb(61, 69, 77);"></path>
+              <path d="M22 6C22 4.9 21.1 4 20 4H4C2.9 4 2 4.9 2 6V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6M20 6L12 11L4 6H20M20 18H4V8L12 13L20 8V18Z"
+                    style="fill: rgb(61, 69, 77);"></path>
             </svg>
           {{else ifEq device.type "PLATFORM"}}
             <svg viewBox="0 0 24 24" role="presentation" style="width: 3rem; height: 3rem;">
@@ -23,47 +25,42 @@
             </svg>
           {{else}}
             <svg viewBox="0 0 24 24" role="presentation" style="width: 3rem; height: 3rem;">
-              <path d="M16,18H7V4H16M11.5,22A1.5,1.5 0 0,1 10,20.5A1.5,1.5 0 0,1 11.5,19A1.5,1.5 0 0,1 13,20.5A1.5,1.5 0 0,1 11.5,22M15.5,1H7.5A2.5,2.5 0 0,0 5,3.5V20.5A2.5,2.5 0 0,0 7.5,23H15.5A2.5,2.5 0 0,0 18,20.5V3.5A2.5,2.5 0 0,0 15.5,1Z" style="fill: rgb(61, 69, 77);"></path>            </svg>
+              <path d="M16,18H7V4H16M11.5,22A1.5,1.5 0 0,1 10,20.5A1.5,1.5 0 0,1 11.5,19A1.5,1.5 0 0,1 13,20.5A1.5,1.5 0 0,1 11.5,22M15.5,1H7.5A2.5,2.5 0 0,0 5,3.5V20.5A2.5,2.5 0 0,0 7.5,23H15.5A2.5,2.5 0 0,0 18,20.5V3.5A2.5,2.5 0 0,0 15.5,1Z"
+                    style="fill: rgb(61, 69, 77);"></path>
+            </svg>
           {{/ifEq}}
         </div>
       </div>
       <div class="tile-button__content-container">
         <div class="flex-row flex-row--align-stretch flex-row--justify-start flex-row--flex-direction-column flex-row--column-spacing-sm"
              data-id="flex-row">
+          {{#if device.nickname}}
+            <div class="tile-button__title">{{device.nickname}}</div>
+          {{else}}
+            {{#ifEq device.type "Android"}}
+              <div class="tile-button__title">PingOne Authenticator</div>
+            {{else ifEq device.type "iPhone"}}
+              <div class="tile-button__title">PingOne Authenticator</div>
+            {{else ifEq device.type "TOTP"}}
+              <div class="tile-button__title">Authenticator App</div>
+            {{else ifEq device.type "SMS"}}
+              <div class="tile-button__title">Text Message</div>
+            {{else ifEq device.type "Email"}}
+              <div class="tile-button__title">Email</div>
+            {{else ifEq device.type "SECURITY_KEY"}}
+              <div class="tile-button__title">Security Key</div>
+            {{else ifEq device.type "PLATFORM"}}
+              <div class="tile-button__title">Biometrics</div>
+            {{else}}
+              <div class="tile-button__title">{{device.type}}</div>
+            {{/ifEq}}
+          {{/if}}
           {{#ifEq device.type "Android"}}
-            <div class="tile-button__title">PingOne Authenticator</div>
             <div class="tile-button__content">{{device.name}}</div>
           {{else ifEq device.type "iPhone"}}
-            <div class="tile-button__title">PingOne Authenticator</div>
             <div class="tile-button__content">{{device.name}}</div>
-          {{else ifEq device.type "TOTP"}}
-            <div class="tile-button__title">Authenticator App</div>
-            {{#if device.nickname}}
-              <div class="tile-button__content">{{device.nickname}}</div>
-            {{/if}}
-          {{else ifEq device.type "SECURITY_KEY"}}
-            <div class="tile-button__title">Security Key {{baseUrl}}</div>
-            {{#if device.nickname}}
-              <div class="tile-button__content">{{device.nickname}}</div>
-            {{else}}
-              <div class="tile-button__content">{{device.type}}</div>
-            {{/if}}
-          {{else ifEq device.type "PLATFORM"}}
-            <div class="tile-button__title">Biometrics</div>
-            {{#if device.nickname}}
-              <div class="tile-button__content">{{device.nickname}}</div>
-            {{else}}
-              <div class="tile-button__content">{{device.type}}</div>
-            {{/if}}
-          {{else ifEq device.type "SMS"}}
-            <div class="tile-button__title">Text Message</div>
+          {{else if device.target}}
             <div class="tile-button__content">{{device.target}}</div>
-          {{else ifEq device.type "Email"}}
-              <div class="tile-button__title">Email</div>
-              <div class="tile-button__content">{{device.target}}</div>
-          {{else}}
-             <div class="tile-button__title">{{device.type}}</div>
-             <div class="tile-button__content">{{device.target}}</div>
           {{/ifEq}}
         </div>
       </div>
