@@ -1,0 +1,13 @@
+{
+  "hooks": {
+    "before:bump": "npm run test",
+    "after:bump": "npm run build",
+    "after:release": "echo successfully released ${name} v${version}"
+  },
+  "git": {
+    "tagName": "v${version}"
+  },
+  "github": {
+    "release": true
+  }
+}
