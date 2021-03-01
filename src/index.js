@@ -834,7 +834,6 @@ export default class AuthnWidget {
       }
     });
 
-    this.store.clearErrors()
     this.dispatchWithCaptcha("registerUser", payload)
   }
 
