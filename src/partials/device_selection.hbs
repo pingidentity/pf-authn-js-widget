@@ -1,5 +1,6 @@
 {{#each devices as |device|}}
   {{#if device.usable}}
+  {{#isValidRpId device.rpId}}
     <div class="tile-button--side-icon tile-button tile-button--stacked-small"
          data-id="device-selection-button" data-mfa-selection="{{device.id}}" role="button" tabindex="0">
       <div class="tile-button__icon-container">
@@ -32,6 +33,20 @@
             {{#if device.nickname}}
               <div class="tile-button__content">{{device.nickname}}</div>
             {{/if}}
+          {{else ifEq device.type "SECURITY_KEY"}}
+            <div class="tile-button__title">Security Key {{baseUrl}}</div>
+            {{#if device.nickname}}
+              <div class="tile-button__content">{{device.nickname}}</div>
+            {{else}}
+              <div class="tile-button__content">{{device.type}}</div>
+            {{/if}}
+          {{else ifEq device.type "PLATFORM"}}
+            <div class="tile-button__title">Platform Biometrics</div>
+            {{#if device.nickname}}
+              <div class="tile-button__content">{{device.nickname}}</div>
+            {{else}}
+              <div class="tile-button__content">{{device.type}}</div>
+            {{/if}}
           {{else ifEq device.type "SMS"}}
             <div class="tile-button__title">Text Message</div>
             <div class="tile-button__content">{{device.target}}</div>
@@ -45,5 +60,6 @@
         </div>
       </div>
     </div>
+     {{/isValidRpId}}
   {{/if}}
 {{/each}}

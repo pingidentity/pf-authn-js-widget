@@ -4,8 +4,9 @@ import 'core-js/stable';
 import 'regenerator-runtime/runtime'; //for async await
 import Store from './store';
 import redirectlessConfigValidator from './validators/redirectless';
+import { getCompatibility } from './utils/assertionutil';
+import { doWebAuthn } from './utils/assertionutil';
 import { completeStateCallback } from './utils/redirectless';
-
 import './scss/main.scss';
 //uncomment to add your personal branding
 // import './scss/branding.scss';
@@ -37,7 +38,7 @@ export default class AuthnWidget {
       'USERNAME_RECOVERY_EMAIL_SENT', 'SUCCESSFUL_ACCOUNT_UNLOCK', 'IDENTIFIER_REQUIRED',
       'EXTERNAL_AUTHENTICATION_COMPLETED', 'EXTERNAL_AUTHENTICATION_FAILED', 'EXTERNAL_AUTHENTICATION_REQUIRED',
       'DEVICE_PROFILE_REQUIRED', 'REGISTRATION_REQUIRED', 'REFERENCE_ID_REQUIRED','CURRENT_CREDENTIALS_REQUIRED',
-      'DEVICE_SELECTION_REQUIRED', 'MFA_COMPLETED', 'MFA_FAILED', 'OTP_REQUIRED',
+      'DEVICE_SELECTION_REQUIRED', 'MFA_COMPLETED', 'MFA_FAILED', 'OTP_REQUIRED', 'ASSERTION_REQUIRED',
       'PUSH_CONFIRMATION_REJECTED', 'PUSH_CONFIRMATION_TIMED_OUT', 'PUSH_CONFIRMATION_WAITING',
       'ID_VERIFICATION_FAILED', 'ID_VERIFICATION_REQUIRED', 'ID_VERIFICATION_TIMED_OUT'];
   }
@@ -99,6 +100,7 @@ export default class AuthnWidget {
     this.postIdVerificationRequired = this.postIdVerificationRequired.bind(this);
     this.handleIdVerificationInProgress = this.handleIdVerificationInProgress.bind(this);
     this.handleIdVerificationFailed = this.handleIdVerificationFailed.bind(this);
+    this.postAssertionRequired = this.postAssertionRequired.bind(this);
     this.pollCheckGet = this.pollCheckGet.bind(this);
     this.stateTemplates = new Map();  //state -> handlebar templates
     this.eventHandler = new Map();  //state -> eventHandlers
@@ -124,6 +126,11 @@ export default class AuthnWidget {
     this.addEventHandler('DEVICE_SELECTION_REQUIRED', this.registerMfaEventHandler);
     this.addEventHandler('OTP_REQUIRED', this.registerMfaEventHandler);
     this.addEventHandler('OTP_REQUIRED', this.registerMfaChangeDeviceEventHandler);
+
+    this.addEventHandler('ASSERTION_REQUIRED', this.registerMfaEventHandler);
+    this.addEventHandler('ASSERTION_REQUIRED', this.registerMfaChangeDeviceEventHandler);
+    this.addPostRenderCallback('ASSERTION_REQUIRED', this.postAssertionRequired);
+
     this.addPostRenderCallback('PUSH_CONFIRMATION_WAITING', this.postPushNotificationWait);
     this.addEventHandler('PUSH_CONFIRMATION_WAITING', this.registerMfaChangeDeviceEventHandler);
     this.addEventHandler('PUSH_CONFIRMATION_TIMED_OUT', this.registerMfaEventHandler);
@@ -149,6 +156,7 @@ export default class AuthnWidget {
     this.actionModels.set('clearIdentifier', { required: ['identifier'], properties: ['identifier'] });
     this.actionModels.set('registerUser', {required: ['password', 'fieldValues'], properties: ['password', 'captchaResponse', 'fieldValues', 'thisIsMyDevice']});
     this.actionModels.set('checkOtp', {required: ['otp']});
+    this.actionModels.set('checkAssertion', {required: ['assertion', 'origin', 'compatibility'],  properties: ['assertion', 'origin', 'compatibility'] });
   }
 
   init() {
@@ -330,6 +338,44 @@ export default class AuthnWidget {
     }
     clearTimeout(this.checkPopupStatusTimeout)
     this.checkPopupStatus(windowReference);
+  }
+
+
+  postAssertionRequired()
+  {
+    let data = this.store.getStore();
+    var selectedDevice = data.devices.filter(device => {return device.id === data.selectedDeviceRef.id;});
+    getCompatibility().then(value => {
+      // compare value with received, if there is no match, trigger cancel flow
+      // PLATFORM - FULL
+      // SECURITY_KEY - SECURITY_KEY_ONLY
+      if ( (selectedDevice[0].type === 'SECURITY_KEY' && value === 'NONE') || (selectedDevice[0].type === 'PLATFORM' && value !== 'FULL') )
+      {
+        // Cancel authentication if this is the only device so we don't loop
+        console.log("No acceptable authenticator");
+        if(data.devices.length == 1)
+        {
+          // Hide back button and all other stuff. Only Cancel is allowed
+          document.querySelector('#assertionRequiredSpinnerId').style.display = 'none';
+          document.querySelector('#assertionRequiredAuthenticatingId').style.display = 'none';
+          document.querySelector('#unsupportedDeviceId').style.display = 'block';
+          document.querySelector('#changeDevice').style.display = 'none';
+          document.querySelector('#deviceInfoBlockId').style.display = 'none';
+        }
+        else
+        {
+          // Hide spinner and info section, show error so user can go back to device selection if required or cancel
+          document.querySelector('#assertionRequiredSpinnerId').style.display = 'none';
+          document.querySelector('#assertionRequiredAuthenticatingId').style.display = 'none';
+          document.querySelector('#unsupportedDeviceId').style.display = 'block';
+          document.querySelector('#deviceInfoBlockId').style.display = 'none';
+        }
+      }
+      else
+      {
+        doWebAuthn(this);
+      }
+    });
   }
 
   postDeviceProfileAction() {
