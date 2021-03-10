@@ -86,6 +86,7 @@ export default class AuthnWidget {
     this.handleReopenPopUp = this.handleReopenPopUp.bind(this);
     this.registerRegistrationLinks = this.registerRegistrationLinks.bind(this);
     this.handleRegisterUser = this.handleRegisterUser.bind(this);
+    this.verifyRegistrationPassword = this.verifyRegistrationPassword.bind(this);
     this.postDeviceProfileAction = this.postDeviceProfileAction.bind(this);
     this.registerAgentlessHandler = this.registerAgentlessHandler.bind(this);
     this.handleAgentlessSignOn = this.handleAgentlessSignOn.bind(this);
@@ -240,6 +241,8 @@ export default class AuthnWidget {
 
   registerRegistrationLinks() {
     Array.from(document.querySelectorAll('[data-registrationactionid]')).forEach(element => element.addEventListener('click', this.handleRegisterUser));
+    Array.from(document.querySelectorAll("select.required, input[type='date'].required")).forEach(element => element.addEventListener('change', this.enableSubmit));
+    Array.from(document.querySelectorAll("input[type='password']")).forEach(element => element.addEventListener('input', this.verifyRegistrationPassword));
   }
 
   handleIdFirstLinks(evt) {
@@ -465,7 +468,9 @@ export default class AuthnWidget {
   }
 
   enableSubmit() {
-    let nodes = (document.querySelectorAll('input.required[type=text]:not(:disabled), input.required[type=password]:not(:disabled), input.required[type=email]:not(:disabled)'));
+    let nodes = document.querySelectorAll('input.required[type=text]:not(:disabled), ' +
+      'input.required[type=password]:not(:disabled), input.required[type=email]:not(:disabled), ' +
+      'select.required:not(:disabled), input.required[type=date]:not(:disabled)');
     let disabled = false;
     if (nodes) {
       nodes.forEach(input => {
@@ -829,5 +834,28 @@ export default class AuthnWidget {
     });
 
     this.dispatchWithCaptcha("registerUser", payload)
+  }
+
+  verifyRegistrationPassword() {
+    let status = document.getElementById('passwordStatus');
+
+    let pass1 = document.querySelector('#newpassword');
+    let pass2 = document.querySelector('#password');
+
+    if (pass1.value.length === 0 || pass2.value.length === 0) {
+      status.style.display = 'none';
+      return;
+    } else {
+      status.style.display = 'block';
+    }
+
+    if (pass1.value === pass2.value) {
+      status.classList.remove('text-input__icon--error');
+      status.classList.add('text-input__icon--success');
+    } else {
+      status.classList.remove('text-input__icon--success');
+      status.classList.add('text-input__icon--error');
+      document.querySelector('#submit').disabled = true;
+    }
   }
 }
