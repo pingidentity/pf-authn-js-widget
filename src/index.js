@@ -60,16 +60,15 @@ export default class AuthnWidget {
    * @param {object} options object containing additional options such as flowId and divId
    */
   constructor(baseUrl, options) {
-    this.flowId = (options && options.flowId) || this.getBrowserFlowId();
+    let flowId = (options && options.flowId) || this.getBrowserFlowId();
     this.divId = (options && options.divId) || 'authnwidget';
     if (!baseUrl) {
       throw new Error(AuthnWidget.BASE_URL_REQUIRED_MSG);
     }
     this.captchaDivId = 'invisibleRecaptchaId';
     this.assets = new Assets(options);
-    this.baseUrl = baseUrl;
     this.invokeReCaptcha = options && options.invokeReCaptcha;
-    this.checkRecaptcha = options && options.checkRecaptcha;
+    let checkRecaptcha = options && options.checkRecaptcha;
     this.grecaptcha = options && options.grecaptcha;
     this.deviceProfileScript = options && options.deviceProfileScript;
     this.dispatch = this.dispatch.bind(this);
@@ -106,7 +105,7 @@ export default class AuthnWidget {
     this.eventHandler = new Map();  //state -> eventHandlers
     this.postRenderCallbacks = new Map();
     this.actionModels = new Map();
-    this.store = new Store(this.flowId, this.baseUrl, this.checkRecaptcha, options);
+    this.store = new Store(flowId, baseUrl, checkRecaptcha, options);
     this.store.registerListener(this.render);
     AuthnWidget.CORE_STATES.forEach(state => this.registerState(state));
 
@@ -155,7 +154,7 @@ export default class AuthnWidget {
 
   init() {
     try {
-      if (!this.flowId) {
+      if (!this.store.flowId) {
         throw new Error(AuthnWidget.FLOW_ID_REQUIRED_MSG);
       }
       this.renderSpinnerTemplate();
@@ -556,7 +555,7 @@ export default class AuthnWidget {
 
   async pollCheckGet(currentVerificationCode, timeout) {
     let fetchUtil = this.store.fetchUtil;
-    let result = await fetchUtil.postFlow(this.flowId, 'poll', '{}');
+    let result = await fetchUtil.postFlow(this.store.flowId, 'poll', '{}');
     let newState = await result.json();
 
     let pollAgain =
