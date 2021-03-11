@@ -10,17 +10,9 @@
       {{else ifEq device.type "iPhone"}}
         <span class="text-block__text">{{device.name}}</span>
       {{else ifEq device.type "PLATFORM"}}
-         {{#if device.nickname}}
-          <span class="text-block__text">{{device.nickname}}</span>
-        {{else}}
-          <span class="text-block__text">{{device.type}}</span>
-        {{/if}}
+          <span class="text-block__text">Biometrics</span>
       {{else ifEq device.type "SECURITY_KEY"}}
-         {{#if device.nickname}}
-          <span class="text-block__text">{{device.nickname}}</span>
-        {{else}}
-          <span class="text-block__text">{{device.type}}</span>
-        {{/if}}
+          <span class="text-block__text">Security Key</span>
       {{else ifEq device.type "TOTP"}}
         {{#if device.nickname}}
           <span class="text-block__text">{{device.nickname}}</span>
