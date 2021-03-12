@@ -3,7 +3,11 @@
     <img class="org-logo__image" src="{{logo}}" alt="Company Logo"/>
   </div>
   <div class="tile-selector tile-selector--stacked">
-    {{> error errorHeader="Blocked" msg=(concat "You couldn't be authenticated. " userMessage)}}
+    {{#ifEq code "ACCOUNT_LOCKED_OUT"}}
+      {{> error errorHeader="Account Locked" msg=userMessage}}
+    {{else}}
+      {{> error errorHeader="Blocked" msg=(concat "You couldn't be authenticated. " userMessage)}}
+    {{/ifEq}}
     <form class="form form--margin-small" id="AuthnWidgetForm">
       <div class="text-block" data-id="textblock">
         <div class="text-block--overflow-wrap">
