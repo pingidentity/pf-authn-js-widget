@@ -3,11 +3,11 @@
   <div class="org-logo">
     <img class="org-logo__image" src="{{logo}}" alt="Company Logo"/>
   </div>
+  {{> errors}}
   {{#each devices as |device|}}
     {{#ifEq device.id ../selectedDeviceRef.id}}
       {{#if device.otpEnabled}}
         <form class="form" id="AuthnWidgetForm">
-          {{> errors}}
           <div class="stack stack--small" data-id="stack">
             {{> device_selection_header headerEnd=' Authentication' device=device}}
           </div>
