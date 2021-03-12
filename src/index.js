@@ -4,8 +4,7 @@ import 'core-js/stable';
 import 'regenerator-runtime/runtime'; //for async await
 import Store from './store';
 import redirectlessConfigValidator from './validators/redirectless';
-import { getCompatibility } from './utils/assertionutil';
-import { doWebAuthn } from './utils/assertionutil';
+import { getCompatibility,  doWebAuthn} from './utils/fidoFlowUtil';
 import { completeStateCallback } from './utils/redirectless';
 import './scss/main.scss';
 //uncomment to add your personal branding

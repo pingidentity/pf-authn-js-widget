@@ -20,7 +20,9 @@
 
   <form class="form" id="AuthnWidgetForm" data-actionId="checkAssertion">
     {{> errors}}
-    {{> spinner_assertion_required}}
+    <div class="spinner spinner--margin-bottom-small" id="assertionRequiredSpinnerId">
+      <div class="spinner__icon" data-id="spinner"></div>
+    </div>
     <div id="assertionRequiredAuthenticatingId" class="icon-feedback icon-feedback--success" style="margin-bottom: 30px;">
       <p class="icon-feedback__label">Authenticating</p>
     </div>

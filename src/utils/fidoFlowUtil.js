@@ -1,4 +1,4 @@
-export function IsWebAuthnSupported() {
+function IsWebAuthnSupported() {
 	if (!window.PublicKeyCredential) {
 		console.log("Web Authentication API is not supported on this browser.");
 		return false;
@@ -6,7 +6,7 @@ export function IsWebAuthnSupported() {
 	return true;
 }
 
-export function isWebAuthnPlatformAuthenticatorAvailable() {
+function isWebAuthnPlatformAuthenticatorAvailable() {
 	var timer;
 	var p1 = new Promise((resolve) => {
 		timer = setTimeout(() => {
@@ -31,7 +31,7 @@ export function isWebAuthnPlatformAuthenticatorAvailable() {
 	});
 }
 
-export function WebAuthnPlatformAuthentication(publicKeyCredentialRequestOptions) {
+function WebAuthnPlatformAuthentication(publicKeyCredentialRequestOptions) {
 	return new Promise((resolve, reject) => {
 		isWebAuthnPlatformAuthenticatorAvailable().then((result) => {
 			if (result) {
@@ -105,7 +105,7 @@ export function doWebAuthn(authnWidget) {
 	});
 }
 
-export function credentialListConversion(list) {
+function credentialListConversion(list) {
 	var credList = [];
 	for (var i = 0; i < list.length; i++) {
 		var cred = {
@@ -120,7 +120,7 @@ export function credentialListConversion(list) {
 	return credList;
 }
 
-export function toBase64Str(bin) {
+function toBase64Str(bin) {
 	return btoa(String.fromCharCode.apply(null, new Uint8Array(bin)));
 }
 
@@ -151,7 +151,7 @@ export function getCompatibility() {
 		});
 }
 
-export function checkAssertion(publicKeyCredential, authnWidget) {
+function checkAssertion(publicKeyCredential, authnWidget) {
 	document.querySelector('#assertion').value = publicKeyCredential;
 	getCompatibility().then((value) => {
 		if (value === 'FULL')
