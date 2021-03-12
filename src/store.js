@@ -83,6 +83,9 @@ export default class Store {
         if (document.querySelector("#AuthnWidgetForm")) {
           document.querySelector("#AuthnWidgetForm").style.display = 'none';
         }
+        if (document.querySelector(".feedback--error")) {
+          document.querySelector(".feedback--error").style.display = 'none';
+        }
       }, 600)
     }
     switch (method) {
