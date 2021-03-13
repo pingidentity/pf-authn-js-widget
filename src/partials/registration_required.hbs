@@ -30,12 +30,14 @@
               class="float-label__label"
               for="password">Password</label></div>
       {{> password_requirements}}
-      <div class="float-label"><input type="password"
-                                      class="text-input float-label__input required"
-                                      id="newpassword" name="newpassword"
-                                      placeholder="Verify Password"/><label
-              class="float-label__label"
-              for="newpassword">Verify New Password</label></div>
+      <div class="float-label">
+        <div id="passwordStatus" class="text-input__icon text-input__icon--error" style="display: none"></div>
+        <input type="password"
+               class="text-input float-label__input required"
+               id="newpassword" name="newpassword"
+               placeholder="Verify Password"/>
+        <label class="float-label__label" for="newpassword">Verify New Password</label>
+      </div>
     </div>
     {{#if showThisIsMyDevice}}
       <div>
