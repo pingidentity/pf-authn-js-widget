@@ -3,12 +3,9 @@ import paOnAuthorizationSuccessValidator from '../validators/paOnAuthorizationSu
 const credentials = 'include';
 
 const getParameters = (response) => {
-  const body = new URLSearchParams();
-
-  for (const [key, value] of Object.entries(response)) {
-    body.append(key, value);
-  }
-  return body;
+  const result = [];
+  Object.keys(response).forEach(key => result.push(key + '=' + response[key]))
+  return result.join('&');
 };
 
 const postHeaders = () => {
@@ -40,9 +37,9 @@ const getOptions = {
 };
 
 const getOidcAuthnResponse = (oidcAuthnResponseEndpoint, callback) => (response) => {
-  const body = getParameters(response);
+  const parameters = getParameters(response);
 
-  fetch(`${oidcAuthnResponseEndpoint}?${body.toString()}`, getOptions)
+  fetch(`${oidcAuthnResponseEndpoint}?${parameters}`, getOptions)
     .then(resp => callback(null, resp))
     .catch(err => callback(err));
 }
