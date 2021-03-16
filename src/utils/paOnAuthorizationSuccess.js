@@ -39,7 +39,7 @@ const getOptions = {
 const getOidcAuthnResponse = (oidcAuthnResponseEndpoint, callback) => (response) => {
   const parameters = getParameters(response);
 
-  fetch(`${oidcAuthnResponseEndpoint}?${parameters}`, getOptions)
+  fetch(`${oidcAuthnResponseEndpoint}?${encodeURI(parameters)}`, getOptions)
     .then(resp => callback(null, resp))
     .catch(err => callback(err));
 }
