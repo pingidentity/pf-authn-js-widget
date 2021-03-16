@@ -13,16 +13,17 @@ The widget is regularly updated to support more integrations.
 | [Apple Cloud Identity Connector](https://docs.pingidentity.com/bundle/integrations/page/cuf1572990949051.html)                | :heavy_check_mark:    | :heavy_check_mark:  |
 | [Duo Security (MFA)](https://docs.pingidentity.com/bundle/integrations/page/oca1563995007204.html)                            | :heavy_check_mark:    | :heavy_check_mark:  |
 | [End User Registration](https://docs.pingidentity.com/csh?Product=pf-latest&topicname=aga1564003007414.html)                  | :heavy_check_mark:    | :heavy_check_mark:  |
-| [Identifier First](https://docs.pingidentity.com/csh?Product=pf-latest&topicname=iek1564003022460.html)                       | :heavy_check_mark:    | :heavy_check_mark:  |
 | [Facebook Cloud Identity Connector](https://docs.pingidentity.com/bundle/integrations/page/bza1563995011780.html)             | :heavy_check_mark:    | :heavy_check_mark:  |
 | [GitHub Cloud Identity Connector](https://docs.pingidentity.com/bundle/integrations/page/iyj1569865047191.html)               | :heavy_check_mark:    | :heavy_check_mark:  |
 | [Google Cloud Identity Connector](https://docs.pingidentity.com/bundle/integrations/page/hxg1563995015946.html)               | :heavy_check_mark:    | :heavy_check_mark:  |
 | [HTML Form Login](https://docs.pingidentity.com/csh?Product=pf-latest&topicname=xvy1564003022890.html)                        | :heavy_check_mark:    | :heavy_check_mark:  |
 | [ID DataWeb Integration Kit](https://docs.pingidentity.com/bundle/integrations/page/ndg1577481773402.html)                    | :heavy_check_mark:    | :heavy_check_mark:  |
+| [Identifier First](https://docs.pingidentity.com/csh?Product=pf-latest&topicname=iek1564003022460.html)                       | :heavy_check_mark:    | :heavy_check_mark:  |
+| [Jamf Integration Kit](https://docs.pingidentity.com/bundle/integrations/page/wyg1612987868528.html)                          | :heavy_check_mark:    | :heavy_check_mark:  |
 | [LinkedIn Cloud Identity Connector](https://docs.pingidentity.com/bundle/integrations/page/pwm1563995028175.html)             | :heavy_check_mark:    | :heavy_check_mark:  |
-| [One-Time Passcode Integration Kit](https://docs.pingidentity.com/bundle/integrations/page/hdv1589402808052.html)             | :heavy_check_mark:    |   |
+| [One-Time Passcode Integration Kit](https://docs.pingidentity.com/bundle/integrations/page/hdv1589402808052.html)             | :heavy_check_mark:    |                     |
 | [PingOne MFA Integration Kit](https://docs.pingidentity.com/bundle/integrations/page/cal1599060087050.html)                   | :heavy_check_mark:    | :heavy_check_mark:  |
 | [PingOne Risk Management Integration Kit](https://docs.pingidentity.com/bundle/integrations/page/fnd1592583282135.html)       | :heavy_check_mark:    | :heavy_check_mark:  |
+| [PingOne Verify Integration Kit](https://docs.pingidentity.com/bundle/integrations/page/elk1607471062724.html)                | :heavy_check_mark:    | :heavy_check_mark:  |
 | [ThreatMetrix Integration Kit](https://docs.pingidentity.com/bundle/integrations/page/nnx1593461471877.html)                  | :heavy_check_mark:    | :heavy_check_mark:  |
 | [Twitter Cloud Identity Connector](https://docs.pingidentity.com/bundle/integrations/page/cav1563995059579.html)              | :heavy_check_mark:    | :heavy_check_mark:  |
-| [PingOne Verify Integration Kit](https://docs.pingidentity.com/bundle/integrations/page/elk1607471062724.html)              | :heavy_check_mark:    | :heavy_check_mark:  |
