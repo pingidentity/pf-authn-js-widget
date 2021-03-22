@@ -3,24 +3,52 @@
   <div class="org-logo">
     <img class="org-logo__image" src="{{logo}}" alt="Company Logo"/>
   </div>
-  <div class="icon-feedback icon-feedback--timeout  icon-feedback--warning"><span
-          class="icon-feedback__icon pingicon-ghost-timed-out"></span>
-    <p class="icon-feedback__label">
-    <p class="icon-feedback__label">Timed Out</p>
-    </p>
-  </div>
-  <form class="form form--margin-small" id="AuthnWidgetForm">
-    <div class="tile-selector tile-selector--stacked">
-      <button class="button button--primary brand-primary-bg" data-id="button"
-              type="button" data-mfa-selection="{{selectedDeviceRef.id}}">
-        Retry
-      </button>
-      <div class="text-block" data-id="textblock">
-        <div class="text-block--overflow-wrap">
-          <a tabindex="0" data-actionId="cancelAuthentication" target="_self" class="anchor">
-            Cancel</a>
+  {{> errors}}
+  {{#each devices as |device|}}
+    {{#ifEq device.id ../selectedDeviceRef.id}}
+      {{#if device.otpEnabled}}
+        <form class="form" id="AuthnWidgetForm">
+          <div class="stack stack--small" data-id="stack">
+            {{> device_selection_header headerEnd=' Authentication' device=device}}
+          </div>
+          <div class="text-input__icon">
+            <input id="otp" name="otp" type="text" class="text-input text-input--primary input--otp required" maxlength="6"
+                   value=""/>
+          </div>
+          {{> device_selection_information device=device}}
+          <button id="submit" data-actionId="checkOtp" type="submit" class="button button--primary brand-primary-bg"
+                  disabled>
+            Sign On
+          </button>
+          <div class="text-block" data-id="textblock">
+            <div class="text-block--overflow-wrap">
+              <a tabindex="0" data-actionId="cancelAuthentication" target="_self" class="anchor">
+                Cancel</a>
+            </div>
+          </div>
+        </form>
+      {{else}}
+        <div class="icon-feedback icon-feedback--timeout  icon-feedback--warning"><span
+                class="icon-feedback__icon pingicon-ghost-timed-out"></span>
+          <p class="icon-feedback__label">
+          <p class="icon-feedback__label">Timed Out</p>
+          </p>
         </div>
-      </div>
-    </div>
-  </form>
+        <form class="form form--margin-small" id="AuthnWidgetForm">
+          <div class="tile-selector tile-selector--stacked">
+            <button class="button button--primary brand-primary-bg" data-id="button"
+                    type="button" data-mfa-selection="{{../selectedDeviceRef.id}}">
+              Retry
+            </button>
+            <div class="text-block" data-id="textblock">
+              <div class="text-block--overflow-wrap">
+                <a tabindex="0" data-actionId="cancelAuthentication" target="_self" class="anchor">
+                  Cancel</a>
+              </div>
+            </div>
+          </div>
+        </form>
+      {{/if}}
+    {{/ifEq}}
+  {{/each}}
 </div>
