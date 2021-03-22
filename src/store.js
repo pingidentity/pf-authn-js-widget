@@ -172,10 +172,18 @@ export default class Store {
 
   getErrorDetails(json) {
     let errors = {
+      errorCode: '',
+      errorDetailCodes: [],
       userMessages: [],
       failedValidators: [],
       satisfiedValidators: []
     };
+    if (json.code) {
+      errors.errorCode = json.code;
+      if (json.details) {
+        json.details.forEach(it => errors.errorDetailCodes.push(it.code));
+      }
+    }
     if (json.code && json.code === 'VALIDATION_ERROR' || json.code === "REGISTRATION_FAILED" || json.code === 'REQUEST_FAILED') {
       if (json.details) {
         json.details.forEach(msg => {

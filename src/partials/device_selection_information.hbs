@@ -1,30 +1,30 @@
-{{#each devices as |device|}}
-  {{#ifEq device.id ../selectedDeviceRef.id}}
-    <div class="form-aside">
-      <div class="stack" data-id="stack">
-        {{#ifNotEq device.type "TOTP"}}
-        <div class="stack stack--small" data-id="stack">
-          <div class="text-block" data-id="textblock">
-            <div class="text-block--overflow-wrap">
-              {{device.type}} sent to:
+<div class="form-aside">
+  <div class="stack" data-id="stack">
+    {{#ifNotEq device.type "TOTP" }}
+      {{#ifNotEq device.type "Android" }}
+        {{#ifNotEq device.type "iPhone" }}
+          <div class="stack stack--small" data-id="stack">
+            <div class="text-block" data-id="textblock">
+              <div class="text-block--overflow-wrap">
+                {{device.type}} sent to:
+              </div>
+            </div>
+            <div class="text-block text-block--large" data-id="textblock">
+              <div class="text-block--overflow-wrap">
+                {{device.target}}
+              </div>
             </div>
           </div>
-          <div class="text-block text-block--large" data-id="textblock">
-            <div class="text-block--overflow-wrap">
-              {{device.target}}
+          <div class="stack stack--small" data-id="stack">
+            <div>
+              <button class="button file-input--button button--tertiary" data-id="button"
+                      type="button" data-mfa-selection="{{device.id}}">
+                Resend
+              </button>
             </div>
           </div>
-        </div>
-        <div class="stack stack--small" data-id="stack">
-          <div>
-            <button class="button file-input--button button--tertiary" data-id="button"
-                    type="button" data-mfa-selection="{{device.id}}">
-              Resend
-            </button>
-          </div>
-        </div>
         {{/ifNotEq}}
-      </div>
-    </div>
-  {{/ifEq}}
-{{/each}}
+      {{/ifNotEq}}
+    {{/ifNotEq}}
+  </div>
+</div>

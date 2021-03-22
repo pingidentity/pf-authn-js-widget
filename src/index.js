@@ -95,6 +95,8 @@ export default class AuthnWidget {
     this.registerMfaEventHandler = this.registerMfaEventHandler.bind(this);
     this.registerMfaChangeDeviceEventHandler = this.registerMfaChangeDeviceEventHandler.bind(this);
     this.handleMfaDeviceChange = this.handleMfaDeviceChange.bind(this);
+    this.registerMfaUsePasscodeEventHandler = this.registerMfaUsePasscodeEventHandler.bind(this);
+    this.handleMfaUsePasscode = this.handleMfaUsePasscode.bind(this);
     this.postPushNotificationWait = this.postPushNotificationWait.bind(this);
     this.registerIdVerificationRequiredEventHandler = this.registerIdVerificationRequiredEventHandler.bind(this);
     this.postIdVerificationRequired = this.postIdVerificationRequired.bind(this);
@@ -127,11 +129,10 @@ export default class AuthnWidget {
     this.addPostRenderCallback('DEVICE_SELECTION_REQUIRED', this.postDeviceSelectionRequired);
     this.addEventHandler('OTP_REQUIRED', this.registerMfaEventHandler);
     this.addEventHandler('OTP_REQUIRED', this.registerMfaChangeDeviceEventHandler);
-
     this.addEventHandler('ASSERTION_REQUIRED', this.registerMfaEventHandler);
     this.addEventHandler('ASSERTION_REQUIRED', this.registerMfaChangeDeviceEventHandler);
     this.addPostRenderCallback('ASSERTION_REQUIRED', this.postAssertionRequired);
-
+    this.addEventHandler('PUSH_CONFIRMATION_WAITING', this.registerMfaUsePasscodeEventHandler);
     this.addPostRenderCallback('PUSH_CONFIRMATION_WAITING', this.postPushNotificationWait);
     this.addEventHandler('PUSH_CONFIRMATION_WAITING', this.registerMfaChangeDeviceEventHandler);
     this.addEventHandler('PUSH_CONFIRMATION_TIMED_OUT', this.registerMfaEventHandler);
@@ -489,11 +490,41 @@ export default class AuthnWidget {
   async handleMfaDeviceChange(evt) {
     evt.preventDefault();
     let state = await this.store.getState();
+    if (this.pollPushNoticationState) {
+      clearTimeout(this.pollPushNoticationState);
+    }
     state.status = 'DEVICE_SELECTION_REQUIRED';
     this.render(this.store.getPreviousStore(), state);
   }
 
+  registerMfaUsePasscodeEventHandler() {
+    if (document.getElementById('usePasscode')) {
+      document.getElementById('usePasscode')
+        .addEventListener('click', this.handleMfaUsePasscode);
+    }
+  }
+
+  async handleMfaUsePasscode(evt) {
+    evt.preventDefault();
+    clearTimeout(this.pollPushNoticationState);
+    let storeState = this.store.getStore();
+    storeState.status = 'OTP_REQUIRED';
+    this.render(this.store.getPreviousStore(), storeState);
+  }
+
   async postPushNotificationWait() {
+    let storeState = this.store.getStore();
+    if (storeState.status === 'OTP_REQUIRED') {
+      this.render(this.store.getPreviousStore(), storeState);
+      return;
+    } else if (storeState.errorCode === 'VALIDATION_ERROR') {
+      if (storeState.errorDetailCodes && storeState.errorDetailCodes.includes('INVALID_OTP')) {
+        storeState.status = 'OTP_REQUIRED';
+        this.render(this.store.getPreviousStore(), storeState);
+        return;
+      }
+    }
+
     if (document.querySelector("#spinnerId")) {
       document.querySelector('#spinnerId').style.display = 'block';
     }
@@ -501,6 +532,7 @@ export default class AuthnWidget {
     let pollState = await this.store.getState();
     if (pollState.status === 'PUSH_CONFIRMATION_WAITING') {
       // continue waiting
+      clearTimeout(this.pollPushNoticationState);
       this.pollPushNoticationState = setTimeout(() => {
         this.postPushNotificationWait();
       }, 1000);

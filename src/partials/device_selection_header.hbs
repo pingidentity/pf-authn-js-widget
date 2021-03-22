@@ -1,26 +1,46 @@
-{{#each devices as |device|}}
-  {{#ifEq device.id ../selectedDeviceRef.id}}
-    {{#ifEq device.type "Android"}}
-      <h1 class="heading">{{../headerStart}} {{device.name}} {{../headerEnd}}</h1>
-    {{else ifEq device.type "iPhone"}}
-      <h1 class="heading">{{../headerStart}} {{device.name}} {{../headerEnd}}</h1>
-    {{else ifEq device.type "TOTP"}}
-        <h1 class="heading">Authenticator App</h1>
-    {{else}}
-      <h1 class="heading">{{../headerStart}} {{device.type}} {{../headerEnd}}</h1>
-    {{/ifEq}}
-    {{#ifEq device.type "TOTP"}}
-      <div class="text-block" data-id="textblock">
-        <div class="text-block--overflow-wrap">
-          Enter the passcode displayed in your app to complete authentication
-        </div>
-      </div>
-    {{else}}
-      <div class="text-block" data-id="textblock">
-        <div class="text-block--overflow-wrap">
-          Enter the passcode that you received to complete authentication.
-        </div>
-      </div>
-    {{/ifEq}}
-  {{/ifEq}}
-{{/each}}
+{{#ifEq device.type "Android"}}
+  <h1 class="heading">PingOne Authenticator</h1>
+{{else ifEq device.type "iPhone"}}
+  <h1 class="heading">PingOne Authenticator</h1>
+{{else ifEq device.type "TOTP"}}
+  <h1 class="heading">Authenticator App</h1>
+{{else}}
+  <h1 class="heading">{{device.type}} {{headerEnd}}</h1>
+{{/ifEq}}
+{{#ifEq device.type "TOTP"}}
+  <div class="text-block" data-id="textblock">
+    <div class="text-block--overflow-wrap">
+      Enter the passcode displayed in your app to complete authentication.
+    </div>
+  </div>
+{{else ifEq device.type "Android"}}
+  <div class="text-block" data-id="textblock">
+    <div class="text-block--overflow-wrap">
+      Enter the passcode displayed in your app
+      {{#if device.pushEnabled}}
+        or
+        <a data-mfa-selection="{{device.id}}" data-id="anchor">retry authentication</a>
+      {{else}}
+        to complete authentication.
+      {{/if}}
+    </div>
+  </div>
+{{else ifEq device.type "iPhone"}}
+  <div class="text-block" data-id="textblock">
+    <div class="text-block--overflow-wrap">
+      Enter the passcode displayed in your app
+      {{#if device.pushEnabled}}
+        or
+        <a data-mfa-selection="{{device.id}}" data-id="anchor">retry authentication</a>
+      {{else}}
+        to complete authentication.
+      {{/if}}
+    </div>
+  </div>
+{{else}}
+  <div class="text-block" data-id="textblock">
+    <div class="text-block--overflow-wrap">
+      Enter the passcode that you received to complete authentication.
+    </div>
+  </div>
+{{/ifEq}}

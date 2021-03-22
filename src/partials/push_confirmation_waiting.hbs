@@ -9,4 +9,15 @@
     <p class="icon-feedback__label">Authenticating</p>
   </div>
   {{> device_selection_body bodyText='Request sent to:'}}
+  {{#each devices as |device|}}
+    {{#ifEq device.id ../selectedDeviceRef.id}}
+      {{#if device.otpEnabled}}
+        <div class="text-block" data-id="textblock" style="margin-top: 25px">
+          <div class="text-block--overflow-wrap">
+            <a id="usePasscode" data-id="change-button">Use passcode</a>
+          </div>
+        </div>
+      {{/if}}
+    {{/ifEq}}
+  {{/each}}
 </div>
