@@ -114,7 +114,6 @@ export default class AuthnWidget {
     this.addEventHandler('USERNAME_PASSWORD_REQUIRED', this.registerAltAuthSourceLinks);
     this.addEventHandler('REGISTRATION_REQUIRED', this.registerRegistrationLinks);
     this.addEventHandler('REGISTRATION_REQUIRED', this.registerAltAuthSourceLinks);
-    this.addPostRenderCallback('REGISTRATION_REQUIRED', this.focusFirstInput);
     this.addEventHandler('EXTERNAL_AUTHENTICATION_COMPLETED', this.postContinueAuthentication);
     this.addEventHandler('EXTERNAL_AUTHENTICATION_REQUIRED', this.registerReopenPopUpHandler);
     this.addPostRenderCallback('RESUME', this.resumeToPf);
@@ -127,7 +126,6 @@ export default class AuthnWidget {
     this.addEventHandler('DEVICE_SELECTION_REQUIRED', this.registerMfaEventHandler);
     this.addEventHandler('OTP_REQUIRED', this.registerMfaEventHandler);
     this.addEventHandler('OTP_REQUIRED', this.registerMfaChangeDeviceEventHandler);
-    this.addPostRenderCallback('OTP_REQUIRED', this.focusFirstInput);
 
     this.addEventHandler('ASSERTION_REQUIRED', this.registerMfaEventHandler);
     this.addEventHandler('ASSERTION_REQUIRED', this.registerMfaChangeDeviceEventHandler);
@@ -793,6 +791,21 @@ export default class AuthnWidget {
     if (this.store.state.showCaptcha && this.grecaptcha) {
       this.grecaptcha.render(this.captchaDivId);
     }
+
+    let alreadyAutofocus = false;
+    let inputElements = document.querySelectorAll("input:not(:disabled)")
+    inputElements.forEach(ele => {
+      if (ele.autofocus) {
+        alreadyAutofocus = true;
+      }
+    });
+    if(!alreadyAutofocus) {
+      let firstInput = document.querySelector("input[type=text]:not(:disabled), input[type=email]:not(:disabled), " +
+        "input[type=date]:not(:disabled), input[type=phone]:not(:disabled), input[type=password]:not(:disabled)");
+      if (firstInput) {
+        firstInput.focus();
+      }
+    }
   }
 
   getBrowserFlowId() {
@@ -927,14 +940,6 @@ export default class AuthnWidget {
       status.classList.remove('text-input__icon--success');
       status.classList.add('text-input__icon--error');
       document.querySelector('#submit').disabled = true;
-    }
-  }
-
-  focusFirstInput() {
-    let firstInput = document.querySelector("input[type=text]:not(:disabled), " +
-      "input[type=email]:not(:disabled), input[type=date]:not(:disabled), input[type=phone]:not(:disabled)");
-    if (firstInput) {
-      firstInput.focus();
     }
   }
 }
