@@ -2,7 +2,7 @@
   {{#if device.usable}}
   {{#isValidRpId device.rpId}}
     <div class="tile-button--side-icon tile-button tile-button--stacked-small"
-         data-id="device-selection-button" data-mfa-selection="{{device.id}}" role="button" tabindex="0">
+         data-id="device-selection-button" id="{{device.type}}-{{device.id}}" data-mfa-selection="{{device.id}}" role="button" tabindex="0">
       <div class="tile-button__icon-container">
         <div class="device-icon">
           {{#ifEq device.type "SMS"}}

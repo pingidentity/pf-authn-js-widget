@@ -126,6 +126,7 @@ export default class AuthnWidget {
     this.addPostRenderCallback('AUTHENTICATION_REQUIRED', this.postEmptyAuthentication);
     this.addPostRenderCallback('MFA_COMPLETED', this.postContinueAuthentication);
     this.addEventHandler('DEVICE_SELECTION_REQUIRED', this.registerMfaEventHandler);
+    this.addPostRenderCallback('DEVICE_SELECTION_REQUIRED', this.postDeviceSelectionRequired);
     this.addEventHandler('OTP_REQUIRED', this.registerMfaEventHandler);
     this.addEventHandler('OTP_REQUIRED', this.registerMfaChangeDeviceEventHandler);
     this.addEventHandler('ASSERTION_REQUIRED', this.registerMfaEventHandler);
@@ -377,6 +378,30 @@ export default class AuthnWidget {
       else
       {
         doWebAuthn(this);
+      }
+    });
+  }
+
+  postDeviceSelectionRequired() {
+    getCompatibility().then(value => {
+      if (value === 'SECURITY_KEY_ONLY')
+      {
+        var platformDevices = document.querySelectorAll("[id^='PLATFORM-']");
+        [].forEach.call(platformDevices, function(platformDevice) {
+          platformDevice.style.display = "none";
+        });
+      }
+      else if (value === 'NONE')
+      {
+        var platformDevices = document.querySelectorAll("[id^='PLATFORM-']");
+        [].forEach.call(platformDevices, function(platformDevice) {
+          platformDevice.style.display = "none";
+        });
+
+        var securityKeyDevices = document.querySelectorAll("[id^='SECURITY_KEY-']");
+        [].forEach.call(securityKeyDevices, function(securityKeyDevice) {
+          securityKeyDevice.style.display = "none";
+        });
       }
     });
   }
