@@ -4,8 +4,8 @@ import 'core-js/stable';
 import 'regenerator-runtime/runtime'; //for async await
 import Store from './store';
 import redirectlessConfigValidator from './validators/redirectless';
+import { getCompatibility,  doWebAuthn} from './utils/fidoFlowUtil';
 import { completeStateCallback } from './utils/redirectless';
-
 import './scss/main.scss';
 //uncomment to add your personal branding
 // import './scss/branding.scss';
@@ -33,14 +33,14 @@ export default class AuthnWidget {
   }
 
   static get CORE_STATES() {
-    return ['USERNAME_PASSWORD_REQUIRED', 'MUST_CHANGE_PASSWORD', 'NEW_PASSWORD_RECOMMENDED',
+    return ['USERNAME_PASSWORD_REQUIRED', 'MUST_CHANGE_PASSWORD', 'CHANGE_PASSWORD_EXTERNAL', 'NEW_PASSWORD_RECOMMENDED',
       'NEW_PASSWORD_REQUIRED', 'SUCCESSFUL_PASSWORD_CHANGE', 'ACCOUNT_RECOVERY_USERNAME_REQUIRED',
       'ACCOUNT_RECOVERY_OTL_VERIFICATION_REQUIRED', 'RECOVERY_CODE_REQUIRED', 'PASSWORD_RESET_REQUIRED',
       'SUCCESSFUL_PASSWORD_RESET', 'CHALLENGE_RESPONSE_REQUIRED', 'USERNAME_RECOVERY_EMAIL_REQUIRED',
       'USERNAME_RECOVERY_EMAIL_SENT', 'SUCCESSFUL_ACCOUNT_UNLOCK', 'IDENTIFIER_REQUIRED',
       'EXTERNAL_AUTHENTICATION_COMPLETED', 'EXTERNAL_AUTHENTICATION_FAILED', 'EXTERNAL_AUTHENTICATION_REQUIRED',
       'DEVICE_PROFILE_REQUIRED', 'REGISTRATION_REQUIRED', 'REFERENCE_ID_REQUIRED','CURRENT_CREDENTIALS_REQUIRED',
-      'DEVICE_SELECTION_REQUIRED', 'MFA_COMPLETED', 'MFA_FAILED', 'OTP_REQUIRED',
+      'DEVICE_SELECTION_REQUIRED', 'MFA_COMPLETED', 'MFA_FAILED', 'OTP_REQUIRED', 'ASSERTION_REQUIRED',
       'PUSH_CONFIRMATION_REJECTED', 'PUSH_CONFIRMATION_TIMED_OUT', 'PUSH_CONFIRMATION_WAITING',
       'ID_VERIFICATION_FAILED', 'ID_VERIFICATION_REQUIRED', 'ID_VERIFICATION_TIMED_OUT'];
   }
@@ -89,6 +89,7 @@ export default class AuthnWidget {
     this.handleReopenPopUp = this.handleReopenPopUp.bind(this);
     this.registerRegistrationLinks = this.registerRegistrationLinks.bind(this);
     this.handleRegisterUser = this.handleRegisterUser.bind(this);
+    this.verifyRegistrationPassword = this.verifyRegistrationPassword.bind(this);
     this.postDeviceProfileAction = this.postDeviceProfileAction.bind(this);
     this.registerAgentlessHandler = this.registerAgentlessHandler.bind(this);
     this.handleAgentlessSignOn = this.handleAgentlessSignOn.bind(this);
@@ -97,11 +98,14 @@ export default class AuthnWidget {
     this.registerMfaEventHandler = this.registerMfaEventHandler.bind(this);
     this.registerMfaChangeDeviceEventHandler = this.registerMfaChangeDeviceEventHandler.bind(this);
     this.handleMfaDeviceChange = this.handleMfaDeviceChange.bind(this);
+    this.registerMfaUsePasscodeEventHandler = this.registerMfaUsePasscodeEventHandler.bind(this);
+    this.handleMfaUsePasscode = this.handleMfaUsePasscode.bind(this);
     this.postPushNotificationWait = this.postPushNotificationWait.bind(this);
     this.registerIdVerificationRequiredEventHandler = this.registerIdVerificationRequiredEventHandler.bind(this);
     this.postIdVerificationRequired = this.postIdVerificationRequired.bind(this);
     this.handleIdVerificationInProgress = this.handleIdVerificationInProgress.bind(this);
     this.handleIdVerificationFailed = this.handleIdVerificationFailed.bind(this);
+    this.postAssertionRequired = this.postAssertionRequired.bind(this);
     this.pollCheckGet = this.pollCheckGet.bind(this);
     this.stateTemplates = new Map();  //state -> handlebar templates
     this.eventHandler = new Map();  //state -> eventHandlers
@@ -125,8 +129,13 @@ export default class AuthnWidget {
     this.addPostRenderCallback('AUTHENTICATION_REQUIRED', this.postEmptyAuthentication);
     this.addPostRenderCallback('MFA_COMPLETED', this.postContinueAuthentication);
     this.addEventHandler('DEVICE_SELECTION_REQUIRED', this.registerMfaEventHandler);
+    this.addPostRenderCallback('DEVICE_SELECTION_REQUIRED', this.postDeviceSelectionRequired);
     this.addEventHandler('OTP_REQUIRED', this.registerMfaEventHandler);
     this.addEventHandler('OTP_REQUIRED', this.registerMfaChangeDeviceEventHandler);
+    this.addEventHandler('ASSERTION_REQUIRED', this.registerMfaEventHandler);
+    this.addEventHandler('ASSERTION_REQUIRED', this.registerMfaChangeDeviceEventHandler);
+    this.addPostRenderCallback('ASSERTION_REQUIRED', this.postAssertionRequired);
+    this.addEventHandler('PUSH_CONFIRMATION_WAITING', this.registerMfaUsePasscodeEventHandler);
     this.addPostRenderCallback('PUSH_CONFIRMATION_WAITING', this.postPushNotificationWait);
     this.addEventHandler('PUSH_CONFIRMATION_WAITING', this.registerMfaChangeDeviceEventHandler);
     this.addEventHandler('PUSH_CONFIRMATION_TIMED_OUT', this.registerMfaEventHandler);
@@ -152,6 +161,7 @@ export default class AuthnWidget {
     this.actionModels.set('clearIdentifier', { required: ['identifier'], properties: ['identifier'] });
     this.actionModels.set('registerUser', {required: ['password', 'fieldValues'], properties: ['password', 'captchaResponse', 'fieldValues', 'thisIsMyDevice']});
     this.actionModels.set('checkOtp', {required: ['otp']});
+    this.actionModels.set('checkAssertion', {required: ['assertion', 'origin', 'compatibility'],  properties: ['assertion', 'origin', 'compatibility'] });
   }
 
   init() {
@@ -243,6 +253,8 @@ export default class AuthnWidget {
 
   registerRegistrationLinks() {
     Array.from(document.querySelectorAll('[data-registrationactionid]')).forEach(element => element.addEventListener('click', this.handleRegisterUser));
+    Array.from(document.querySelectorAll("select.required, input[type='date'].required")).forEach(element => element.addEventListener('change', this.enableSubmit));
+    Array.from(document.querySelectorAll("input[type='password']")).forEach(element => element.addEventListener('input', this.verifyRegistrationPassword));
   }
 
   handleIdFirstLinks(evt) {
@@ -335,6 +347,68 @@ export default class AuthnWidget {
     this.checkPopupStatus(windowReference);
   }
 
+
+  postAssertionRequired()
+  {
+    let data = this.store.getStore();
+    var selectedDevice = data.devices.filter(device => {return device.id === data.selectedDeviceRef.id;});
+    getCompatibility().then(value => {
+      // compare value with received, if there is no match, trigger cancel flow
+      // PLATFORM - FULL
+      // SECURITY_KEY - SECURITY_KEY_ONLY
+      if ( (selectedDevice[0].type === 'SECURITY_KEY' && value === 'NONE') || (selectedDevice[0].type === 'PLATFORM' && value !== 'FULL') )
+      {
+        // Cancel authentication if this is the only device so we don't loop
+        console.log("No acceptable authenticator");
+        if(data.devices.length == 1)
+        {
+          // Hide back button and all other stuff. Only Cancel is allowed
+          document.querySelector('#assertionRequiredSpinnerId').style.display = 'none';
+          document.querySelector('#assertionRequiredAuthenticatingId').style.display = 'none';
+          document.querySelector('#unsupportedDeviceId').style.display = 'block';
+          document.querySelector('#changeDevice').style.display = 'none';
+          document.querySelector('#deviceInfoBlockId').style.display = 'none';
+        }
+        else
+        {
+          // Hide spinner and info section, show error so user can go back to device selection if required or cancel
+          document.querySelector('#assertionRequiredSpinnerId').style.display = 'none';
+          document.querySelector('#assertionRequiredAuthenticatingId').style.display = 'none';
+          document.querySelector('#unsupportedDeviceId').style.display = 'block';
+          document.querySelector('#deviceInfoBlockId').style.display = 'none';
+        }
+      }
+      else
+      {
+        doWebAuthn(this);
+      }
+    });
+  }
+
+  postDeviceSelectionRequired() {
+    getCompatibility().then(value => {
+      if (value === 'SECURITY_KEY_ONLY')
+      {
+        var platformDevices = document.querySelectorAll("[id^='PLATFORM-']");
+        [].forEach.call(platformDevices, function(platformDevice) {
+          platformDevice.style.display = "none";
+        });
+      }
+      else if (value === 'NONE')
+      {
+        var platformDevices = document.querySelectorAll("[id^='PLATFORM-']");
+        [].forEach.call(platformDevices, function(platformDevice) {
+          platformDevice.style.display = "none";
+        });
+
+        var securityKeyDevices = document.querySelectorAll("[id^='SECURITY_KEY-']");
+        [].forEach.call(securityKeyDevices, function(securityKeyDevice) {
+          securityKeyDevice.style.display = "none";
+        });
+      }
+    });
+  }
+
   postDeviceProfileAction() {
     let data = this.store.getStore();
     let script;
@@ -419,11 +493,41 @@ export default class AuthnWidget {
   async handleMfaDeviceChange(evt) {
     evt.preventDefault();
     let state = await this.store.getState();
+    if (this.pollPushNoticationState) {
+      clearTimeout(this.pollPushNoticationState);
+    }
     state.status = 'DEVICE_SELECTION_REQUIRED';
     this.render(this.store.getPreviousStore(), state);
   }
 
+  registerMfaUsePasscodeEventHandler() {
+    if (document.getElementById('usePasscode')) {
+      document.getElementById('usePasscode')
+        .addEventListener('click', this.handleMfaUsePasscode);
+    }
+  }
+
+  async handleMfaUsePasscode(evt) {
+    evt.preventDefault();
+    clearTimeout(this.pollPushNoticationState);
+    let storeState = this.store.getStore();
+    storeState.status = 'OTP_REQUIRED';
+    this.render(this.store.getPreviousStore(), storeState);
+  }
+
   async postPushNotificationWait() {
+    let storeState = this.store.getStore();
+    if (storeState.status === 'OTP_REQUIRED') {
+      this.render(this.store.getPreviousStore(), storeState);
+      return;
+    } else if (storeState.errorCode === 'VALIDATION_ERROR') {
+      if (storeState.errorDetailCodes && storeState.errorDetailCodes.includes('INVALID_OTP')) {
+        storeState.status = 'OTP_REQUIRED';
+        this.render(this.store.getPreviousStore(), storeState);
+        return;
+      }
+    }
+
     if (document.querySelector("#spinnerId")) {
       document.querySelector('#spinnerId').style.display = 'block';
     }
@@ -431,6 +535,7 @@ export default class AuthnWidget {
     let pollState = await this.store.getState();
     if (pollState.status === 'PUSH_CONFIRMATION_WAITING') {
       // continue waiting
+      clearTimeout(this.pollPushNoticationState);
       this.pollPushNoticationState = setTimeout(() => {
         this.postPushNotificationWait();
       }, 1000);
@@ -468,7 +573,9 @@ export default class AuthnWidget {
   }
 
   enableSubmit() {
-    let nodes = (document.querySelectorAll('input.required[type=text]:not(:disabled), input.required[type=password]:not(:disabled), input.required[type=email]:not(:disabled)'));
+    let nodes = document.querySelectorAll('input.required[type=text]:not(:disabled), ' +
+      'input.required[type=password]:not(:disabled), input.required[type=email]:not(:disabled), ' +
+      'select.required:not(:disabled), input.required[type=date]:not(:disabled)');
     let disabled = false;
     if (nodes) {
       nodes.forEach(input => {
@@ -832,5 +939,28 @@ export default class AuthnWidget {
     });
 
     this.dispatchWithCaptcha("registerUser", payload)
+  }
+
+  verifyRegistrationPassword() {
+    let status = document.getElementById('passwordStatus');
+
+    let pass1 = document.querySelector('#newpassword');
+    let pass2 = document.querySelector('#password');
+
+    if (pass1.value.length === 0 || pass2.value.length === 0) {
+      status.style.display = 'none';
+      return;
+    } else {
+      status.style.display = 'block';
+    }
+
+    if (pass1.value === pass2.value) {
+      status.classList.remove('text-input__icon--error');
+      status.classList.add('text-input__icon--success');
+    } else {
+      status.classList.remove('text-input__icon--success');
+      status.classList.add('text-input__icon--error');
+      document.querySelector('#submit').disabled = true;
+    }
   }
 }

@@ -83,6 +83,9 @@ export default class Store {
         if (document.querySelector("#AuthnWidgetForm")) {
           document.querySelector("#AuthnWidgetForm").style.display = 'none';
         }
+        if (document.querySelector(".feedback--error")) {
+          document.querySelector(".feedback--error").style.display = 'none';
+        }
       }, 600)
     }
     switch (method) {
@@ -169,10 +172,18 @@ export default class Store {
 
   getErrorDetails(json) {
     let errors = {
+      errorCode: '',
+      errorDetailCodes: [],
       userMessages: [],
       failedValidators: [],
       satisfiedValidators: []
     };
+    if (json.code) {
+      errors.errorCode = json.code;
+      if (json.details) {
+        json.details.forEach(it => errors.errorDetailCodes.push(it.code));
+      }
+    }
     if (json.code && json.code === 'VALIDATION_ERROR' || json.code === "REGISTRATION_FAILED" || json.code === 'REQUEST_FAILED') {
       if (json.details) {
         json.details.forEach(msg => {
