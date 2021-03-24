@@ -792,14 +792,8 @@ export default class AuthnWidget {
       this.grecaptcha.render(this.captchaDivId);
     }
 
-    let alreadyAutofocus = false;
-    let inputElements = document.querySelectorAll("input:not(:disabled)")
-    inputElements.forEach(ele => {
-      if (ele.autofocus) {
-        alreadyAutofocus = true;
-      }
-    });
-    if(!alreadyAutofocus) {
+    let autofocusInput = document.querySelector("input:not(:disabled)[autofocus]")
+    if (!autofocusInput) {
       let firstInput = document.querySelector("input[type=text]:not(:disabled), input[type=email]:not(:disabled), " +
         "input[type=date]:not(:disabled), input[type=phone]:not(:disabled), input[type=password]:not(:disabled)");
       if (firstInput) {
