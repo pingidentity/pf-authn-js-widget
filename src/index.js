@@ -250,7 +250,7 @@ export default class AuthnWidget {
 
   registerRegistrationLinks() {
     Array.from(document.querySelectorAll('[data-registrationactionid]')).forEach(element => element.addEventListener('click', this.handleRegisterUser));
-    Array.from(document.querySelectorAll("select.required, input[type='date'].required")).forEach(element => element.addEventListener('change', this.enableSubmit));
+    Array.from(document.querySelectorAll("select.required, input[type='date'].required, input.required[type='checkbox']")).forEach(element => element.addEventListener('change', this.enableSubmit));
     Array.from(document.querySelectorAll("input[type='password']")).forEach(element => element.addEventListener('input', this.verifyRegistrationPassword));
   }
 
@@ -572,7 +572,8 @@ export default class AuthnWidget {
   enableSubmit() {
     let nodes = document.querySelectorAll('input.required[type=text]:not(:disabled), ' +
       'input.required[type=password]:not(:disabled), input.required[type=email]:not(:disabled), ' +
-      'select.required:not(:disabled), input.required[type=date]:not(:disabled)');
+      'select.required:not(:disabled), input.required[type=date]:not(:disabled), ' +
+      'div.checkbox__single.required > label > input.required[type=checkbox]:not(:disabled)');
     let disabled = false;
     if (nodes) {
       nodes.forEach(input => {
@@ -591,9 +592,32 @@ export default class AuthnWidget {
             disabled = true;
           }
         }
+        if (input.type === 'checkbox') {
+          if (!input.checked) {
+            disabled = true;
+          }
+        }
       });
     }
-
+    let checkboxGroups = document.querySelectorAll("div.required.checkbox__group")
+    if (checkboxGroups) {
+      checkboxGroups.forEach(checkboxes => {
+        let oneChecked = false;
+        let inputs = checkboxes.querySelectorAll("input:not(:disabled)")
+        if (inputs) {
+          inputs.forEach(checkbox => {
+            if (checkbox.checked) {
+              oneChecked = true;
+            }
+          })
+        } else {
+          oneChecked = true;
+        }
+        if (!oneChecked) {
+          disabled = true;
+        }
+      })
+    }
     document.querySelector('#submit').disabled = disabled;
   }
 
@@ -823,6 +847,15 @@ export default class AuthnWidget {
     }
     if (this.store.state.showCaptcha && this.grecaptcha) {
       this.grecaptcha.render(this.captchaDivId);
+    }
+
+    let autofocusInput = document.querySelector("input:not(:disabled)[autofocus]")
+    if (!autofocusInput) {
+      let firstInput = document.querySelector("input[type=text]:not(:disabled), input[type=email]:not(:disabled), " +
+        "input[type=date]:not(:disabled), input[type=phone]:not(:disabled), input[type=password]:not(:disabled)");
+      if (firstInput) {
+        firstInput.focus();
+      }
     }
   }
 

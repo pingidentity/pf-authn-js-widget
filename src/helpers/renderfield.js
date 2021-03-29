@@ -66,21 +66,24 @@ module.exports = function (field_info) {
       return new handlebars.SafeString(html);
     case "checkbox":
       html = '' +
-        '<label class="checkbox"' +
-        '       for="' + escaped_id + '">' +
-        '  <input type="checkbox"' +
-        '         class="' + css_classes + ' checkbox__input"' +
-        '         id="' + escaped_id + '"' +
-        '         name="' + escaped_id + '"' +
-                  ((field_value.toLowerCase() === 'true' || field_value.toLowerCase() === 'on') ? 'checked' : '') +
-                  ((field_info.readonly) ? " disabled " : "") +
-        '  />' +
-        '    <span class="checkbox__standin"></span>' +
-        '    <span class="checkbox__label">' + escaped_label + '</span>' +
-        '</label>';
+        '<div class="' + css_classes + ' checkbox__single">' +
+          '<label class="checkbox"' +
+          '       for="' + escaped_id + '">' +
+          '  <input type="checkbox"' +
+          '         class="' + css_classes + ' checkbox__input"' +
+          '         id="' + escaped_id + '"' +
+          '         name="' + escaped_id + '"' +
+                    ((field_value.toLowerCase() === 'true' || field_value.toLowerCase() === 'on') ? 'checked' : '') +
+                    ((field_info.readonly) ? " disabled " : "") +
+          '  />' +
+          '    <span class="checkbox__standin"></span>' +
+          '    <span class="checkbox__label">' + escaped_label + '</span>' +
+          '</label>' +
+        '</div>';
       return new handlebars.SafeString(html);
     case "checkbox group":
-      html = '<div class="checkbox__label">' + escaped_label + '</div>';
+      html = '<div class="checkbox__group__label">' + escaped_label + '</div>' +
+                '<div class="' + css_classes + ' checkbox__group">';
       field_info.options.forEach(option => {
         html +=
           '<div class="checkbox_group_labels">' +
@@ -98,6 +101,7 @@ module.exports = function (field_info) {
           '    </label>' +
           '</div>';
       });
+      html += '</div>'
       return new handlebars.SafeString(html);
 
     case "hidden":
