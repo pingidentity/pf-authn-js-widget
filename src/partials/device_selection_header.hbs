@@ -37,6 +37,12 @@
       {{/if}}
     </div>
   </div>
+{{else ifEq device.type "Voice"}}
+  <div class="text-block" data-id="textblock">
+    <div class="text-block--overflow-wrap">
+      Enter the passcode you heard to complete authentication.
+    </div>
+  </div>
 {{else}}
   <div class="text-block" data-id="textblock">
     <div class="text-block--overflow-wrap">

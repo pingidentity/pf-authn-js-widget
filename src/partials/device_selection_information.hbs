@@ -6,7 +6,11 @@
           <div class="stack stack--small" data-id="stack">
             <div class="text-block" data-id="textblock">
               <div class="text-block--overflow-wrap">
-                {{device.type}} sent to:
+                {{#ifEq device.type "Voice" }}
+                  Calling:
+                {{else}}
+                  {{device.type}} sent to:
+                {{/ifEq}}
               </div>
             </div>
             <div class="text-block text-block--large" data-id="textblock">
@@ -19,7 +23,11 @@
             <div>
               <button class="button file-input--button button--tertiary" data-id="button"
                       type="button" data-mfa-selection="{{device.id}}">
-                Resend
+                {{#ifEq device.type "Voice" }}
+                  Call again
+                {{else}}
+                  Resend
+                {{/ifEq}}
               </button>
             </div>
           </div>
