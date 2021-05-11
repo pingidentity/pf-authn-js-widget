@@ -1,6 +1,9 @@
 # PingAccess Redirectless support
 
-PingAccess specific callback functions used to build a configuration object for [redirectless mode](/docs/redirectless.md).    
+PingAccess specific callback functions used to build a configuration object for [redirectless mode](/docs/redirectless.md).
+After successfully completing the redirectless flow, APIs protected by PingAccess can be accessed by configuring the 
+fetch API or XMLHttpRequest API to include credentials. This configuration will ensure that the PingAccess session 
+cookie, established by the redirectless flow, is included in API requests.   
 
 ## Usage
 
