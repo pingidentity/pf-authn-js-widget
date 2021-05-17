@@ -220,3 +220,40 @@ input:read-only {
   top: 15px;
   left: 15px
 }
+
+
+
+.popper-container {
+    position: absolute;
+    display: none;
+    right: 0;
+}
+
+.popper-container:before,
+.popper-container:after {
+    content: '';
+    position: absolute;
+    bottom: 100%;
+    right: 13px;
+    display: block;
+    margin-bottom: -1px;
+}
+
+.popper-container:before {
+    border-color: transparent transparent #e8ebed transparent;
+    border-style: solid;
+    border-width: 10px;
+    right: 11px;
+    z-index: 1;
+}
+
+.popper-container:after {
+    border-color: transparent transparent white transparent;
+    border-style: solid;
+    border-width: 8px;
+    z-index: 2;
+}
+
+.popover-menu__item {
+    white-space: nowrap;
+}
