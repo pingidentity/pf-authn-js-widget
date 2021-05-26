@@ -1,0 +1,25 @@
+<div class="card card--wide">
+  <div class="org-logo">
+    <img class="org-logo__image" src="{{logo}}" alt="Company Logo"/>
+  </div>
+  <h1 class="heading">Email Verification</h1>
+  <div class="text-block">
+    <div class="text-block__text">
+      <p>A verification email was sent to <span style="font-weight:bold">{{email}}</span>. Check your email and follow the directions to verify your account.</p>
+      <p>Didn't receive the email? <a href="#" data-actionid="sendEmailVerificationOtl">Resend</a></p>
+    </div>
+  </div>
+  <form class="form form--margin-small" id="AuthnWidgetForm">
+    <div class="button-set">
+      <button data-actionId="poll" class="button button--primary brand-primary-bg">Continue</button>
+      {{#if profileManagementUrl}}
+      <div class="text-block">
+        <a href="{{profileManagementUrl}}" target="_blank">Manage Profile</a>
+      </div>
+      {{/if}}
+      <div class="text-block">
+        <a href="#" data-actionid="cancel">Cancel</a>
+      </div>
+    </div>
+  </form>
+</div>
