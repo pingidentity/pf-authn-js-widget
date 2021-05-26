@@ -83,6 +83,7 @@ export default class AuthnWidget {
     this.openExternalAuthnPopup = this.openExternalAuthnPopup.bind(this);
     this.externalAuthnFailure = this.externalAuthnFailure.bind(this);
     this.postContinueAuthentication = this.postContinueAuthentication.bind(this);
+    this.postEmailVerificationRequired = this.postEmailVerificationRequired.bind(this);
     this.registerReopenPopUpHandler = this.registerReopenPopUpHandler.bind(this);
     this.handleReopenPopUp = this.handleReopenPopUp.bind(this);
     this.registerRegistrationLinks = this.registerRegistrationLinks.bind(this);
@@ -144,6 +145,7 @@ export default class AuthnWidget {
     this.addPostRenderCallback('ID_VERIFICATION_IN_PROGRESS', this.handleIdVerificationInProgress);
     this.addPostRenderCallback('ID_VERIFICATION_COMPLETED', this.postContinueAuthentication);
     this.addEventHandler('ID_VERIFICATION_FAILED', this.handleIdVerificationFailed);
+    this.addPostRenderCallback('EMAIL_VERIFICATION_REQUIRED', this.postEmailVerificationRequired);
 
     this.actionModels.set('checkUsernamePassword', { required: ['username', 'password'], properties: ['username', 'password', 'rememberMyUsername', 'thisIsMyDevice', 'captchaResponse'] });
     this.actionModels.set('initiateAccountRecovery', { properties: ['usernameHint'] });
@@ -325,6 +327,22 @@ export default class AuthnWidget {
     setTimeout(() => {
       this.store.dispatch('POST_FLOW', 'continueAuthentication', '{}');
     }, 1000)
+  }
+
+  postEmailVerificationRequired() {
+    clearTimeout(this.emailVerificationRequiredStateTimeout);
+    if (this.store.getStore().status !== this.store.getPreviousStore().status) {
+      if (document.querySelector("#notification")) {
+        document.querySelector('#notification').style.display = 'none';
+      }
+    }
+    else {
+      this.emailVerificationRequiredStateTimeout = setTimeout(() => {
+        if (document.querySelector("#notification")) {
+          document.querySelector('#notification').style.display = 'none';
+        }
+      }, 5000)
+    }
   }
 
   registerReopenPopUpHandler() {
