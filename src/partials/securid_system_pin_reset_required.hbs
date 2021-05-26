@@ -1,0 +1,32 @@
+<div class="card">
+  <div class="org-logo">
+    <img class="org-logo__image" src="{{logo}}" alt="Company Logo" />
+  </div>
+  {{> errors}}
+  {{> spinner}}
+  <form class="form" id="AuthnWidgetForm">
+    <div class="text-block" data-id="textblock">
+      <div class="text-block--overflow-wrap">
+        Either you do not have a PIN yet, or security policy requires a PIN change.<br/>Below is your new PIN information, please make a note of that and press 'Ok' to proceed.
+      </div>
+    </div>
+    <div class="text-block" data-id="textblock">
+      <div class="text-block--overflow-wrap">
+        New Pin<br> <strong>{{pin}}</strong>
+      </div>
+    </div>
+    <div class="text-block" data-id="textblock">
+      <div class="text-block--overflow-wrap">
+        Remember your new RSA SecurID PIN. It will not be displayed again. Note: The PIN will not be set until you press 'Submit' and get the re-authentication form.
+      </div>
+    </div>
+    <button id="submit" data-actionid="continue" type="submit" class="button button--primary brand-primary-bg">
+      Submit
+    </button>
+    <div class="text-block">
+      <div class="text-block--overflow-wrap">
+        <a tabindex="0" data-actionId="cancel" target="_self" class="anchor">Cancel</a>
+      </div>
+    </div>
+  </form>
+</div>

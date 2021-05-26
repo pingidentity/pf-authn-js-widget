@@ -1,0 +1,27 @@
+<div class="card">
+  <div class="org-logo">
+    <img class="org-logo__image" src="{{logo}}" alt="Company Logo" />
+  </div>
+  {{> errors}}
+  {{> spinner}}
+  <form class="form" id="AuthnWidgetForm">
+    <div class="text-block" data-id="textblock">
+      <div class="text-block--overflow-wrap">
+        Please re-authenticate to complete your pin reset.<br/><br/>Wait until the tokencode (the number on your RSA SecurID token) changes, then enter that new tokencode. <br><strong>Note</strong>: It may take a minute or more for the tokencode to change.
+      </div>
+    </div>
+    <div class="float-label">
+      <input type="password" class="text-input float-label__input required" id="passcode" name="passcode"
+        placeholder="Passcode" />
+      <label class="float-label__label" for="passcode">Passcode</label>
+    </div>
+    <button id="submit" data-actionid="checkPasscode" type="submit" class="button button--primary brand-primary-bg">
+      Submit
+    </button>
+    <div class="text-block">
+      <div class="text-block--overflow-wrap">
+        <a tabindex="0" data-actionId="cancel" target="_self" class="anchor">Cancel</a>
+      </div>
+    </div>
+  </form>
+</div>
