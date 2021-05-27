@@ -83,7 +83,6 @@ export default class AuthnWidget {
     this.openExternalAuthnPopup = this.openExternalAuthnPopup.bind(this);
     this.externalAuthnFailure = this.externalAuthnFailure.bind(this);
     this.postContinueAuthentication = this.postContinueAuthentication.bind(this);
-    this.postEmailVerificationRequired = this.postEmailVerificationRequired.bind(this);
     this.registerReopenPopUpHandler = this.registerReopenPopUpHandler.bind(this);
     this.handleReopenPopUp = this.handleReopenPopUp.bind(this);
     this.registerRegistrationLinks = this.registerRegistrationLinks.bind(this);
@@ -106,6 +105,7 @@ export default class AuthnWidget {
     this.handleIdVerificationFailed = this.handleIdVerificationFailed.bind(this);
     this.postAssertionRequired = this.postAssertionRequired.bind(this);
     this.pollCheckGet = this.pollCheckGet.bind(this);
+    this.postEmailVerificationRequired = this.postEmailVerificationRequired.bind(this);
     this.stateTemplates = new Map();  //state -> handlebar templates
     this.eventHandler = new Map();  //state -> eventHandlers
     this.postRenderCallbacks = new Map();
