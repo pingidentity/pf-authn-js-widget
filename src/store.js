@@ -166,9 +166,7 @@ export default class Store {
         daysToExpireMsg = "in " + daysToExpire + " days";
       }
     }
-    let actionId = actionid;
-
-    combinedData = { ...combinedData, checkRecaptcha: this.checkRecaptcha, daysToExpireMsg, actionId };
+    combinedData = { ...combinedData, checkRecaptcha: this.checkRecaptcha, daysToExpireMsg, actionid };
     return combinedData;
   }
 

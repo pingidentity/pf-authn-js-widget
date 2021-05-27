@@ -22,14 +22,14 @@
       </div>
     </div>
   </form>
-  {{#ifEq actionId "poll"}}
-  <div id="notification" class="icon-feedback icon-feedback--small">
-    <span class="icon-feedback__icon pingicon-ghost-success icon-feedback--success"></span>
+  {{#ifEq actionid "poll"}}
+  <div id="notification" class="icon-feedback icon-feedback--warning icon-feedback--small">
+    <span class="icon-feedback__icon pingicon-ghost-error"></span>
     <p class="icon-feedback__label">Check your email and come back here to continue.</p>
   </div>
-  {{else ifEq actionId "sendEmailVerificationOtl"}}
-  <div id="notification" class="icon-feedback icon-feedback--small">
-    <span class="icon-feedback__icon pingicon-ghost-success icon-feedback--success"></span>
+  {{else ifEq actionid "sendEmailVerificationOtl"}}
+  <div id="notification" class="icon-feedback icon-feedback--success icon-feedback--small">
+    <span class="icon-feedback__icon pingicon-ghost-success"></span>
     <p class="icon-feedback__label">A verification email has been sent. Check your email and come back here to continue.</p>
   </div>
   {{/ifEq}}
