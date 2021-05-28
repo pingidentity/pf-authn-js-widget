@@ -104,7 +104,6 @@ export default class AuthnWidget {
     this.postIdVerificationRequired = this.postIdVerificationRequired.bind(this);
     this.handleIdVerificationInProgress = this.handleIdVerificationInProgress.bind(this);
     this.handleIdVerificationFailed = this.handleIdVerificationFailed.bind(this);
-    this.handleSecureIdCredentialRequired = this.handleSecureIdCredentialRequired.bind(this);
     this.checkSecurIdPinReset = this.checkSecurIdPinReset.bind(this);
     this.postAssertionRequired = this.postAssertionRequired.bind(this);
     this.pollCheckGet = this.pollCheckGet.bind(this);
@@ -147,7 +146,6 @@ export default class AuthnWidget {
     this.addPostRenderCallback('ID_VERIFICATION_IN_PROGRESS', this.handleIdVerificationInProgress);
     this.addPostRenderCallback('ID_VERIFICATION_COMPLETED', this.postContinueAuthentication);
     this.addEventHandler('ID_VERIFICATION_FAILED', this.handleIdVerificationFailed);
-    this.addEventHandler('SECURID_CREDENTIAL_REQUIRED', this.handleSecureIdCredentialRequired);
     this.addEventHandler('SECURID_USER_PIN_RESET_REQUIRED', this.checkSecurIdPinReset);
 
     this.actionModels.set('checkUsernamePassword', { required: ['username', 'password'], properties: ['username', 'password', 'rememberMyUsername', 'thisIsMyDevice', 'captchaResponse'] });
@@ -727,33 +725,32 @@ export default class AuthnWidget {
     return errorMessage;
   }
 
-  async handleSecureIdCredentialRequired() {
-    let currState = this.store.getStore();
-
-    if (currState.authFailed)
-    {
-      let newState = await this.store.getState();
-      let setNewState = currState.remainingTries != newState.remainingTries;
-
-      if (setNewState) {
-        document.getElementById('errorMessage').innerHTML = "Login Failed. '" + newState.remainingTries + "' attempt(s) remaining.";
-      }
-    }
-  }
-
   checkSecurIdPinReset() {
     Array.from(document.querySelectorAll("input[type='password']")).forEach(element => element.addEventListener('input', this.checkPinMatch));
   }
 
   checkPinMatch() {
+    var status = document.getElementById('pinStatus');
+    var errorMessage = document.getElementById('errorMessage');
     var pin = document.getElementById("newPin").value;
     var confirmPin = document.getElementById("confirmPin").value;
-    if (pin != "" && confirmPin != "" && pin == confirmPin) {
-        document.getElementById("submit").disabled = false;
-        document.getElementById("pinMismatch").style.display = "none";
+
+    if (pin.length === 0 || confirmPin.length === 0) {
+      status.style.display = 'none';
+      return;
     } else {
-        document.getElementById("submit").disabled = true;
-        document.getElementById("pinMismatch").style.display = "flex";
+      status.style.display = 'block';
+    }
+
+    if (pin === confirmPin) {
+      status.classList.remove('text-input__icon--error');
+      errorMessage.style.display = "none";
+      status.classList.add('text-input__icon--success');
+    } else {
+      status.classList.remove('text-input__icon--success');
+      status.classList.add('text-input__icon--error');
+      errorMessage.style.display = "block";
+      document.querySelector('#submit').disabled = true;
     }
   }
 
