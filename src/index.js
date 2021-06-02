@@ -39,7 +39,9 @@ export default class AuthnWidget {
       'DEVICE_PROFILE_REQUIRED', 'REGISTRATION_REQUIRED', 'REFERENCE_ID_REQUIRED','CURRENT_CREDENTIALS_REQUIRED',
       'DEVICE_SELECTION_REQUIRED', 'MFA_COMPLETED', 'MFA_FAILED', 'OTP_REQUIRED', 'ASSERTION_REQUIRED',
       'PUSH_CONFIRMATION_REJECTED', 'PUSH_CONFIRMATION_TIMED_OUT', 'PUSH_CONFIRMATION_WAITING',
-      'ID_VERIFICATION_FAILED', 'ID_VERIFICATION_REQUIRED', 'ID_VERIFICATION_TIMED_OUT', 'ACCOUNT_LINKING_FAILED'];
+      'ID_VERIFICATION_FAILED', 'ID_VERIFICATION_REQUIRED', 'ID_VERIFICATION_TIMED_OUT', 'ACCOUNT_LINKING_FAILED',
+      'SECURID_CREDENTIAL_REQUIRED', 'SECURID_NEXT_TOKENCODE_REQUIRED', 'SECURID_REAUTHENTICATION_REQUIRED',
+      'SECURID_SYSTEM_PIN_RESET_REQUIRED', 'SECURID_USER_PIN_RESET_REQUIRED'];
   }
 
   static get COMMUNICATION_ERROR_MSG() {
@@ -102,6 +104,7 @@ export default class AuthnWidget {
     this.postIdVerificationRequired = this.postIdVerificationRequired.bind(this);
     this.handleIdVerificationInProgress = this.handleIdVerificationInProgress.bind(this);
     this.handleIdVerificationFailed = this.handleIdVerificationFailed.bind(this);
+    this.checkSecurIdPinReset = this.checkSecurIdPinReset.bind(this);
     this.postAssertionRequired = this.postAssertionRequired.bind(this);
     this.pollCheckGet = this.pollCheckGet.bind(this);
     this.stateTemplates = new Map();  //state -> handlebar templates
@@ -143,6 +146,7 @@ export default class AuthnWidget {
     this.addPostRenderCallback('ID_VERIFICATION_IN_PROGRESS', this.handleIdVerificationInProgress);
     this.addPostRenderCallback('ID_VERIFICATION_COMPLETED', this.postContinueAuthentication);
     this.addEventHandler('ID_VERIFICATION_FAILED', this.handleIdVerificationFailed);
+    this.addEventHandler('SECURID_USER_PIN_RESET_REQUIRED', this.checkSecurIdPinReset);
 
     this.actionModels.set('checkUsernamePassword', { required: ['username', 'password'], properties: ['username', 'password', 'rememberMyUsername', 'thisIsMyDevice', 'captchaResponse'] });
     this.actionModels.set('initiateAccountRecovery', { properties: ['usernameHint'] });
@@ -159,6 +163,10 @@ export default class AuthnWidget {
     this.actionModels.set('registerUser', {required: ['password', 'fieldValues'], properties: ['password', 'captchaResponse', 'fieldValues', 'thisIsMyDevice']});
     this.actionModels.set('checkOtp', {required: ['otp']});
     this.actionModels.set('checkAssertion', {required: ['assertion', 'origin', 'compatibility'],  properties: ['assertion', 'origin', 'compatibility'] });
+    this.actionModels.set('checkCredential', { required: ['passcode'], properties: ['username', 'passcode'] });
+    this.actionModels.set('checkNextTokencode', { required: ['tokencode'], properties: ['tokencode'] });
+    this.actionModels.set('checkPasscode', { required: ['passcode'], properties: ['passcode'] });
+    this.actionModels.set('resetPin', { required: ['newPin', 'confirmPin'], properties: ['newPin', 'confirmPin'] });
   }
 
   init() {
@@ -715,6 +723,35 @@ export default class AuthnWidget {
       })
 
     return errorMessage;
+  }
+
+  checkSecurIdPinReset() {
+    Array.from(document.querySelectorAll("input[type='password']")).forEach(element => element.addEventListener('input', this.checkPinMatch));
+  }
+
+  checkPinMatch() {
+    var status = document.getElementById('pinStatus');
+    var errorMessage = document.getElementById('errorMessage');
+    var pin = document.getElementById("newPin").value;
+    var confirmPin = document.getElementById("confirmPin").value;
+
+    if (pin.length === 0 || confirmPin.length === 0) {
+      status.style.display = 'none';
+      return;
+    } else {
+      status.style.display = 'block';
+    }
+
+    if (pin === confirmPin) {
+      status.classList.remove('text-input__icon--error');
+      errorMessage.style.display = "none";
+      status.classList.add('text-input__icon--success');
+    } else {
+      status.classList.remove('text-input__icon--success');
+      status.classList.add('text-input__icon--error');
+      errorMessage.style.display = "block";
+      document.querySelector('#submit').disabled = true;
+    }
   }
 
   /**
