@@ -330,13 +330,8 @@ export default class AuthnWidget {
   }
 
   postEmailVerificationRequired() {
-    clearTimeout(this.emailVerificationRequiredStateTimeout);
-    if (this.store.getStore().status !== this.store.getPreviousStore().status) {
-      if (document.querySelector("#notification")) {
-        document.querySelector('#notification').style.display = 'none';
-      }
-    }
-    else {
+    if (this.store.getStore().status == this.store.getPreviousStore().status) {
+      clearTimeout(this.emailVerificationRequiredStateTimeout);
       this.emailVerificationRequiredStateTimeout = setTimeout(() => {
         if (document.querySelector("#notification")) {
           document.querySelector('#notification').style.display = 'none';
