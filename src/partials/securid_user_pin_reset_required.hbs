@@ -1,0 +1,47 @@
+<div class="card">
+  <div class="org-logo">
+    <img class="org-logo__image" src="{{logo}}" alt="Company Logo" />
+  </div>
+  {{> errors}}
+  {{> spinner}}
+  <form class="form" id="AuthnWidgetForm">
+    {{#if authFailed}}
+    <div class="feedback feedback--error" data-id="feedback">
+      <span class="feedback__icon pingicon-error-triangle"></span>
+      <div class="feedback__message">
+        Invalid PIN.
+      </div>
+    </div>
+    {{/if}}
+    <div class="text-block" data-id="textblock">
+      <div class="text-block--overflow-wrap">
+        Either you do not have a PIN yet, or the security policy requires a PIN change.
+      </div>
+    </div>
+    <div class="text-block" data-id="textblock">
+      <div class="text-block--overflow-wrap" id="newPinMessage">
+        {{pinResetMessage}}
+      </div>
+    </div>
+    <div class="float-label">
+      <input type="password" class="text-input float-label__input required" id="newPin" name="newPin" placeholder="New Pin" />
+      <label class="float-label__label" for="newPin">New PIN</label>
+    </div>
+    <div class="float-label">
+      <div id="pinStatus" class="text-input__icon text-input__icon--error" style="display: none"></div>
+      <input type="password" class="text-input float-label__input required" id="confirmPin" name="confirmPin" placeholder="Confirm Pin" />
+      <label class="float-label__label" for="confirmPin">Confirm PIN</label>
+      <div id="errorMessage" class="tooltip" data-id="tooltip" style="display: none">
+        The PINs do not match.
+      </div>
+    </div>
+    <button id="submit" data-actionid="resetPin" type="submit" class="button button--primary brand-primary-bg">
+      Submit
+    </button>
+    <div class="text-block">
+      <div class="text-block--overflow-wrap">
+        <a tabindex="0" data-actionId="cancel" target="_self" class="anchor">Cancel</a>
+      </div>
+    </div>
+  </form>
+</div>
