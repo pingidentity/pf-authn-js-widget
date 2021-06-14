@@ -10,6 +10,9 @@ import './scss/main.scss';
 //uncomment to add your personal branding
 // import './scss/branding.scss';
 
+export { default as paOnAuthorizationRequest } from './utils/paOnAuthorizationRequest';
+export { default as paOnAuthorizationSuccess } from './utils/paOnAuthorizationSuccess';
+
 (function () {
 
   if (typeof window.CustomEvent === "function") return false;
