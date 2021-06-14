@@ -1,0 +1,22 @@
+<div class="card">
+  <div class="org-logo">
+    <img class="org-logo__image" src="{{logo}}" alt="Company Logo" />
+  </div>
+  <h1 class="heading">Account Linking Failed</h1>
+  <div class="text-block text-block--small">
+    <div class="text-block__text">{{userMessage}}</div>
+  </div>
+
+  <div class="button-set">
+    <form>
+      {{#with _links as |actions|}}
+      {{#if continue}}
+      <button data-actionId="continue" class="button">Continue</button>
+      {{/if}}
+      {{#if restart}}
+      <button data-actionId="restart" class="button">Continue</button>
+      {{/if}}
+      {{/with}}
+    </form>
+  </div>
+</div>
