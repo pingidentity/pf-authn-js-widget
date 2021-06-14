@@ -31,7 +31,7 @@ var config = {
       return;
     }
 
-    doSomethingElse(data);
+    doSomethingElse(resp);
   })
 };
 authnWidget.initRedirectless(config);
