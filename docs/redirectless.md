@@ -36,6 +36,7 @@ Use option 1 for most deployments. Use option 2 for advanced use-cases.
 
 ### `onAuthorizationRequest` function
 This callback function is called during the authorization request. It has no arguments and it's expected to return a JavaScript `Promise`, which completes the authorization request call to PingFederate.
+[PingAccess redirectless support](/docs/pingaccessRedirectless.md).
 
 Here's an example:
 ```javascript
@@ -54,6 +55,7 @@ The `options` attribute `credentials: 'include'` is required to ensure the brows
 
 ### `onAuthorizationSuccess` function
 This callback function returns the result of the transaction to the webpage containing the Authentication API widget. The protocol response is passed to this function as the first argument when the Authentication API widget calls it.
+[PingAccess redirectless support](/docs/pingaccessRedirectless.md).
 
 Here is an example: 
 ```js
