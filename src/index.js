@@ -292,6 +292,7 @@ export default class AuthnWidget {
     Array.from(document.querySelectorAll('[data-altauthsource]')).forEach(element => element.addEventListener('click', this.handleAltAuthSource))
   }
 
+  // whitepsace
   handleAltAuthSource(evt) {
     evt.preventDefault();
     let source = evt.currentTarget;
