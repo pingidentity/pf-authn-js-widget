@@ -220,3 +220,14 @@ input:read-only {
   top: 15px;
   left: 15px
 }
+.icon-heading {
+  display: flex;
+  -webkit-box-pack: center;
+  justify-content: center;
+  -webkit-box-align: center;
+  align-items: center;
+}
+
+.inline-icon {
+  margin-left: .5em
+}

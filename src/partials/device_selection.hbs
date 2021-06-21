@@ -56,7 +56,7 @@
               <div class="tile-button__title">Security Key</div>
             {{else ifEq device.type "PLATFORM"}}
               <div class="tile-button__title">Biometrics</div>
-            {{else ifEq device.type "VOICE"}}
+            {{else ifEq device.type "Voice"}}
               <div class="tile-button__title">Voice</div>
             {{else}}
               <div class="tile-button__title">{{device.type}}</div>
@@ -67,7 +67,11 @@
           {{else ifEq device.type "iPhone"}}
             <div class="tile-button__content">{{device.name}}</div>
           {{else if device.target}}
-            <div class="tile-button__content">{{device.target}}</div>
+            {{#ifNotEq device.type "SECURITY_KEY"}}
+              {{#ifNotEq device.type "PLATFORM"}}
+                <div class="tile-button__content">{{device.target}}</div>
+              {{/ifNotEq}}
+            {{/ifNotEq}}
           {{/ifEq}}
         </div>
       </div>

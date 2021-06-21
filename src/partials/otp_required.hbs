@@ -8,7 +8,7 @@
     <div class="stack stack--small" data-id="stack">
       {{#each devices as |device|}}
         {{#ifEq device.id ../selectedDeviceRef.id}}
-          {{> device_selection_header headerEnd=' Authentication' device=device}}
+          {{> device_selection_header headerEnd='' device=device}}
         {{/ifEq}}
       {{/each}}
     </div>
