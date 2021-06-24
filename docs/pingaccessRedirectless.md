@@ -24,8 +24,8 @@ Here is an example:
 ```javascript
 var authnWidget = new PfAuthnWidget("https://localhost", { divId: 'authnwidget' });
 var config = {
-  onAuthorizationRequest: paOnAuthorizationRequest(response),
-  onAuthorizationSuccess: paOnAuthorizationSuccess(response, function(err, resp) {
+  onAuthorizationRequest: PfAuthnWidget.paOnAuthorizationRequest(response),
+  onAuthorizationSuccess: PfAuthnWidget.paOnAuthorizationSuccess(response, function(err, resp) {
     if (err) {
       doSomething(err);
       return;

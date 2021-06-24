@@ -4,14 +4,13 @@ import 'core-js/stable';
 import 'regenerator-runtime/runtime'; //for async await
 import Store from './store';
 import redirectlessConfigValidator from './validators/redirectless';
-import { getCompatibility,  doWebAuthn} from './utils/fidoFlowUtil';
+import { getCompatibility, doWebAuthn } from './utils/fidoFlowUtil';
 import { completeStateCallback } from './utils/redirectless';
+import paOnAuthorizationRequest from './utils/paOnAuthorizationRequest';
+import paOnAuthorizationSuccess from './utils/paOnAuthorizationSuccess';
 import './scss/main.scss';
 //uncomment to add your personal branding
 // import './scss/branding.scss';
-
-export { default as paOnAuthorizationRequest } from './utils/paOnAuthorizationRequest';
-export { default as paOnAuthorizationSuccess } from './utils/paOnAuthorizationSuccess';
 
 (function () {
 
@@ -58,6 +57,10 @@ export default class AuthnWidget {
   static get BASE_URL_REQUIRED_MSG() {
     return "PingFederate Base URL is required."
   }
+
+  static paOnAuthorizationRequest = paOnAuthorizationRequest;
+  static paOnAuthorizationSuccess = paOnAuthorizationSuccess;
+
   /*
    * Constructs a new AuthnWidget object
    * @param {string} baseUrl Required: PingFederate Base Url
