@@ -10,8 +10,8 @@ import './scss/main.scss';
 //uncomment to add your personal branding
 // import './scss/branding.scss';
 
-export { default as paOnAuthorizationRequest } from './utils/paOnAuthorizationRequest';
-export { default as paOnAuthorizationSuccess } from './utils/paOnAuthorizationSuccess';
+// export { default as paOnAuthorizationRequest } from './utils/paOnAuthorizationRequest';
+// export { default as paOnAuthorizationSuccess } from './utils/paOnAuthorizationSuccess';
 
 (function () {
 
@@ -110,6 +110,7 @@ export default class AuthnWidget {
     this.handleIdVerificationFailed = this.handleIdVerificationFailed.bind(this);
     this.checkSecurIdPinReset = this.checkSecurIdPinReset.bind(this);
     this.postAssertionRequired = this.postAssertionRequired.bind(this);
+    this.postDeviceSelectionRequired = this.postDeviceSelectionRequired.bind(this);
     this.showDeviceManagementPopup = this.showDeviceManagementPopup.bind(this);
     this.hideDeviceManagementPopup = this.hideDeviceManagementPopup.bind(this);
     this.pollCheckGet = this.pollCheckGet.bind(this);
@@ -410,6 +411,15 @@ export default class AuthnWidget {
   }
 
   postDeviceSelectionRequired() {
+    let data = this.store.getStore();    
+    if(data.userSelectedDefault === false)
+    {
+      var deviceKebabMenus = document.querySelectorAll('#kebab-menu-icon-id');
+      [].forEach.call(deviceKebabMenus, function(deviceKebabMenu) {
+        deviceKebabMenu.style.display = "none";
+      });
+    }
+
     getCompatibility().then(value => {
       if (value === 'SECURITY_KEY_ONLY')
       {
@@ -535,7 +545,6 @@ export default class AuthnWidget {
 
   hideDeviceManagementPopup(evt) {
     var target = evt.target;
-    console.log("target....." + target);
     var kebabMenuDivs = document.querySelectorAll("[id='kebab-menu-svg-id']");
     for (var i = 0; i < kebabMenuDivs.length; ++i) {
       if (kebabMenuDivs[i] == target) {
