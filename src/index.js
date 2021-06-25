@@ -505,8 +505,7 @@ export default class AuthnWidget {
     Array.from(document.querySelectorAll('[data-mfa-selection]'))
       .forEach(element => element.addEventListener('click', this.handleMfaDeviceSelection));
 
-    Array.from(document.querySelectorAll('div'))
-      .forEach(element => element.addEventListener('click', this.hideDeviceManagementPopup));
+    document.addEventListener('click', this.hideDeviceManagementPopup);
 
     Array.from(document.querySelectorAll("[id^='device-management-popup-frame']"))
       .forEach(element => element.addEventListener('click', this.handleMfaSetDefaultDeviceSelection));
