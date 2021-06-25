@@ -499,11 +499,11 @@ export default class AuthnWidget {
   }
 
   registerMfaEventHandler() {
-    Array.from(document.querySelectorAll('[data-mfa-selection]'))
-      .forEach(element => element.addEventListener('click', this.handleMfaDeviceSelection));
-
     Array.from(document.querySelectorAll('[data-mfa-selection-kebab-menu-container]'))
       .forEach(element => element.addEventListener('click', this.showDeviceManagementPopup));
+
+    Array.from(document.querySelectorAll('[data-mfa-selection]'))
+      .forEach(element => element.addEventListener('click', this.handleMfaDeviceSelection));
 
     Array.from(document.querySelectorAll('div'))
       .forEach(element => element.addEventListener('click', this.hideDeviceManagementPopup));
@@ -529,6 +529,7 @@ export default class AuthnWidget {
   }
 
   showDeviceManagementPopup(evt) {
+    evt.stopPropagation();
     // close other popups if any
     var popupDivs = document.querySelectorAll("[id^='device-management-popup-frame']");
     for (var i = 0; i < popupDivs.length; ++i) {
@@ -538,9 +539,9 @@ export default class AuthnWidget {
       }
     }
     let source = evt.currentTarget;
-    var deviceId = source.dataset['mfaSelectionKebabMenuContainer'];
+    var deviceId = source.dataset['mfaSelectionKebabMenuContainer'];   
     var docId = 'device-management-popup-frame-' + deviceId;
-    document.querySelector("[id='" + CSS.escape(docId) + "']").style.display = 'block';
+    document.getElementById(CSS.escape(docId)).style.display = 'block';
   }
 
   hideDeviceManagementPopup(evt) {

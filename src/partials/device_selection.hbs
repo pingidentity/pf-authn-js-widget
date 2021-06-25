@@ -2,7 +2,7 @@
   {{#if device.usable}}
   {{#isValidRpId device.rpId}}
     <div class="tile-button--side-icon tile-button tile-button--stacked-small"
-         data-id="device-selection-button" id="{{device.type}}-{{device.id}}" role="button" tabindex="0">
+         data-id="device-selection-button" id="{{device.type}}-{{device.id}}" role="button" tabindex="0" data-mfa-selection="{{device.id}}">
       <div class="tile-button__icon-container" data-mfa-selection="{{device.id}}">
         <div class="device-icon">
           {{#ifEq device.type "SMS"}}
@@ -89,12 +89,11 @@
           </a>
           <div id="device-management-popup-frame-{{device.id}}" data-mfa-selection-kebab-menu-container="{{device.id}}" data-id="popup-frame" data-parent="popover-nav-menu"
             class="popper-container popover-display" ;
-            style="display:none; position: absolute; will-change: transform; right: 0px;">
+            style="display:none; position: absolute; right: 0px;">
             <div class="popup-frame popup-frame--left">
               <div class="popover-menu__dialog" data-id="kebab-menu">
                 <div>
-                  <button class="button file-input--button popover-menu__item" data-id="button" type="button"
-                    onclick="setDefaultDevice(event, '$device.id')">Set As Default</button>
+                  <button class="button file-input--button popover-menu__item" data-id="button" type="button">Set As Default</button>
                 </div>
               </div>
             </div>
