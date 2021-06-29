@@ -73,6 +73,12 @@
                 <div class="tile-button__content">{{device.target}}</div>
               {{/ifNotEq}}
             {{/ifNotEq}}
+            {{#ifEq device.type "SECURITY_KEY"}}
+              <div class="tile-button__content"></div>
+            {{/ifEq}}
+            {{#ifEq device.type "PLATFORM"}}
+              <div class="tile-button__content"></div>
+            {{/ifEq}}
           {{/ifEq}}
           {{#if device.defaultDevice}}
           <div class="device-selector__item-status"><span class="muted-text">Default</span></div>
