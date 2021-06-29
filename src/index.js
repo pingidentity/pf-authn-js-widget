@@ -411,7 +411,7 @@ export default class AuthnWidget {
   }
 
   postDeviceSelectionRequired() {
-    let data = this.store.getStore();    
+    let data = this.store.getStore();
     if(data.userSelectedDefault === false)
     {
       var deviceKebabMenus = document.querySelectorAll('#kebab-menu-icon-id');
@@ -538,9 +538,9 @@ export default class AuthnWidget {
       }
     }
     let source = evt.currentTarget;
-    var deviceId = source.dataset['mfaSelectionKebabMenuContainer'];   
+    var deviceId = source.dataset['mfaSelectionKebabMenuContainer'];
     var docId = 'device-management-popup-frame-' + deviceId;
-    document.getElementById(CSS.escape(docId)).style.display = 'block';
+    document.getElementById(docId).style.display = 'block';
   }
 
   hideDeviceManagementPopup(evt) {

@@ -75,6 +75,7 @@
           {{/if}}
         </div>
       </div>
+      {{#ifEq device.defaultDevice false}}
       <div class="device-selector__item-controls" id="kebab-menu-icon-id" data-mfa-selection-kebab-menu-container="{{device.id}}">
         <div class="popover popover--left" data-id="popover-nav-menu">
           <a class="popover__trigger" data-id="popover-nav-menu-trigger">
@@ -100,6 +101,7 @@
           </div>
         </div>
       </div>
+      {{/ifEq}}
     </div>
     {{/isValidRpId}}
   {{/if}}
