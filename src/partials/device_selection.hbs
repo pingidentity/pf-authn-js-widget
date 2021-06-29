@@ -2,8 +2,8 @@
   {{#if device.usable}}
   {{#isValidRpId device.rpId}}
     <div class="tile-button--side-icon tile-button tile-button--stacked-small"
-         data-id="device-selection-button" id="{{device.type}}-{{device.id}}" data-mfa-selection="{{device.id}}" role="button" tabindex="0">
-      <div class="tile-button__icon-container">
+         data-id="device-selection-button" id="{{device.type}}-{{device.id}}" role="button" tabindex="0" data-mfa-selection="{{device.id}}">
+      <div class="tile-button__icon-container" data-mfa-selection="{{device.id}}">
         <div class="device-icon">
           {{#ifEq device.type "SMS"}}
             <svg viewBox="0 0 24 24" role="presentation" style="width: 32px; height: 32px">
@@ -36,11 +36,12 @@
           {{/ifEq}}
         </div>
       </div>
-      <div class="tile-button__content-container">
-        <div class="flex-row flex-row--align-stretch flex-row--justify-start flex-row--flex-direction-column flex-row--column-spacing-sm"
-             data-id="flex-row">
+      <div class="tile-button__content-container" data-mfa-selection="{{device.id}}">
+        <div
+          class="flex-row flex-row--align-stretch flex-row--justify-start flex-row--flex-direction-column flex-row--column-spacing-sm"
+          data-id="flex-row">
           {{#if device.nickname}}
-            <div class="tile-button__title">{{device.nickname}}</div>
+          <div class="tile-button__title">{{device.nickname}}</div>
           {{else}}
             {{#ifEq device.type "Android"}}
               <div class="tile-button__title">PingOne Authenticator</div>
@@ -63,9 +64,9 @@
             {{/ifEq}}
           {{/if}}
           {{#ifEq device.type "Android"}}
-            <div class="tile-button__content">{{device.name}}</div>
+          <div class="tile-button__content">{{device.name}}</div>
           {{else ifEq device.type "iPhone"}}
-            <div class="tile-button__content">{{device.name}}</div>
+          <div class="tile-button__content">{{device.name}}</div>
           {{else if device.target}}
             {{#ifNotEq device.type "SECURITY_KEY"}}
               {{#ifNotEq device.type "PLATFORM"}}
@@ -73,9 +74,39 @@
               {{/ifNotEq}}
             {{/ifNotEq}}
           {{/ifEq}}
+          {{#if device.defaultDevice}}
+          <div class="device-selector__item-status"><span class="muted-text">Default</span></div>
+          {{/if}}
         </div>
       </div>
+      {{#ifEq device.defaultDevice false}}
+      <div class="device-selector__item-controls" id="kebab-menu-icon-id" data-mfa-selection-kebab-menu-container="{{device.id}}">
+        <div class="popover popover--left" data-id="popover-nav-menu">
+          <a class="popover__trigger" data-id="popover-nav-menu-trigger">
+            <div>
+              <button class="button file-input~~button popover-menu__control" data-id="button" style="border:none" type="button">
+                <svg id="kebab-menu-svg-id" viewBox="0 0 24 24" role="presentation" style="width: 26px; height: 26px;">
+                  <path
+                    d="M12,16A2,2 0 0,1 14,18A2,2 0 0,1 12,20A2,2 0 0,1 10,18A2,2 0 0,1 12,16M12,10A2,2 0 0,1 14,12A2,2 0 0,1 12,14A2,2 0 0,1 10,12A2,2 0 0,1 12,10M12,4A2,2 0 0,1 14,6A2,2 0 0,1 12,8A2,2 0 0,1 10,6A2,2 0 0,1 12,4Z"
+                    style="fill: rgb(104, 111, 119);"></path>
+                </svg></button>
+            </div>
+          </a>
+          <div id="device-management-popup-frame-{{device.id}}" data-mfa-selection-kebab-menu-container="{{device.id}}" data-id="popup-frame" data-parent="popover-nav-menu"
+            class="popper-container popover-display" ;
+            style="display:none; position: absolute; right: 0px;">
+            <div class="popup-frame popup-frame--left">
+              <div class="popover-menu__dialog" data-id="kebab-menu">
+                <div>
+                  <button class="button file-input--button popover-menu__item" data-id="button" type="button">Set As Default</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {{/ifEq}}
     </div>
-     {{/isValidRpId}}
+    {{/isValidRpId}}
   {{/if}}
 {{/each}}

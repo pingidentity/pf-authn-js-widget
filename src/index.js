@@ -97,6 +97,7 @@ export default class AuthnWidget {
     this.handleAgentlessSignOn = this.handleAgentlessSignOn.bind(this);
     this.postEmptyAuthentication = this.postEmptyAuthentication.bind(this);
     this.handleMfaDeviceSelection = this.handleMfaDeviceSelection.bind(this);
+    this.handleMfaSetDefaultDeviceSelection = this.handleMfaSetDefaultDeviceSelection.bind(this);
     this.registerMfaEventHandler = this.registerMfaEventHandler.bind(this);
     this.registerMfaChangeDeviceEventHandler = this.registerMfaChangeDeviceEventHandler.bind(this);
     this.handleMfaDeviceChange = this.handleMfaDeviceChange.bind(this);
@@ -109,6 +110,9 @@ export default class AuthnWidget {
     this.handleIdVerificationFailed = this.handleIdVerificationFailed.bind(this);
     this.checkSecurIdPinReset = this.checkSecurIdPinReset.bind(this);
     this.postAssertionRequired = this.postAssertionRequired.bind(this);
+    this.postDeviceSelectionRequired = this.postDeviceSelectionRequired.bind(this);
+    this.showDeviceManagementPopup = this.showDeviceManagementPopup.bind(this);
+    this.hideDeviceManagementPopup = this.hideDeviceManagementPopup.bind(this);
     this.pollCheckGet = this.pollCheckGet.bind(this);
     this.postEmailVerificationRequired = this.postEmailVerificationRequired.bind(this);
     this.stateTemplates = new Map();  //state -> handlebar templates
@@ -407,6 +411,15 @@ export default class AuthnWidget {
   }
 
   postDeviceSelectionRequired() {
+    let data = this.store.getStore();
+    if(data.userSelectedDefault === false)
+    {
+      var deviceKebabMenus = document.querySelectorAll('#kebab-menu-icon-id');
+      [].forEach.call(deviceKebabMenus, function(deviceKebabMenu) {
+        deviceKebabMenu.style.display = "none";
+      });
+    }
+
     getCompatibility().then(value => {
       if (value === 'SECURITY_KEY_ONLY')
       {
@@ -486,8 +499,16 @@ export default class AuthnWidget {
   }
 
   registerMfaEventHandler() {
+    Array.from(document.querySelectorAll('[data-mfa-selection-kebab-menu-container]'))
+      .forEach(element => element.addEventListener('click', this.showDeviceManagementPopup));
+
     Array.from(document.querySelectorAll('[data-mfa-selection]'))
       .forEach(element => element.addEventListener('click', this.handleMfaDeviceSelection));
+
+    document.addEventListener('click', this.hideDeviceManagementPopup);
+
+    Array.from(document.querySelectorAll("[id^='device-management-popup-frame']"))
+      .forEach(element => element.addEventListener('click', this.handleMfaSetDefaultDeviceSelection));
   }
 
   handleMfaDeviceSelection(evt) {
@@ -501,6 +522,56 @@ export default class AuthnWidget {
         }
       };
       this.store.dispatch('POST_FLOW', "selectDevice", JSON.stringify(data));
+    } else {
+      console.log("ERROR - Unable to dispatch device selection as the target was null");
+    }
+  }
+
+  showDeviceManagementPopup(evt) {
+    evt.stopPropagation();
+    // close other popups if any
+    var popupDivs = document.querySelectorAll("[id^='device-management-popup-frame']");
+    for (var i = 0; i < popupDivs.length; ++i) {
+      var popupDisplayStatus = popupDivs[i].style.display;
+      if (popupDisplayStatus === 'block') {
+        popupDivs[i].style.display = 'none';
+      }
+    }
+    let source = evt.currentTarget;
+    var deviceId = source.dataset['mfaSelectionKebabMenuContainer'];
+    var docId = 'device-management-popup-frame-' + deviceId;
+    document.getElementById(docId).style.display = 'block';
+  }
+
+  hideDeviceManagementPopup(evt) {
+    var target = evt.target;
+    var kebabMenuDivs = document.querySelectorAll("[id='kebab-menu-svg-id']");
+    for (var i = 0; i < kebabMenuDivs.length; ++i) {
+      if (kebabMenuDivs[i] == target) {
+        return;
+      }
+    }
+
+    var popupDivs = document.querySelectorAll("[id^='device-management-popup-frame']");
+    for (var i = 0; i < popupDivs.length; ++i) {
+      var popupDisplayStatus = popupDivs[i].style.display;
+      if (popupDisplayStatus === 'block') {
+        popupDivs[i].style.display = 'none';
+      }
+    }
+  }
+
+  handleMfaSetDefaultDeviceSelection(evt) {
+    evt.stopPropagation();
+    let source = evt.currentTarget;
+    if (source) {
+      let deviceId = source.dataset['mfaSelectionKebabMenuContainer'];
+      let data = {
+        "deviceRef": {
+          "id": deviceId
+        }
+      };
+      this.store.dispatch('POST_FLOW', "setDefaultDevice", JSON.stringify(data));
     } else {
       console.log("ERROR - Unable to dispatch device selection as the target was null");
     }
