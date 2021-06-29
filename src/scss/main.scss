@@ -221,7 +221,26 @@ input:read-only {
   left: 15px
 }
 
+.icon-heading {
+  display: flex;
+  -webkit-box-pack: center;
+  justify-content: center;
+  -webkit-box-align: center;
+  align-items: center;
 
+  svg {
+    width: 32px;
+    height: 32px;
+
+    path {
+      fill: rgb(61, 69, 77)
+    }
+  }
+}
+
+.inline-icon {
+  margin-left: .5em
+}
 
 .popper-container {
     position: absolute;

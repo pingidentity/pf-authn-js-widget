@@ -8,12 +8,14 @@
               <div class="text-block--overflow-wrap">
                 {{#ifEq device.type "Voice" }}
                   Calling:
+                {{else ifEq device.type "SMS" }}
+                  Message sent to:
                 {{else}}
                   {{device.type}} sent to:
                 {{/ifEq}}
               </div>
             </div>
-            <div class="text-block text-block--large" data-id="textblock">
+            <div class="text-block" data-id="textblock">
               <div class="text-block--overflow-wrap">
                 {{device.target}}
               </div>
