@@ -1,0 +1,99 @@
+<div class="card">
+  <div class="org-logo">
+    <img class="org-logo__image" src="{{logo}}" alt="Company Logo"/>
+  </div>
+  {{> errors}}
+  <h1 class="heading">Select Method</h1>
+  <div class="text-block">
+    <div class="text-block__text">Select the authentication method you want to pair with your account.</div>
+  </div>
+  {{#each devicePairingMethods as |devicePairingMethod|}}
+    <div class="tile-button--side-icon tile-button tile-button--stacked-small"
+         data-id="device-pairing-method-button"
+         id="{{devicePairingMethod.deviceType}}-{{devicePairingMethod.applicationName}}" role="button" tabindex="0"
+         data-mfa-device-pairing-selection="{{devicePairingMethod.deviceType}}.{{devicePairingMethod.applicationName}}">
+      <div class="tile-button__icon-container">
+        <div class="device-icon">
+          {{#ifEq devicePairingMethod.deviceType "SMS"}}
+            <svg viewBox="0 0 24 24" role="presentation" style="width: 32px; height: 32px">
+              <path d="M20,2A2,2 0 0,1 22,4V16A2,2 0 0,1 20,18H6L2,22V4C2,2.89 2.9,2 4,2H20M4,4V17.17L5.17,16H20V4H4M6,7H18V9H6V7M6,11H15V13H6V11Z"
+                    style="fill: rgb(61, 69, 77);"></path>
+            </svg>
+          {{else ifEq devicePairingMethod.deviceType "Email"}}
+            <svg viewBox="0 0 24 24" role="presentation" style="width: 32px; height: 32px">
+              <path d="M22 6C22 4.9 21.1 4 20 4H4C2.9 4 2 4.9 2 6V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6M20 6L12 11L4 6H20M20 18H4V8L12 13L20 8V18Z"
+                    style="fill: rgb(61, 69, 77);"></path>
+            </svg>
+          {{else ifEq devicePairingMethod.deviceType "PLATFORM"}}
+            <svg viewBox="0 0 24 24" role="presentation" style="width: 32px; height: 32px">
+              <path d="M17.81,4.47C17.73,4.47 17.65,4.45 17.58,4.41C15.66,3.42 14,3 12,3C10.03,3 8.15,3.47 6.44,4.41C6.2,4.54 5.9,4.45 5.76,4.21C5.63,3.97 5.72,3.66 5.96,3.53C7.82,2.5 9.86,2 12,2C14.14,2 16,2.47 18.04,3.5C18.29,3.65 18.38,3.95 18.25,4.19C18.16,4.37 18,4.47 17.81,4.47M3.5,9.72C3.4,9.72 3.3,9.69 3.21,9.63C3,9.47 2.93,9.16 3.09,8.93C4.08,7.53 5.34,6.43 6.84,5.66C10,4.04 14,4.03 17.15,5.65C18.65,6.42 19.91,7.5 20.9,8.9C21.06,9.12 21,9.44 20.78,9.6C20.55,9.76 20.24,9.71 20.08,9.5C19.18,8.22 18.04,7.23 16.69,6.54C13.82,5.07 10.15,5.07 7.29,6.55C5.93,7.25 4.79,8.25 3.89,9.5C3.81,9.65 3.66,9.72 3.5,9.72M9.75,21.79C9.62,21.79 9.5,21.74 9.4,21.64C8.53,20.77 8.06,20.21 7.39,19C6.7,17.77 6.34,16.27 6.34,14.66C6.34,11.69 8.88,9.27 12,9.27C15.12,9.27 17.66,11.69 17.66,14.66A0.5,0.5 0 0,1 17.16,15.16A0.5,0.5 0 0,1 16.66,14.66C16.66,12.24 14.57,10.27 12,10.27C9.43,10.27 7.34,12.24 7.34,14.66C7.34,16.1 7.66,17.43 8.27,18.5C8.91,19.66 9.35,20.15 10.12,20.93C10.31,21.13 10.31,21.44 10.12,21.64C10,21.74 9.88,21.79 9.75,21.79M16.92,19.94C15.73,19.94 14.68,19.64 13.82,19.05C12.33,18.04 11.44,16.4 11.44,14.66A0.5,0.5 0 0,1 11.94,14.16A0.5,0.5 0 0,1 12.44,14.66C12.44,16.07 13.16,17.4 14.38,18.22C15.09,18.7 15.92,18.93 16.92,18.93C17.16,18.93 17.56,18.9 17.96,18.83C18.23,18.78 18.5,18.96 18.54,19.24C18.59,19.5 18.41,19.77 18.13,19.82C17.56,19.93 17.06,19.94 16.92,19.94M14.91,22C14.87,22 14.82,22 14.78,22C13.19,21.54 12.15,20.95 11.06,19.88C9.66,18.5 8.89,16.64 8.89,14.66C8.89,13.04 10.27,11.72 11.97,11.72C13.67,11.72 15.05,13.04 15.05,14.66C15.05,15.73 16,16.6 17.13,16.6C18.28,16.6 19.21,15.73 19.21,14.66C19.21,10.89 15.96,7.83 11.96,7.83C9.12,7.83 6.5,9.41 5.35,11.86C4.96,12.67 4.76,13.62 4.76,14.66C4.76,15.44 4.83,16.67 5.43,18.27C5.53,18.53 5.4,18.82 5.14,18.91C4.88,19 4.59,18.87 4.5,18.62C4,17.31 3.77,16 3.77,14.66C3.77,13.46 4,12.37 4.45,11.42C5.78,8.63 8.73,6.82 11.96,6.82C16.5,6.82 20.21,10.33 20.21,14.65C20.21,16.27 18.83,17.59 17.13,17.59C15.43,17.59 14.05,16.27 14.05,14.65C14.05,13.58 13.12,12.71 11.97,12.71C10.82,12.71 9.89,13.58 9.89,14.65C9.89,16.36 10.55,17.96 11.76,19.16C12.71,20.1 13.62,20.62 15.03,21C15.3,21.08 15.45,21.36 15.38,21.62C15.33,21.85 15.12,22 14.91,22Z"
+                    style="fill: rgb(61, 69, 77);"></path>
+            </svg>
+          {{else ifEq devicePairingMethod.deviceType "SECURITY_KEY"}}
+            <svg viewBox="0 0 24 24" role="presentation" style="width: 32px; height: 32px">
+              <path d="M8 15C8.55 15 9 15.45 9 16C9 16.55 8.55 17 8 17C7.45 17 7 16.55 7 16C7 15.45 7.45 15 8 15M15.07 4.69L16.5 6.1L15.07 7.5L13.66 6.1L15.07 4.69M17.9 7.5L19.31 8.93L17.9 10.34L16.5 8.93L17.9 7.5M8 13C6.34 13 5 14.34 5 16C5 17.66 6.34 19 8 19C9.66 19 11 17.66 11 16C11 14.34 9.66 13 8 13M9.77 4.33L10.5 5.08L14.29 1.29C14.47 1.11 14.72 1 15 1C15.28 1 15.53 1.11 15.71 1.29L22.78 8.36L22.78 8.37C22.92 8.54 23 8.76 23 9C23 9.3 22.87 9.57 22.66 9.76L22.66 9.76L18.93 13.5L19.67 14.23L12.95 20.95C11.68 22.22 9.93 23 8 23C4.13 23 1 19.87 1 16C1 14.07 1.78 12.32 3.05 11.05L9.77 4.33M20.59 9L15 3.41L11.93 6.5L17.5 12.08L20.59 9Z"
+                    style="fill: rgb(61, 69, 77);"></path>
+            </svg>
+          {{else ifEq devicePairingMethod.deviceType "Voice"}}
+            <svg viewBox="0 0 24 24" role="presentation" style="width: 32px; height: 32px;">
+              <path d="M20,15.5C18.8,15.5 17.5,15.3 16.4,14.9C16.3,14.9 16.2,14.9 16.1,14.9C15.8,14.9 15.6,15 15.4,15.2L13.2,17.4C10.4,15.9 8,13.6 6.6,10.8L8.8,8.6C9.1,8.3 9.2,7.9 9,7.6C8.7,6.5 8.5,5.2 8.5,4C8.5,3.5 8,3 7.5,3H4C3.5,3 3,3.5 3,4C3,13.4 10.6,21 20,21C20.5,21 21,20.5 21,20V16.5C21,16 20.5,15.5 20,15.5M5,5H6.5C6.6,5.9 6.8,6.8 7,7.6L5.8,8.8C5.4,7.6 5.1,6.3 5,5M19,19C17.7,18.9 16.4,18.6 15.2,18.2L16.4,17C17.2,17.2 18.1,17.4 19,17.4V19Z"
+                    style="fill: rgb(61, 69, 77);"></path>
+            </svg>
+          {{else}}
+            <svg viewBox="0 0 24 24" role="presentation" style="width: 32px; height: 32px">
+              <path d="M16,18H7V4H16M11.5,22A1.5,1.5 0 0,1 10,20.5A1.5,1.5 0 0,1 11.5,19A1.5,1.5 0 0,1 13,20.5A1.5,1.5 0 0,1 11.5,22M15.5,1H7.5A2.5,2.5 0 0,0 5,3.5V20.5A2.5,2.5 0 0,0 7.5,23H15.5A2.5,2.5 0 0,0 18,20.5V3.5A2.5,2.5 0 0,0 15.5,1Z"
+                    style="fill: rgb(61, 69, 77);"></path>
+            </svg>
+          {{/ifEq}}
+        </div>
+      </div>
+      <div class="tile-button__content-container">
+        <div class="flex-row flex-row--align-stretch flex-row--justify-start flex-row--flex-direction-column flex-row--column-spacing-sm"
+             data-id="flex-row">
+          {{#ifEq devicePairingMethod.deviceType "MOBILE"}}
+            <div class="tile-button__title">PingOne Authenticator</div>
+          {{else ifEq devicePairingMethod.deviceType "TOTP"}}
+            <div class="tile-button__title">Authenticator App</div>
+          {{else ifEq devicePairingMethod.deviceType "SMS"}}
+            <div class="tile-button__title">Text Message</div>
+          {{else ifEq devicePairingMethod.deviceType "Email"}}
+            <div class="tile-button__title">Email</div>
+          {{else ifEq devicePairingMethod.deviceType "SECURITY_KEY"}}
+            <div class="tile-button__title">Security Key</div>
+          {{else ifEq devicePairingMethod.deviceType "PLATFORM"}}
+            <div class="tile-button__title">Biometrics</div>
+          {{else ifEq devicePairingMethod.deviceType "Voice"}}
+            <div class="tile-button__title">Voice</div>
+          {{else}}
+            <div class="tile-button__title">{{devicePairingMethod.deviceType}}</div>
+          {{/ifEq}}
+          {{#ifEq devicePairingMethod.deviceType "MOBILE"}}
+            <div class="tile-button__content">Use PingOne to receive push notifications.</div>
+          {{else ifEq devicePairingMethod.deviceType "TOTP"}}
+            <div class="tile-button__content">Use an authenticator app (like Google) to authenticate.</div>
+          {{else ifEq devicePairingMethod.deviceType "SMS"}}
+            <div class="tile-button__content">Receive a text message with a passcode to authenticate.</div>
+          {{else ifEq devicePairingMethod.deviceType "Email"}}
+            <div class="tile-button__content">Receive an email with a passcode to authenticate.</div>
+          {{else ifEq devicePairingMethod.deviceType "SECURITY_KEY"}}
+            <div class="tile-button__content">Use a security key to authenticate.</div>
+          {{else ifEq devicePairingMethod.deviceType "PLATFORM"}}
+            <div class="tile-button__content">Use a fingerprint or facial scan to authenticate.</div>
+          {{else ifEq devicePairingMethod.deviceType "Voice"}}
+            <div class="tile-button__content">Receive a phone call with a passcode to authenticate.</div>
+          {{/ifEq}}
+        </div>
+      </div>
+    </div>
+  {{/each}}
+  <div class="tile-selector tile-selector--stacked">
+    <form class="form form--margin-small" id="AuthnWidgetForm">
+      <div class="text-block" data-id="textblock">
+        <div class="text-block--overflow-wrap">
+          <a tabindex="0" data-actionId="cancelDevicePairing" target="_self" class="anchor">
+            Cancel</a>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
