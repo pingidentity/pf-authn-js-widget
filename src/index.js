@@ -45,7 +45,8 @@ export default class AuthnWidget {
       'SECURID_CREDENTIAL_REQUIRED', 'SECURID_NEXT_TOKENCODE_REQUIRED', 'SECURID_REAUTHENTICATION_REQUIRED',
       'SECURID_SYSTEM_PIN_RESET_REQUIRED', 'SECURID_USER_PIN_RESET_REQUIRED', 'EMAIL_VERIFICATION_REQUIRED',
       'MFA_SETUP_REQUIRED', 'DEVICE_PAIRING_METHOD_REQUIRED', 'EMAIL_PAIRING_TARGET_REQUIRED',
-      'EMAIL_ACTIVATION_REQUIRED', 'SMS_PAIRING_TARGET_REQUIRED', 'SMS_ACTIVATION_REQUIRED'];
+      'EMAIL_ACTIVATION_REQUIRED', 'SMS_PAIRING_TARGET_REQUIRED', 'SMS_ACTIVATION_REQUIRED',
+      'VOICE_PAIRING_TARGET_REQUIRED', 'VOICE_ACTIVATION_REQUIRED'];
   }
 
   static get COMMUNICATION_ERROR_MSG() {
@@ -188,6 +189,8 @@ export default class AuthnWidget {
     this.actionModels.set('activateEmailDevice', {required: ['otp']});
     this.actionModels.set('submitSmsTarget', {required: ['phone']});
     this.actionModels.set('activateSmsDevice', {required: ['otp']});
+    this.actionModels.set('submitVoiceTarget', {required: ['phone']});
+    this.actionModels.set('activateVoiceDevice', {required: ['otp']});
   }
 
   init() {
