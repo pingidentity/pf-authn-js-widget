@@ -5,24 +5,25 @@
   {{> errors}}
   <h1 class="heading-text centered-text icon-heading">
     <svg viewBox="0 0 24 24" role="presentation">
-      <path d="M22 6C22 4.9 21.1 4 20 4H4C2.9 4 2 4.9 2 6V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6M20 6L12 11L4 6H20M20 18H4V8L12 13L20 8V18Z"/>
-    </svg>
-    <span class="inline-icon">Email</span></h1>
+      <path d="M20,2A2,2 0 0,1 22,4V16A2,2 0 0,1 20,18H6L2,22V4C2,2.89 2.9,2 4,2H20M4,4V17.17L5.17,16H20V4H4M6,7H18V9H6V7M6,11H15V13H6V11Z"></path>
+    </svg><span class="inline-icon">Text Message</span></h1>
   <div class="text-block">
-    <div class="text-block--overflow-wrap">Enter the email you would like to receive authentication codes with.</div>
+    <div class="text-block--overflow-wrap">Enter the mobile number you would like to receive authentication codes
+      with.
+    </div>
   </div>
   <div class="tile-selector tile-selector--stacked">
     <form class="form" id="AuthnWidgetForm">
       <div class="stack stack--small" data-id="stack">
         <div class="text-input__icon">
-          <input id="email" type="email" name="email" class="text-input text-input required" value=""/>
+          <input id="phone" type="tel" name="phone" class="text-input text-input required" value=""/>
         </div>
       </div>
       <div class="text-block" data-id="textblock">
         <div class="text-block--overflow-wrap">
           <div class="stack" data-id="stack">
             <div>
-              <button id="submit" data-actionId="submitEmailTarget" type="submit"
+              <button id="submit" data-actionId="submitSmsTarget" type="submit"
                       class="button button--primary brand-primary-bg">
                 Next
               </button>

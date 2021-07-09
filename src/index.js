@@ -45,7 +45,7 @@ export default class AuthnWidget {
       'SECURID_CREDENTIAL_REQUIRED', 'SECURID_NEXT_TOKENCODE_REQUIRED', 'SECURID_REAUTHENTICATION_REQUIRED',
       'SECURID_SYSTEM_PIN_RESET_REQUIRED', 'SECURID_USER_PIN_RESET_REQUIRED', 'EMAIL_VERIFICATION_REQUIRED',
       'MFA_SETUP_REQUIRED', 'DEVICE_PAIRING_METHOD_REQUIRED', 'EMAIL_PAIRING_TARGET_REQUIRED',
-      'EMAIL_ACTIVATION_REQUIRED'];
+      'EMAIL_ACTIVATION_REQUIRED', 'SMS_PAIRING_TARGET_REQUIRED', 'SMS_ACTIVATION_REQUIRED'];
   }
 
   static get COMMUNICATION_ERROR_MSG() {
@@ -186,6 +186,8 @@ export default class AuthnWidget {
     this.actionModels.set('resetPin', { required: ['newPin', 'confirmPin'], properties: ['newPin', 'confirmPin'] });
     this.actionModels.set('submitEmailTarget', {required: ['email']});
     this.actionModels.set('activateEmailDevice', {required: ['otp']});
+    this.actionModels.set('submitSmsTarget', {required: ['phone']});
+    this.actionModels.set('activateSmsDevice', {required: ['otp']});
   }
 
   init() {
@@ -240,7 +242,8 @@ export default class AuthnWidget {
       .querySelectorAll("[data-actionId]"))
       .forEach(element => element.addEventListener("click", this.dispatch));
 
-    let nodes = document.querySelectorAll(`#${this.divId} input[type=text], input[type=password], input[type=email]`);
+    let nodes = document.querySelectorAll(`#${this.divId} input[type=text], input[type=password],
+    input[type=email], input[type=tel]`);
     if (nodes) {
       nodes.forEach(n => n.addEventListener('input', this.enableSubmit));
     }
@@ -702,7 +705,8 @@ export default class AuthnWidget {
     let nodes = document.querySelectorAll('input.required[type=text]:not(:disabled), ' +
       'input.required[type=password]:not(:disabled), input.required[type=email]:not(:disabled), ' +
       'select.required:not(:disabled), input.required[type=date]:not(:disabled), ' +
-      'div.checkbox__single.required > label > input.required[type=checkbox]:not(:disabled)');
+      'div.checkbox__single.required > label > input.required[type=checkbox]:not(:disabled),' +
+      'input.required[type=tel]:not(:disabled)');
     let disabled = false;
     if (nodes) {
       nodes.forEach(input => {
@@ -723,6 +727,12 @@ export default class AuthnWidget {
         }
         if (input.type === 'checkbox') {
           if (!input.checked) {
+            disabled = true;
+          }
+        }
+        if (input.type === 'tel') {
+          let isValidPhone = input.value.length > 0 && input.checkValidity();
+          if (!isValidPhone) {
             disabled = true;
           }
         }
@@ -1010,7 +1020,8 @@ export default class AuthnWidget {
     let autofocusInput = document.querySelector("input:not(:disabled)[autofocus]")
     if (!autofocusInput) {
       let firstInput = document.querySelector("input[type=text]:not(:disabled), input[type=email]:not(:disabled), " +
-        "input[type=date]:not(:disabled), input[type=phone]:not(:disabled), input[type=password]:not(:disabled)");
+        "input[type=date]:not(:disabled), input[type=phone]:not(:disabled), input[type=password]:not(:disabled)," +
+        "input[type=tel]:not(:disabled)");
       if (firstInput) {
         firstInput.focus();
       }

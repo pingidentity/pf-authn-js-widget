@@ -1,0 +1,62 @@
+<div class="card">
+  <div class="org-logo">
+    <img class="org-logo__image" src="{{logo}}" alt="Company Logo"/>
+  </div>
+  {{> errors}}
+  <h1 class="heading-text centered-text icon-heading">
+    <svg viewBox="0 0 24 24" role="presentation">
+      <path d="M20,2A2,2 0 0,1 22,4V16A2,2 0 0,1 20,18H6L2,22V4C2,2.89 2.9,2 4,2H20M4,4V17.17L5.17,16H20V4H4M6,7H18V9H6V7M6,11H15V13H6V11Z"></path>
+    </svg><span class="inline-icon">Text Message</span></h1>
+  <div class="text-block">
+    <div class="text-block--overflow-wrap">
+      Enter the passcode that you received to complete authentication.
+    </div>
+  </div>
+  <div class="tile-selector tile-selector--stacked">
+    <form class="form" id="AuthnWidgetForm">
+      <div class="stack stack--small" data-id="stack">
+        <div class="text-input__icon">
+          <input id="otp" name="otp" type="text" class="text-input text-input--primary input--otp required"
+                 maxlength="6" value=""/>
+        </div>
+      </div>
+      <div class="form-aside">
+        <div class="stack" data-id="stack">
+          <div class="stack stack--small" data-id="stack">
+            <div class="text-block" data-id="textblock">
+              <div class="text-block--overflow-wrap">
+                Text message sent to:
+              </div>
+            </div>
+            <div class="text-block" data-id="textblock">
+              <div class="text-block--overflow-wrap">
+                {{phone}}
+              </div>
+            </div>
+          </div>
+          <div class="stack stack--small" data-id="stack">
+            <div>
+              <button class="button file-input--button button--tertiary" data-id="button"
+                      data-actionId="resendOtp" type="button">
+                Resend
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="text-block" data-id="textblock">
+        <div class="text-block--overflow-wrap">
+          <div class="stack" data-id="stack">
+            <div>
+              <button id="submit" data-actionId="activateSmsDevice" type="submit"
+                      class="button button--primary brand-primary-bg">
+                Next
+              </button>
+            </div>
+            <a tabindex="0" data-actionId="cancelDevicePairing" target="_self" class="anchor">Cancel</a>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
