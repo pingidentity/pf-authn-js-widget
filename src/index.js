@@ -44,7 +44,8 @@ export default class AuthnWidget {
       'ID_VERIFICATION_FAILED', 'ID_VERIFICATION_REQUIRED', 'ID_VERIFICATION_TIMED_OUT', 'ACCOUNT_LINKING_FAILED',
       'SECURID_CREDENTIAL_REQUIRED', 'SECURID_NEXT_TOKENCODE_REQUIRED', 'SECURID_REAUTHENTICATION_REQUIRED',
       'SECURID_SYSTEM_PIN_RESET_REQUIRED', 'SECURID_USER_PIN_RESET_REQUIRED', 'EMAIL_VERIFICATION_REQUIRED',
-      'MFA_SETUP_REQUIRED', 'DEVICE_PAIRING_METHOD_REQUIRED'];
+      'MFA_SETUP_REQUIRED', 'DEVICE_PAIRING_METHOD_REQUIRED', 'EMAIL_PAIRING_TARGET_REQUIRED',
+      'EMAIL_ACTIVATION_REQUIRED'];
   }
 
   static get COMMUNICATION_ERROR_MSG() {
@@ -183,6 +184,8 @@ export default class AuthnWidget {
     this.actionModels.set('checkNextTokencode', { required: ['tokencode'], properties: ['tokencode'] });
     this.actionModels.set('checkPasscode', { required: ['passcode'], properties: ['passcode'] });
     this.actionModels.set('resetPin', { required: ['newPin', 'confirmPin'], properties: ['newPin', 'confirmPin'] });
+    this.actionModels.set('submitEmailTarget', {required: ['email']});
+    this.actionModels.set('activateEmailDevice', {required: ['otp']});
   }
 
   init() {
