@@ -82,6 +82,7 @@
     "core-js": "^3.4.0",
     "es6-promise": "^4.2.8",
     "formdata-polyfill": "^3.0.19",
+    "qrcode": "^1.4.4",
     "query-string": "^5.1.1",
     "validate.js": "^0.13.1",
     "whatwg-fetch": "^3.0.0"

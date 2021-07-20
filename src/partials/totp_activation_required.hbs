@@ -1,0 +1,50 @@
+<div class="card">
+  <div class="org-logo">
+    <img class="org-logo__image" src="{{logo}}" alt="Company Logo"/>
+  </div>
+  {{> errors}}
+  <h1 class="heading-text centered-text icon-heading">
+     <svg viewBox="0 0 24 24" role="presentation" style="width: 32px; height: 32px;">
+      <path d="M16,18H7V4H16M11.5,22A1.5,1.5 0 0,1 10,20.5A1.5,1.5 0 0,1 11.5,19A1.5,1.5 0 0,1 13,20.5A1.5,1.5 0 0,1 11.5,22M15.5,1H7.5A2.5,2.5 0 0,0 5,3.5V20.5A2.5,2.5 0 0,0 7.5,23H15.5A2.5,2.5 0 0,0 18,20.5V3.5A2.5,2.5 0 0,0 15.5,1Z"
+      style="fill: rgb(61, 69, 77);"/>
+     </svg>
+    <span class="inline-icon">Authenticator App</span></h1>
+  <div class="text-block">
+    <div class="text-block--overflow-wrap">
+      Scan the QR Code using your authenticator app, then enter the code displayed to finish.
+    </div>
+    <div class="text-block" data-id="textblock">
+      <canvas id="qrcode" class="qrcode"></canvas>
+    </div>
+  </div>
+  <div class="tile-selector tile-selector--stacked">
+    <form class="form" id="AuthnWidgetForm">
+      <div class="stack stack--small" data-id="stack">
+         <div class="text-block" data-id="textblock">
+            <div class="text-block--overflow-wrap">Pairing Key:
+            </div>
+          </div>
+          <div class="text-block" data-id="textblock">
+            <div class="text-block--overflow-wrap">{{pairingKey}}</div>
+          </div>
+        <div class="text-input__icon">
+          <input id="otp" name="otp" type="text" class="text-input text-input--primary input--otp required"
+                 maxlength="6" value=""/>
+        </div>
+      </div>
+      <div class="text-block" data-id="textblock">
+        <div class="text-block--overflow-wrap">
+          <div class="stack" data-id="stack">
+            <div>
+              <button id="submit" data-actionId="activateTotpDevice" type="submit"
+                      class="button button--primary brand-primary-bg">
+                Finish
+              </button>
+            </div>
+            <a tabindex="0" data-actionId="cancelDevicePairing" target="_self" class="anchor">Cancel</a>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
