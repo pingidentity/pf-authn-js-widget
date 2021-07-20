@@ -51,7 +51,7 @@
         <div class="flex-row flex-row--align-stretch flex-row--justify-start flex-row--flex-direction-column flex-row--column-spacing-sm"
              data-id="flex-row">
           {{#ifEq devicePairingMethod.deviceType "MOBILE"}}
-            <div class="tile-button__title">PingOne Authenticator</div>
+            <div class="tile-button__title">{{devicePairingMethod.applicationName}}</div>
           {{else ifEq devicePairingMethod.deviceType "TOTP"}}
             <div class="tile-button__title">Authenticator App</div>
           {{else ifEq devicePairingMethod.deviceType "SMS"}}

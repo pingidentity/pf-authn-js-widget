@@ -46,7 +46,7 @@ export default class AuthnWidget {
       'SECURID_SYSTEM_PIN_RESET_REQUIRED', 'SECURID_USER_PIN_RESET_REQUIRED', 'EMAIL_VERIFICATION_REQUIRED',
       'MFA_SETUP_REQUIRED', 'DEVICE_PAIRING_METHOD_REQUIRED', 'EMAIL_PAIRING_TARGET_REQUIRED',
       'EMAIL_ACTIVATION_REQUIRED', 'SMS_PAIRING_TARGET_REQUIRED', 'SMS_ACTIVATION_REQUIRED',
-      'VOICE_PAIRING_TARGET_REQUIRED', 'VOICE_ACTIVATION_REQUIRED'];
+      'VOICE_PAIRING_TARGET_REQUIRED', 'VOICE_ACTIVATION_REQUIRED', 'MOBILE_ACTIVATION_REQUIRED'];
   }
 
   static get COMMUNICATION_ERROR_MSG() {
@@ -123,6 +123,7 @@ export default class AuthnWidget {
     this.postEmailVerificationRequired = this.postEmailVerificationRequired.bind(this);
     this.registerMfaDevicePairingEventHandler = this.registerMfaDevicePairingEventHandler.bind(this);
     this.handleMfaDevicePairingSelection = this.handleMfaDevicePairingSelection.bind(this);
+    this.postMobileActivationRequired = this.postMobileActivationRequired.bind(this);
     this.stateTemplates = new Map();  //state -> handlebar templates
     this.eventHandler = new Map();  //state -> eventHandlers
     this.postRenderCallbacks = new Map();
@@ -165,6 +166,7 @@ export default class AuthnWidget {
     this.addEventHandler('SECURID_USER_PIN_RESET_REQUIRED', this.checkSecurIdPinReset);
     this.addPostRenderCallback('EMAIL_VERIFICATION_REQUIRED', this.postEmailVerificationRequired);
     this.addEventHandler('DEVICE_PAIRING_METHOD_REQUIRED', this.registerMfaDevicePairingEventHandler);
+    this.addPostRenderCallback('MOBILE_ACTIVATION_REQUIRED', this.postMobileActivationRequired);
 
     this.actionModels.set('checkUsernamePassword', { required: ['username', 'password'], properties: ['username', 'password', 'rememberMyUsername', 'thisIsMyDevice', 'captchaResponse'] });
     this.actionModels.set('initiateAccountRecovery', { properties: ['usernameHint'] });
@@ -391,6 +393,30 @@ export default class AuthnWidget {
       this.store.dispatch('POST_FLOW', "selectDevicePairingMethod", JSON.stringify(data));
     } else {
       console.log("ERROR - Unable to dispatch device selection as the target was null");
+    }
+  }
+
+  async postMobileActivationRequired() {
+    let data = this.store.getStore();
+    let QRCode = require('qrcode');
+    QRCode.toCanvas(document.getElementById('qrcode'), data.pairingKey, function (error) {
+      if (error) {
+        console.error(error);
+      }
+    });
+
+    let pollState = await this.store.getState();
+    if (pollState.status === 'MOBILE_ACTIVATION_REQUIRED') {
+      // continue waiting
+      clearTimeout(this.pollMobileActivationState);
+      this.pollMobileActivationState = setTimeout(() => {
+        this.postMobileActivationRequired();
+      }, 1000);
+    } else {
+      clearTimeout(this.pollMobileActivationState);
+      this.store
+        .dispatch('GET_FLOW')
+        .catch(() => this.generalErrorRenderer(AuthnWidget.COMMUNICATION_ERROR_MSG));
     }
   }
 
