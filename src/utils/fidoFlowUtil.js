@@ -105,6 +105,69 @@ export function doWebAuthn(authnWidget) {
 	});
 }
 
+export function doRegisterWebAuthn(authnWidget) {
+	var authAbortController = window.PublicKeyCredential ? new AbortController() : null;
+	var authAbortSignal = window.PublicKeyCredential ? authAbortController.signal : null;
+	return new Promise((resolve, reject) => {
+		let data = authnWidget.store.getStore();
+		let options = JSON.parse(data.publicKeyCredentialCreationOptions);		
+		let publicKeyCredential = {};
+		publicKeyCredential.rp = options.rp;		
+		publicKeyCredential.user = options.user;		
+		publicKeyCredential.user.id = new Uint8Array(options.user.id);
+		publicKeyCredential.challenge = new Uint8Array(options.challenge);
+		publicKeyCredential.pubKeyCredParams = options.pubKeyCredParams;
+		// Optional parameters
+		if ('timeout' in options) {
+			publicKeyCredential.timeout = options.timeout;
+		}
+		if ('excludeCredentials' in options) {
+			publicKeyCredential.excludeCredentials = credentialListConversion(options.excludeCredentials);
+		}
+		if ('authenticatorSelection' in options) {
+			publicKeyCredential.authenticatorSelection = options.authenticatorSelection;
+		}
+		if ('attestation' in options) {
+			publicKeyCredential.attestation = options.attestation;
+		}
+		if ('extensions' in options) {
+			publicKeyCredential.extensions = options.extensions;
+		}
+
+		navigator.credentials.create({ "publicKey": publicKeyCredential, "signal": authAbortSignal })
+			.then(function (newCredentialInfo) {
+				// Send new credential info to server for verification and registration.				
+				var publicKeyCredential = {};
+				if ('id' in newCredentialInfo) {
+					publicKeyCredential.id = newCredentialInfo.id;
+				}
+				if ('type' in newCredentialInfo) {
+					publicKeyCredential.type = newCredentialInfo.type;
+				}
+				if ('rawId' in newCredentialInfo) {
+					publicKeyCredential.rawId = toBase64Str(newCredentialInfo.rawId);
+				}
+				if (!newCredentialInfo.response) {
+					throw "Missing 'response' attribute in credential response";
+				}
+				var response = {};
+				response.clientDataJSON = toBase64Str(newCredentialInfo.response.clientDataJSON);
+				response.attestationObject = toBase64Str(newCredentialInfo.response.attestationObject);
+				publicKeyCredential.response = response;
+				resolve(JSON.stringify(publicKeyCredential));
+				activatePlatformDevice(JSON.stringify(publicKeyCredential), authnWidget);
+			}).catch(function (err) {
+				// No acceptable authenticator or user refused consent. Handle appropriately.
+				console.log(err);
+				document.querySelector('#platform_icon_container_id').style.display = 'none';
+				document.querySelector('#attestationRequiredId').style.display = 'none';
+				document.querySelector('#unsupportedDeviceId').style.display = 'none'; 
+				document.querySelector('#consentRefusedId').style.display = 'block';				
+			});
+	});
+}
+
+
 function credentialListConversion(list) {
 	var credList = [];
 	for (var i = 0; i < list.length; i++) {
@@ -165,4 +228,11 @@ function checkAssertion(publicKeyCredential, authnWidget) {
 		let formData = authnWidget.getFormData();
 		authnWidget.store.dispatch('POST_FLOW', "checkAssertion", JSON.stringify(formData));
 	});
+}
+
+function activatePlatformDevice(publicKeyCredential, authnWidget) {
+	document.querySelector('#attestation').value = publicKeyCredential;
+	document.querySelector('#origin').value = window.location.origin; // Origin
+	let formData = authnWidget.getFormData();
+	authnWidget.store.dispatch('POST_FLOW', "activatePlatformDevice", JSON.stringify(formData));	
 }
