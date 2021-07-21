@@ -1,3 +1,5 @@
+import 'regenerator-runtime/runtime'; //for async await
+
 function IsWebAuthnSupported() {
 	if (!window.PublicKeyCredential) {
 		console.log("Web Authentication API is not supported on this browser.");
@@ -105,7 +107,7 @@ export function doWebAuthn(authnWidget) {
 	});
 }
 
-export function doRegisterWebAuthn(authnWidget) {
+export function doRegisterWebAuthn(authnWidget, status) {
 	var authAbortController = window.PublicKeyCredential ? new AbortController() : null;
 	var authAbortSignal = window.PublicKeyCredential ? authAbortController.signal : null;
 	return new Promise((resolve, reject) => {
@@ -155,7 +157,11 @@ export function doRegisterWebAuthn(authnWidget) {
 				response.attestationObject = toBase64Str(newCredentialInfo.response.attestationObject);
 				publicKeyCredential.response = response;
 				resolve(JSON.stringify(publicKeyCredential));
-				activatePlatformDevice(JSON.stringify(publicKeyCredential), authnWidget);
+				if (status === 'PLATFORM_ACTIVATION_REQUIRED')
+					activatePlatformDevice(JSON.stringify(publicKeyCredential), authnWidget);
+				else
+					activateSecurityKeyDevice(JSON.stringify(publicKeyCredential), authnWidget);
+
 			}).catch(function (err) {
 				// No acceptable authenticator or user refused consent. Handle appropriately.
 				console.log(err);
@@ -236,3 +242,11 @@ function activatePlatformDevice(publicKeyCredential, authnWidget) {
 	let formData = authnWidget.getFormData();
 	authnWidget.store.dispatch('POST_FLOW', "activatePlatformDevice", JSON.stringify(formData));	
 }
+
+function activateSecurityKeyDevice(publicKeyCredential, authnWidget) {
+	document.querySelector('#attestation').value = publicKeyCredential;
+	document.querySelector('#origin').value = window.location.origin; // Origin
+	let formData = authnWidget.getFormData();
+	authnWidget.store.dispatch('POST_FLOW', "activateSecurityKeyDevice", JSON.stringify(formData));	
+}
+

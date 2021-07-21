@@ -46,7 +46,7 @@ export default class AuthnWidget {
       'SECURID_SYSTEM_PIN_RESET_REQUIRED', 'SECURID_USER_PIN_RESET_REQUIRED', 'EMAIL_VERIFICATION_REQUIRED',
       'MFA_SETUP_REQUIRED', 'DEVICE_PAIRING_METHOD_REQUIRED', 'EMAIL_PAIRING_TARGET_REQUIRED',
       'EMAIL_ACTIVATION_REQUIRED', 'SMS_PAIRING_TARGET_REQUIRED', 'SMS_ACTIVATION_REQUIRED',
-      'VOICE_PAIRING_TARGET_REQUIRED', 'VOICE_ACTIVATION_REQUIRED', 'TOTP_ACTIVATION_REQUIRED', 'PLATFORM_ACTIVATION_REQUIRED', 'MOBILE_ACTIVATION_REQUIRED'];
+      'VOICE_PAIRING_TARGET_REQUIRED', 'VOICE_ACTIVATION_REQUIRED', 'TOTP_ACTIVATION_REQUIRED', 'PLATFORM_ACTIVATION_REQUIRED', 'SECURITY_KEY_ACTIVATION_REQUIRED', 'MOBILE_ACTIVATION_REQUIRED'];
   }
 
   static get COMMUNICATION_ERROR_MSG() {
@@ -121,6 +121,7 @@ export default class AuthnWidget {
     this.postAssertionRequired = this.postAssertionRequired.bind(this);
     this.postTOTPActivationRequired = this.postTOTPActivationRequired.bind(this);
     this.postPlatformDeviceActivationRequired = this.postPlatformDeviceActivationRequired.bind(this);
+    this.postSecurityKeyDeviceActivationRequired = this.postSecurityKeyDeviceActivationRequired.bind(this);
     this.postDeviceSelectionRequired = this.postDeviceSelectionRequired.bind(this);
     this.showDeviceManagementPopup = this.showDeviceManagementPopup.bind(this);
     this.hideDeviceManagementPopup = this.hideDeviceManagementPopup.bind(this);
@@ -173,6 +174,7 @@ export default class AuthnWidget {
     this.addPostRenderCallback('EMAIL_VERIFICATION_REQUIRED', this.postEmailVerificationRequired);
     this.addPostRenderCallback('TOTP_ACTIVATION_REQUIRED', this.postTOTPActivationRequired);
     this.addPostRenderCallback('PLATFORM_ACTIVATION_REQUIRED', this.postPlatformDeviceActivationRequired);
+    this.addPostRenderCallback('SECURITY_KEY_ACTIVATION_REQUIRED', this.postSecurityKeyDeviceActivationRequired);
     this.addEventHandler('DEVICE_PAIRING_METHOD_REQUIRED', this.registerMfaDevicePairingEventHandler);
     this.addPostRenderCallback('MOBILE_ACTIVATION_REQUIRED', this.postMobileActivationRequired);
 
@@ -203,6 +205,7 @@ export default class AuthnWidget {
     this.actionModels.set('activateVoiceDevice', {required: ['otp']});
     this.actionModels.set('activateTotpDevice', {required: ['otp']});
     this.actionModels.set('activatePlatformDevice', {required: ['origin', 'attestation']});
+    this.actionModels.set('activateSecurityKeyDevice', {required: ['origin', 'attestation']});
   }
 
   init() {
@@ -463,21 +466,35 @@ export default class AuthnWidget {
     });
   }
 
-  postPlatformDeviceActivationRequired()
-  {
+  postPlatformDeviceActivationRequired() {
+    let data = this.store.getStore();
     getCompatibility().then(value => {
       // PLATFORM - FULL
-      if ( value !== 'FULL' )
-      {
+      if (value !== 'FULL') {
         console.log("No acceptable authenticator");
         document.querySelector('#platform_icon_container_id').style.display = 'none';
         document.querySelector('#attestationRequiredId').style.display = 'none';
         document.querySelector('#unsupportedDeviceId').style.display = 'block';
         document.querySelector('#consentRefusedId').style.display = 'none';
       }
-      else
-      {
-        doRegisterWebAuthn(this);
+      else {
+        doRegisterWebAuthn(this, data.status);
+      }
+    });
+  }
+
+  postSecurityKeyDeviceActivationRequired() {
+    let data = this.store.getStore();
+    getCompatibility().then(value => {
+      if (value === 'NONE') {
+        console.log("No acceptable authenticator");
+        document.querySelector('#security_key_icon_container_id').style.display = 'none';
+        document.querySelector('#attestationRequiredId').style.display = 'none';
+        document.querySelector('#unsupportedDeviceId').style.display = 'block';
+        document.querySelector('#consentRefusedId').style.display = 'none';
+      }
+      else {
+        doRegisterWebAuthn(this, data.status);
       }
     });
   }
