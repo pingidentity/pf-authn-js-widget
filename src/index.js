@@ -104,6 +104,9 @@ export default class AuthnWidget {
     this.postEmptyAuthentication = this.postEmptyAuthentication.bind(this);
     this.handleMfaDeviceSelection = this.handleMfaDeviceSelection.bind(this);
     this.handleMfaSetDefaultDeviceSelection = this.handleMfaSetDefaultDeviceSelection.bind(this);
+    this.handleAddMfaMethod = this.handleAddMfaMethod.bind(this);
+    this.handleCancelAddMfaMethod = this.handleCancelAddMfaMethod.bind(this);
+    this.handleContinueAddMfaMethod = this.handleContinueAddMfaMethod.bind(this);
     this.registerMfaEventHandler = this.registerMfaEventHandler.bind(this);
     this.registerMfaChangeDeviceEventHandler = this.registerMfaChangeDeviceEventHandler.bind(this);
     this.handleMfaDeviceChange = this.handleMfaDeviceChange.bind(this);
@@ -575,6 +578,23 @@ export default class AuthnWidget {
 
     Array.from(document.querySelectorAll("[id^='device-management-popup-frame']"))
       .forEach(element => element.addEventListener('click', this.handleMfaSetDefaultDeviceSelection));
+
+    if (document.getElementById('addMfaMethod') !== null) {
+      document.getElementById('addMfaMethod')
+        .addEventListener('click', this.handleAddMfaMethod);
+    }
+    if (document.getElementById('continueAddMfaMethod') !== null) {
+      document.getElementById('continueAddMfaMethod')
+        .addEventListener('click', this.handleContinueAddMfaMethod);
+    }
+    if (document.getElementById('addMfaMethodModalBackground') !== null) {
+      document.getElementById('addMfaMethodModalBackground')
+        .addEventListener('click', this.handleCancelAddMfaMethod);
+    }
+    if (document.getElementById('cancelAddMfaMethod') !== null) {
+      document.getElementById('cancelAddMfaMethod')
+        .addEventListener('click', this.handleCancelAddMfaMethod);
+    }
   }
 
   handleMfaDeviceSelection(evt) {
@@ -625,6 +645,27 @@ export default class AuthnWidget {
         popupDivs[i].style.display = 'none';
       }
     }
+  }
+
+  handleAddMfaMethod() {
+    if (document.querySelector('#authentication_required_block_id') != null) {
+      document.querySelector('#authentication_required_block_id').style.display = 'block';
+    }
+    document.body.style.overflow = "hidden";
+    document.body.style.height = "100%";
+  }
+
+  handleContinueAddMfaMethod() {
+    this.handleCancelAddMfaMethod();
+    this.store.dispatch('POST_FLOW', "setupMfa", null);
+  }
+
+  handleCancelAddMfaMethod() {
+    if (document.querySelector('#authentication_required_block_id') != null) {
+      document.querySelector('#authentication_required_block_id').style.display = 'none';
+    }
+    document.body.style.overflow = "auto";
+    document.body.style.height = "auto";
   }
 
   handleMfaSetDefaultDeviceSelection(evt) {
