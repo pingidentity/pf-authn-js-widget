@@ -791,7 +791,7 @@ export default class AuthnWidget {
           }
         }
         if (input.type === 'text' && input.id === 'otp') {
-          if (input.value.length !== 6) {
+          if (input.value.length !== 6 || !(/^\d+$/.test(input.value))) {
             disabled = true;
           }
         }
