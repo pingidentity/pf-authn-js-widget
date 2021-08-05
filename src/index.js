@@ -461,10 +461,11 @@ export default class AuthnWidget {
   {
     let data = this.store.getStore();
     var QRCode = require('qrcode');
-    QRCode.toCanvas(document.getElementById('qrcode'), data.keyUri, function (error) {
-      if (error)
-      console.error(error);
-    });
+    QRCode.toCanvas(document.getElementById('qrcode'), data.keyUri, { 'width': 128, 'height': 128 },
+      function (error) {
+        if (error)
+          console.error(error);
+      });
   }
 
   postPlatformDeviceActivationRequired() {
