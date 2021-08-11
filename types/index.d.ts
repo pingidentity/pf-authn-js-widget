@@ -22,14 +22,14 @@ export interface IOptions {
 export interface IAuthnWidget {
   init(): void;
   initRedirectless(redirectlessConfig: RedirectlessConfig): void;
-  dispatchPendingState(token: any): void;
+  dispatchPendingState(token: string): void;
   clearPendingState(): void;
 }
 
 export default class AuthnWidget implements IAuthnWidget {
-  constructor(baseUrl: string, options: Options);
+  constructor(baseUrl: string, options: IOptions);
   init(): void;
   initRedirectless(redirectlessConfig: RedirectlessConfig): void;
-  dispatchPendingState(token: any): void;
+  dispatchPendingState(token: string): void;
   clearPendingState(): void;
 }

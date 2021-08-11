@@ -18,7 +18,7 @@
             console.log('captcha response: ' + token);
             if (token.length === 0) {
                 //reCaptcha not verified
-                dispatchPendingState.clearPendingState();
+                authnWidget.clearPendingState();
                 console.log('did not pass captcha try again');
             } else {
                 //reCaptch verified
