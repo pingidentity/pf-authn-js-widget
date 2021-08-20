@@ -127,6 +127,7 @@ export default class AuthnWidget {
     this.registerMfaDevicePairingEventHandler = this.registerMfaDevicePairingEventHandler.bind(this);
     this.handleMfaDevicePairingSelection = this.handleMfaDevicePairingSelection.bind(this);
     this.postMobileActivationRequired = this.postMobileActivationRequired.bind(this);
+    this.pollMobileActivationState = this.pollMobileActivationState.bind(this);
     this.stateTemplates = new Map();  //state -> handlebar templates
     this.eventHandler = new Map();  //state -> eventHandlers
     this.postRenderCallbacks = new Map();
@@ -402,21 +403,26 @@ export default class AuthnWidget {
   async postMobileActivationRequired() {
     let data = this.store.getStore();
     let QRCode = require('qrcode');
-    QRCode.toCanvas(document.getElementById('qrcode'), data.pairingKey, function (error) {
+    QRCode.toCanvas(document.getElementById('qrcode'), data.pairingKey, error => {
       if (error) {
+        document.getElementById("pairing-message").innerText =
+          `Enter the pairing key using ${data.applicationName} to finish pairing.`;
         console.error(error);
       }
     });
+    await this.pollMobileActivationState();
+  }
 
+  async pollMobileActivationState() {
     let pollState = await this.store.getState();
     if (pollState.status === 'MOBILE_ACTIVATION_REQUIRED') {
       // continue waiting
-      clearTimeout(this.pollMobileActivationState);
-      this.pollMobileActivationState = setTimeout(() => {
-        this.postMobileActivationRequired();
+      clearTimeout(this.pollMobileActivationStateHandler);
+      this.pollMobileActivationStateHandler = setTimeout(() => {
+        this.pollMobileActivationState();
       }, 1000);
     } else {
-      clearTimeout(this.pollMobileActivationState);
+      clearTimeout(this.pollMobileActivationStateHandler);
       this.store
         .dispatch('GET_FLOW')
         .catch(() => this.generalErrorRenderer(AuthnWidget.COMMUNICATION_ERROR_MSG));
