@@ -16,6 +16,7 @@ export interface IOptions {
   invokeReCaptcha?: () => void,
   checkRecaptcha?: string,
   grecaptcha?: any,
+  useActionParam?: boolean,
   deviceProfileScript?: string
 }
 

@@ -7,6 +7,7 @@ var options: IOptions = {
     invokeReCaptcha: () => {},
     checkRecaptcha: 'checkRecaptcha',
     grecaptcha: {},
+    useActionParam: true,
     deviceProfileScript: 'deviceProfileScript'
 }
 
