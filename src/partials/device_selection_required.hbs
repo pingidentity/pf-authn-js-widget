@@ -1,17 +1,27 @@
 <div class="card">
   <div class="org-logo">
-    <img class="org-logo__image" src="{{logo}}" alt="Company Logo" />
+    <img class="org-logo__image" src="{{logo}}" alt="Company Logo"/>
   </div>
   {{> errors}}
   <h1 class="heading">Select Authentication Method</h1>
   <div class="text-block">
-    <div class="text-block__text">Select the authentication method you want to use with your account.</div>
+    {{#if manualPairing}}
+      <div class="text-block__text">To add a new authentication method you will need to authenticate with an existing method.</div>
+    {{else}}
+      <div class="text-block__text">Select the authentication method you want to use with your account.</div>
+    {{/if}}
   </div>
   <div class="tile-selector tile-selector--stacked">
     {{> device_selection}}
     <form class="form form--margin-small" id="AuthnWidgetForm">
-      <div class="text-block" data-id="textblock">
-        <div class="text-block--overflow-wrap">
+      <div class="stack" data-id="stack">
+        {{#if manualPairingPermitted}}
+          <div class="text-block">
+            <button id="addMfaMethod" class="button file-input--button button--primary brand-primary-bg"
+                    data-id="button" type="button">+ Add Method</button>
+          </div>
+        {{/if}}
+        <div class="text-block">
           <a tabindex="0" data-actionId="cancelAuthentication" target="_self" class="anchor">
             Cancel</a>
         </div>
@@ -19,3 +29,32 @@
     </form>
   </div>
 </div>
+{{#if manualPairingPermitted}}
+  <div id="authentication_required_block_id" class="modal dialog show modal-width-small" style="display: none; top: 25%">
+  <div id="addMfaMethodModalBackground" class="modal-bg" data-id="modal-bg" onclick="cancelAddMethod()"></div>
+  <div class="modal-content" tabindex="-1" data-id="modal-content" style="min-width: 320px; width: 320px; height: auto;">
+        <span>
+            <div class="modal-body overflow-auto" data-id="modal-body">
+                <h1 class="heading-text centered-text">Authentication Required</h1>
+                <div class="text-block" data-id="textblock">
+                    <div class="text-block--overflow-wrap">To add a new authentication method you will need to authenticate with an existing method.</div>
+                </div>
+                <div class="text-block">
+                    <div class="stack" data-id="stack">
+                        <div style="margin-top: 30px">
+                            <button id="cancelAddMfaMethod" class="button file-input--button brand-primary-bg"
+                                    data-id="button" type="button" style="display: inline-block; width: 100px; margin-right: 10px">
+                                Cancel
+                            </button>
+                            <button id="continueAddMfaMethod" class="button file-input--button button--primary brand-primary-bg"
+                                    data-id="button" type="button" style="display: inline-block; width: 100px">
+                                Continue
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </span>
+  </div>
+</div>
+{{/if}}

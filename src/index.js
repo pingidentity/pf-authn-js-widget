@@ -43,7 +43,10 @@ export default class AuthnWidget {
       'PUSH_CONFIRMATION_REJECTED', 'PUSH_CONFIRMATION_TIMED_OUT', 'PUSH_CONFIRMATION_WAITING',
       'ID_VERIFICATION_FAILED', 'ID_VERIFICATION_REQUIRED', 'ID_VERIFICATION_TIMED_OUT', 'ACCOUNT_LINKING_FAILED',
       'SECURID_CREDENTIAL_REQUIRED', 'SECURID_NEXT_TOKENCODE_REQUIRED', 'SECURID_REAUTHENTICATION_REQUIRED',
-      'SECURID_SYSTEM_PIN_RESET_REQUIRED', 'SECURID_USER_PIN_RESET_REQUIRED', 'EMAIL_VERIFICATION_REQUIRED'];
+      'SECURID_SYSTEM_PIN_RESET_REQUIRED', 'SECURID_USER_PIN_RESET_REQUIRED', 'EMAIL_VERIFICATION_REQUIRED',
+      'MFA_SETUP_REQUIRED', 'DEVICE_PAIRING_METHOD_REQUIRED', 'EMAIL_PAIRING_TARGET_REQUIRED',
+      'EMAIL_ACTIVATION_REQUIRED', 'SMS_PAIRING_TARGET_REQUIRED', 'SMS_ACTIVATION_REQUIRED',
+      'VOICE_PAIRING_TARGET_REQUIRED', 'VOICE_ACTIVATION_REQUIRED', 'MOBILE_ACTIVATION_REQUIRED'];
   }
 
   static get COMMUNICATION_ERROR_MSG() {
@@ -101,6 +104,9 @@ export default class AuthnWidget {
     this.postEmptyAuthentication = this.postEmptyAuthentication.bind(this);
     this.handleMfaDeviceSelection = this.handleMfaDeviceSelection.bind(this);
     this.handleMfaSetDefaultDeviceSelection = this.handleMfaSetDefaultDeviceSelection.bind(this);
+    this.handleAddMfaMethod = this.handleAddMfaMethod.bind(this);
+    this.handleCancelAddMfaMethod = this.handleCancelAddMfaMethod.bind(this);
+    this.handleContinueAddMfaMethod = this.handleContinueAddMfaMethod.bind(this);
     this.registerMfaEventHandler = this.registerMfaEventHandler.bind(this);
     this.registerMfaChangeDeviceEventHandler = this.registerMfaChangeDeviceEventHandler.bind(this);
     this.handleMfaDeviceChange = this.handleMfaDeviceChange.bind(this);
@@ -118,6 +124,10 @@ export default class AuthnWidget {
     this.hideDeviceManagementPopup = this.hideDeviceManagementPopup.bind(this);
     this.pollCheckGet = this.pollCheckGet.bind(this);
     this.postEmailVerificationRequired = this.postEmailVerificationRequired.bind(this);
+    this.registerMfaDevicePairingEventHandler = this.registerMfaDevicePairingEventHandler.bind(this);
+    this.handleMfaDevicePairingSelection = this.handleMfaDevicePairingSelection.bind(this);
+    this.postMobileActivationRequired = this.postMobileActivationRequired.bind(this);
+    this.pollMobileActivationState = this.pollMobileActivationState.bind(this);
     this.stateTemplates = new Map();  //state -> handlebar templates
     this.eventHandler = new Map();  //state -> eventHandlers
     this.postRenderCallbacks = new Map();
@@ -159,6 +169,8 @@ export default class AuthnWidget {
     this.addEventHandler('ID_VERIFICATION_FAILED', this.handleIdVerificationFailed);
     this.addEventHandler('SECURID_USER_PIN_RESET_REQUIRED', this.checkSecurIdPinReset);
     this.addPostRenderCallback('EMAIL_VERIFICATION_REQUIRED', this.postEmailVerificationRequired);
+    this.addEventHandler('DEVICE_PAIRING_METHOD_REQUIRED', this.registerMfaDevicePairingEventHandler);
+    this.addPostRenderCallback('MOBILE_ACTIVATION_REQUIRED', this.postMobileActivationRequired);
 
     this.actionModels.set('checkUsernamePassword', { required: ['username', 'password'], properties: ['username', 'password', 'rememberMyUsername', 'thisIsMyDevice', 'captchaResponse'] });
     this.actionModels.set('initiateAccountRecovery', { properties: ['usernameHint'] });
@@ -179,6 +191,12 @@ export default class AuthnWidget {
     this.actionModels.set('checkNextTokencode', { required: ['tokencode'], properties: ['tokencode'] });
     this.actionModels.set('checkPasscode', { required: ['passcode'], properties: ['passcode'] });
     this.actionModels.set('resetPin', { required: ['newPin', 'confirmPin'], properties: ['newPin', 'confirmPin'] });
+    this.actionModels.set('submitEmailTarget', {required: ['email']});
+    this.actionModels.set('activateEmailDevice', {required: ['otp']});
+    this.actionModels.set('submitSmsTarget', {required: ['phone']});
+    this.actionModels.set('activateSmsDevice', {required: ['otp']});
+    this.actionModels.set('submitVoiceTarget', {required: ['phone']});
+    this.actionModels.set('activateVoiceDevice', {required: ['otp']});
   }
 
   init() {
@@ -233,7 +251,8 @@ export default class AuthnWidget {
       .querySelectorAll("[data-actionId]"))
       .forEach(element => element.addEventListener("click", this.dispatch));
 
-    let nodes = document.querySelectorAll(`#${this.divId} input[type=text], input[type=password], input[type=email]`);
+    let nodes = document.querySelectorAll(`#${this.divId} input[type=text], input[type=password],
+    input[type=email], input[type=tel]`);
     if (nodes) {
       nodes.forEach(n => n.addEventListener('input', this.enableSubmit));
     }
@@ -354,6 +373,59 @@ export default class AuthnWidget {
           document.querySelector('#notification').style.display = 'none';
         }
       }, 5000)
+    }
+  }
+
+  registerMfaDevicePairingEventHandler() {
+    Array.from(document.querySelectorAll('[data-mfa-device-pairing-selection]'))
+      .forEach(element => element.addEventListener('click', this.handleMfaDevicePairingSelection));
+  }
+
+  handleMfaDevicePairingSelection(evt) {
+    evt.preventDefault();
+    let source = evt.currentTarget;
+    if (source) {
+      let devicePairingMethod = source.dataset['mfaDevicePairingSelection'].split('.');
+      let data = {
+        'devicePairingMethod': {
+          'deviceType': devicePairingMethod[0]
+        }
+      };
+      if (devicePairingMethod.length > 1 && devicePairingMethod[1] !== '') {
+        data['devicePairingMethod']['applicationName'] = devicePairingMethod[1];
+      }
+      this.store.dispatch('POST_FLOW', "selectDevicePairingMethod", JSON.stringify(data));
+    } else {
+      console.log("ERROR - Unable to dispatch device selection as the target was null");
+    }
+  }
+
+  async postMobileActivationRequired() {
+    let data = this.store.getStore();
+    let QRCode = require('qrcode');
+    QRCode.toCanvas(document.getElementById('qrcode'), data.pairingKey, error => {
+      if (error) {
+        document.getElementById("pairing-message").innerText =
+          `Enter the pairing key using ${data.applicationName} to finish pairing.`;
+        console.error(error);
+      }
+    });
+    await this.pollMobileActivationState();
+  }
+
+  async pollMobileActivationState() {
+    let pollState = await this.store.getState();
+    if (pollState.status === 'MOBILE_ACTIVATION_REQUIRED') {
+      // continue waiting
+      clearTimeout(this.pollMobileActivationStateHandler);
+      this.pollMobileActivationStateHandler = setTimeout(() => {
+        this.pollMobileActivationState();
+      }, 1000);
+    } else {
+      clearTimeout(this.pollMobileActivationStateHandler);
+      this.store
+        .dispatch('GET_FLOW')
+        .catch(() => this.generalErrorRenderer(AuthnWidget.COMMUNICATION_ERROR_MSG));
     }
   }
 
@@ -512,6 +584,23 @@ export default class AuthnWidget {
 
     Array.from(document.querySelectorAll("[id^='device-management-popup-frame']"))
       .forEach(element => element.addEventListener('click', this.handleMfaSetDefaultDeviceSelection));
+
+    if (document.getElementById('addMfaMethod') !== null) {
+      document.getElementById('addMfaMethod')
+        .addEventListener('click', this.handleAddMfaMethod);
+    }
+    if (document.getElementById('continueAddMfaMethod') !== null) {
+      document.getElementById('continueAddMfaMethod')
+        .addEventListener('click', this.handleContinueAddMfaMethod);
+    }
+    if (document.getElementById('addMfaMethodModalBackground') !== null) {
+      document.getElementById('addMfaMethodModalBackground')
+        .addEventListener('click', this.handleCancelAddMfaMethod);
+    }
+    if (document.getElementById('cancelAddMfaMethod') !== null) {
+      document.getElementById('cancelAddMfaMethod')
+        .addEventListener('click', this.handleCancelAddMfaMethod);
+    }
   }
 
   handleMfaDeviceSelection(evt) {
@@ -562,6 +651,27 @@ export default class AuthnWidget {
         popupDivs[i].style.display = 'none';
       }
     }
+  }
+
+  handleAddMfaMethod() {
+    if (document.querySelector('#authentication_required_block_id') != null) {
+      document.querySelector('#authentication_required_block_id').style.display = 'block';
+    }
+    document.body.style.overflow = "hidden";
+    document.body.style.height = "100%";
+  }
+
+  handleContinueAddMfaMethod() {
+    this.handleCancelAddMfaMethod();
+    this.store.dispatch('POST_FLOW', "setupMfa", null);
+  }
+
+  handleCancelAddMfaMethod() {
+    if (document.querySelector('#authentication_required_block_id') != null) {
+      document.querySelector('#authentication_required_block_id').style.display = 'none';
+    }
+    document.body.style.overflow = "auto";
+    document.body.style.height = "auto";
   }
 
   handleMfaSetDefaultDeviceSelection(evt) {
@@ -671,7 +781,8 @@ export default class AuthnWidget {
     let nodes = document.querySelectorAll('input.required[type=text]:not(:disabled), ' +
       'input.required[type=password]:not(:disabled), input.required[type=email]:not(:disabled), ' +
       'select.required:not(:disabled), input.required[type=date]:not(:disabled), ' +
-      'div.checkbox__single.required > label > input.required[type=checkbox]:not(:disabled)');
+      'div.checkbox__single.required > label > input.required[type=checkbox]:not(:disabled),' +
+      'input.required[type=tel]:not(:disabled)');
     let disabled = false;
     if (nodes) {
       nodes.forEach(input => {
@@ -686,12 +797,18 @@ export default class AuthnWidget {
           }
         }
         if (input.type === 'text' && input.id === 'otp') {
-          if (input.value.length !== 6) {
+          if (input.value.length !== 6 || !(/^\d+$/.test(input.value))) {
             disabled = true;
           }
         }
         if (input.type === 'checkbox') {
           if (!input.checked) {
+            disabled = true;
+          }
+        }
+        if (input.type === 'tel') {
+          let isValidPhone = input.value.length > 0 && input.checkValidity();
+          if (!isValidPhone) {
             disabled = true;
           }
         }
@@ -979,7 +1096,8 @@ export default class AuthnWidget {
     let autofocusInput = document.querySelector("input:not(:disabled)[autofocus]")
     if (!autofocusInput) {
       let firstInput = document.querySelector("input[type=text]:not(:disabled), input[type=email]:not(:disabled), " +
-        "input[type=date]:not(:disabled), input[type=phone]:not(:disabled), input[type=password]:not(:disabled)");
+        "input[type=date]:not(:disabled), input[type=phone]:not(:disabled), input[type=password]:not(:disabled)," +
+        "input[type=tel]:not(:disabled)");
       if (firstInput) {
         firstInput.focus();
       }
