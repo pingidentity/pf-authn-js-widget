@@ -227,7 +227,7 @@ function onloadCallback() {
 }
 ```
 It is crucial that `api.js` is loaded before the widget is instantiated. Therefore we are using a callback function to load the widget. The `grecaptcha` object
-will be available after the `api.js` is loaded. For more information, see [Captcha documentations](https://developers.google.com/recaptcha/docs/display).
+will be available after the `api.js` is loaded. For more information, see [Captcha documentations](https://developers.google.com/recaptcha/docs/invisible).
 
 ## Using Risk-Based Authentication With the Widget
 
