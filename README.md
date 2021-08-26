@@ -198,7 +198,7 @@ function checkRecaptcha(token) {
   console.log('captcha response: ' + token);
   if (token.length === 0) {
     //reCaptcha not verified
-    dispatchPendingState.clearPendingState();
+    authnWidget.clearPendingState();
     console.log('did not pass captcha try again');
   } else {
     //reCaptch verified
@@ -235,6 +235,9 @@ Please refer to the [guide for using risk-based authentication with the widget](
 
 ## Redirectless Support 
 Please refer to the [Redirectless Support](/docs/redirectless.md) guide for more infomation on how to configure PingFederate and how to use widget's redirectless feature.
+
+## Typescript Support
+Please refer to the [Typescript Support](/docs/typescript.md) guide for more information on how to use the typescript definitions.
 
 # Browser Compatibility
 
