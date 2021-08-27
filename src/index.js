@@ -463,8 +463,11 @@ export default class AuthnWidget {
     var QRCode = require('qrcode');
     QRCode.toCanvas(document.getElementById('qrcode'), data.keyUri, { 'width': 128, 'height': 128 },
       function (error) {
-        if (error)
+        if (error) {
+          document.getElementById("pairing-message").innerText =
+          `Enter the pairing key using your authenticator app,  then enter the code displayed to finish.`;
           console.error(error);
+        }
       });
   }
 

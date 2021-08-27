@@ -158,9 +158,9 @@ export function doRegisterWebAuthn(authnWidget, status) {
 				publicKeyCredential.response = response;
 				resolve(JSON.stringify(publicKeyCredential));
 				if (status === 'PLATFORM_ACTIVATION_REQUIRED')
-					activatePlatformDevice(JSON.stringify(publicKeyCredential), authnWidget);
+					activateFIDODevice(JSON.stringify(publicKeyCredential), authnWidget, true);
 				else
-					activateSecurityKeyDevice(JSON.stringify(publicKeyCredential), authnWidget);
+					activateFIDODevice(JSON.stringify(publicKeyCredential), authnWidget, false);
 
 			}).catch(function (err) {
 				// No acceptable authenticator or user refused consent. Handle appropriately.
@@ -236,17 +236,17 @@ function checkAssertion(publicKeyCredential, authnWidget) {
 	});
 }
 
-function activatePlatformDevice(publicKeyCredential, authnWidget) {
+function activateFIDODevice(publicKeyCredential, authnWidget, isPlatformDevice) {
 	document.querySelector('#attestation').value = publicKeyCredential;
 	document.querySelector('#origin').value = window.location.origin; // Origin
 	let formData = authnWidget.getFormData();
-	authnWidget.store.dispatch('POST_FLOW', "activatePlatformDevice", JSON.stringify(formData));	
+	if(isPlatformDevice == true)
+	{
+		authnWidget.store.dispatch('POST_FLOW', "activatePlatformDevice", JSON.stringify(formData));
+	}
+	else
+	{
+		authnWidget.store.dispatch('POST_FLOW', "activateSecurityKeyDevice", JSON.stringify(formData));
+	}
+	
 }
-
-function activateSecurityKeyDevice(publicKeyCredential, authnWidget) {
-	document.querySelector('#attestation').value = publicKeyCredential;
-	document.querySelector('#origin').value = window.location.origin; // Origin
-	let formData = authnWidget.getFormData();
-	authnWidget.store.dispatch('POST_FLOW', "activateSecurityKeyDevice", JSON.stringify(formData));	
-}
-
