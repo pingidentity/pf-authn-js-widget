@@ -29,3 +29,4 @@ The widget is regularly updated to support more integrations.
 | [RSA SecurID Integration Kit](https://docs.pingidentity.com/bundle/integrations/page/ikv1563995044731.html)                   | :heavy_check_mark:    | :heavy_check_mark:  |
 | [ThreatMetrix Integration Kit](https://docs.pingidentity.com/bundle/integrations/page/nnx1593461471877.html)                  | :heavy_check_mark:    | :heavy_check_mark:  |
 | [Twitter Cloud Identity Connector](https://docs.pingidentity.com/bundle/integrations/page/cav1563995059579.html)              | :heavy_check_mark:    | :heavy_check_mark:  |
+| [Symantec VIP Integration Kit](https://docs.pingidentity.com/bundle/integrations/page/fvd1563995058360.html)                  | :heavy_check_mark:    | :heavy_check_mark:  |
