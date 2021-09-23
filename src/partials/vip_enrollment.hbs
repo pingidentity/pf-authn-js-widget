@@ -1,0 +1,34 @@
+<div class="card">
+  <div class="org-logo">
+    <img class="org-logo__image" src="{{logo}}" alt="Company Logo"/>
+  </div>
+  {{> errors}}
+  <h1 class="heading">{{username}}</h1>
+  <div class="text-block">
+    <div class="text-block__text">Registered Credentials</div>
+  </div>
+  <div class="tile-selector tile-selector--stacked">
+    <form class="form form--margin-small" id="AuthnWidgetForm">
+      <div class="stack" data-id="stack">
+        {{#each vipCredentials as |credential|}}
+          <div class="text-block">
+            <div class="text-block__text">{{credential.id}}</div>
+          </div>
+        {{/each}}
+        <div class="text-block">
+          <button class="button button--primary brand-primary-bg" data-id="button"
+                  data-actionId="continue" type="button">Continue
+          </button>
+        </div>
+        <div class="text-block">
+          <button class="button" data-id="button" data-actionId="addVIPCredential" type="button">
+            Add Credential
+          </button>
+        </div>
+        <div class="text-block">
+          <a tabindex="0" data-actionId="cancel" target="_self" class="anchor">Cancel</a>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>

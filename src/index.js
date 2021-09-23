@@ -47,7 +47,8 @@ export default class AuthnWidget {
       'MFA_SETUP_REQUIRED', 'DEVICE_PAIRING_METHOD_REQUIRED', 'EMAIL_PAIRING_TARGET_REQUIRED',
       'EMAIL_ACTIVATION_REQUIRED', 'SMS_PAIRING_TARGET_REQUIRED', 'SMS_ACTIVATION_REQUIRED',
       'VOICE_PAIRING_TARGET_REQUIRED', 'VOICE_ACTIVATION_REQUIRED', 'TOTP_ACTIVATION_REQUIRED', 'PLATFORM_ACTIVATION_REQUIRED',
-      'SECURITY_KEY_ACTIVATION_REQUIRED', 'MOBILE_ACTIVATION_REQUIRED', 'MFA_DEVICE_PAIRING_METHOD_FAILED'];
+      'SECURITY_KEY_ACTIVATION_REQUIRED', 'MOBILE_ACTIVATION_REQUIRED', 'MFA_DEVICE_PAIRING_METHOD_FAILED',
+      'VIP_ENROLLMENT', 'VIP_CREDENTIAL_REQUIRED', 'VIP_AUTHENTICATION_REQUIRED', 'VIP_CREDENTIAL_RESET_REQUIRED'];
   }
 
   static get COMMUNICATION_ERROR_MSG() {
@@ -132,6 +133,8 @@ export default class AuthnWidget {
     this.handleMfaDevicePairingSelection = this.handleMfaDevicePairingSelection.bind(this);
     this.postMobileActivationRequired = this.postMobileActivationRequired.bind(this);
     this.pollMobileActivationState = this.pollMobileActivationState.bind(this);
+    this.registerVIPAuthHandler = this.registerVIPAuthHandler.bind(this);
+    this.vipAuthHandler = this.vipAuthHandler.bind(this);
     this.stateTemplates = new Map();  //state -> handlebar templates
     this.eventHandler = new Map();  //state -> eventHandlers
     this.postRenderCallbacks = new Map();
@@ -178,6 +181,7 @@ export default class AuthnWidget {
     this.addPostRenderCallback('SECURITY_KEY_ACTIVATION_REQUIRED', this.postSecurityKeyDeviceActivationRequired);
     this.addEventHandler('DEVICE_PAIRING_METHOD_REQUIRED', this.registerMfaDevicePairingEventHandler);
     this.addPostRenderCallback('MOBILE_ACTIVATION_REQUIRED', this.postMobileActivationRequired);
+    this.addEventHandler('VIP_AUTHENTICATION_REQUIRED', this.registerVIPAuthHandler);
 
     this.actionModels.set('checkUsernamePassword', { required: ['username', 'password'], properties: ['username', 'password', 'rememberMyUsername', 'thisIsMyDevice', 'captchaResponse'] });
     this.actionModels.set('initiateAccountRecovery', { properties: ['usernameHint'] });
@@ -207,6 +211,8 @@ export default class AuthnWidget {
     this.actionModels.set('activateTotpDevice', {required: ['otp']});
     this.actionModels.set('activatePlatformDevice', {required: ['origin', 'attestation']});
     this.actionModels.set('activateSecurityKeyDevice', {required: ['origin', 'attestation']});
+    this.actionModels.set('submitVIPCredential', {required: ['vipCredentialId', 'securityCode']});
+    this.actionModels.set('resetVIPCredential', {required: ['vipCredentialId', 'securityCode', 'nextSecurityCode']});
   }
 
   init() {
@@ -1292,6 +1298,51 @@ export default class AuthnWidget {
       status.classList.remove('text-input__icon--success');
       status.classList.add('text-input__icon--error');
       document.querySelector('#submit').disabled = true;
+    }
+  }
+
+  registerVIPAuthHandler() {
+    const enableRadio = () => document.querySelector('#submit').disabled = false;
+    const disableRadio = () => document.querySelector('#submit').disabled = true;
+    if (document.getElementById('security-code-radio') !== null) {
+      document.getElementById('security-code-radio')
+        .addEventListener('click', disableRadio);
+    }
+    if (document.getElementById('push-radio') !== null) {
+      document.getElementById('push-radio')
+        .addEventListener('click', enableRadio);
+    }
+    if (document.getElementById('sms-radio') !== null) {
+      document.getElementById('sms-radio')
+        .addEventListener('click', enableRadio);
+    }
+    if (document.getElementById('voice-radio') !== null) {
+      document.getElementById('voice-radio')
+        .addEventListener('click', enableRadio);
+    }
+    document.getElementById('submit')
+      .addEventListener('click', this.vipAuthHandler);
+  }
+
+  vipAuthHandler(evt) {
+    evt.preventDefault();
+    const vipAuthentication = document.querySelector('input[name="vipAuthentication"]:checked').value;
+    if (vipAuthentication === 'push') {
+      this.renderSpinnerTemplate();
+      this.store.dispatch('POST_FLOW', "initiatePushAuthentication", null);
+    } else if (vipAuthentication === 'securityCode') {
+      const securityCode = document.getElementById('security-code').value
+      const data = { securityCode };
+      this.store.dispatch('POST_FLOW', "checkSecurityCode", JSON.stringify(data));
+    } else {
+      let vipCredentialId;
+      if (vipAuthentication === 'sms') {
+        vipCredentialId = document.getElementById("sms-list").value;
+      } else if (vipAuthentication === 'voice') {
+        vipCredentialId = document.getElementById("voice-list").value;
+      }
+      const data = { vipCredentialId };
+      this.store.dispatch('POST_FLOW', "selectVIPCredential", JSON.stringify(data));
     }
   }
 }
