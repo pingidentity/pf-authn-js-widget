@@ -25,6 +25,12 @@ module.exports = function (api) {
       },
     ],
     "@babel/plugin-transform-arrow-functions",
+    [
+      "@babel/plugin-proposal-private-methods",
+      {
+        "loose": true
+      }
+    ]
 
   ];
 
