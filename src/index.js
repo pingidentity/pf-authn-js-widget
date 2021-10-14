@@ -400,11 +400,13 @@ export default class AuthnWidget {
   handleMfaDevicePairingSelection(evt) {
     evt.preventDefault();
     let source = evt.currentTarget;
+    let rpId = window.location.hostname;
     if (source) {
       let devicePairingMethod = source.dataset['mfaDevicePairingSelection'].split('.');
       let data = {
         'devicePairingMethod': {
-          'deviceType': devicePairingMethod[0]
+          'deviceType': devicePairingMethod[0],
+          'relyingPartyId': rpId
         }
       };
       if (devicePairingMethod.length > 1 && devicePairingMethod[1] !== '') {
