@@ -405,12 +405,14 @@ export default class AuthnWidget {
       let devicePairingMethod = source.dataset['mfaDevicePairingSelection'].split('.');
       let data = {
         'devicePairingMethod': {
-          'deviceType': devicePairingMethod[0],
-          'relyingPartyId': rpId
+          'deviceType': devicePairingMethod[0]
         }
       };
       if (devicePairingMethod.length > 1 && devicePairingMethod[1] !== '') {
         data['devicePairingMethod']['applicationName'] = devicePairingMethod[1];
+      }
+      if (devicePairingMethod[0] === 'SECURITY_KEY' || devicePairingMethod[0] === 'PLATFORM' ) {
+        data['devicePairingMethod']['relyingPartyId'] = rpId;
       }
       this.store.dispatch('POST_FLOW', "selectDevicePairingMethod", JSON.stringify(data));
     } else {
