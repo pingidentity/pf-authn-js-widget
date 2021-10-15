@@ -30,3 +30,4 @@ The widget is regularly updated to support more integrations.
 | [ThreatMetrix Integration Kit](https://docs.pingidentity.com/bundle/integrations/page/nnx1593461471877.html)                  | :heavy_check_mark:    | :heavy_check_mark:  |
 | [Twitter Cloud Identity Connector](https://docs.pingidentity.com/bundle/integrations/page/cav1563995059579.html)              | :heavy_check_mark:    | :heavy_check_mark:  |
 | [Symantec VIP Integration Kit](https://docs.pingidentity.com/bundle/integrations/page/fvd1563995058360.html)                  | :heavy_check_mark:    | :heavy_check_mark:  |
+| [Azure AD Identity Protection Integration Kit](https://docs.pingidentity.com/bundle/pingfederate-azuread-identityprotection-ik/page/dsl1633639056209.html)| :heavy_check_mark:    | :heavy_check_mark:  |azure-ad-identity-protection
