@@ -30,6 +30,9 @@ describe("isValidPhoneNumber", function () {
     expect(isValidPhone("123-456-7890")).toBe(true);
     expect(isValidPhone("123 456 7890")).toBe(true);
     expect(isValidPhone("(555) 555-5555")).toBe(true);
+    expect(isValidPhone("+61 2 8503 8000")).toBe(true);
+    expect(isValidPhone("+44 20 8759 9036")).toBe(true);
+    expect(isValidPhone("+1 800 444 4444")).toBe(true);
   });
 
   it("returns false for invalid phone numbers", function () {
