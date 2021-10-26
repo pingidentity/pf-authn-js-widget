@@ -9,6 +9,7 @@ import { completeStateCallback } from './utils/redirectless';
 import paOnAuthorizationRequest from './utils/paOnAuthorizationRequest';
 import paOnAuthorizationSuccess from './utils/paOnAuthorizationSuccess';
 import './scss/main.scss';
+import {isValidEmail, isValidPhone} from "./validators/inputs";
 //uncomment to add your personal branding
 // import './scss/branding.scss';
 
@@ -857,8 +858,8 @@ export default class AuthnWidget {
           disabled = true
         }
         if (input.type === 'email') {
-          let isValidEmail = input.checkValidity();
-          if (!isValidEmail) {
+          let emailIsValid = input.checkValidity() && isValidEmail(input.value);
+          if (!emailIsValid) {
             disabled = true;
           }
         }
@@ -873,8 +874,8 @@ export default class AuthnWidget {
           }
         }
         if (input.type === 'tel') {
-          let isValidPhone = input.value.length > 0 && input.checkValidity();
-          if (!isValidPhone) {
+          let phoneIsValid = input.value.length > 0 && input.checkValidity() && isValidPhone(input.value);
+          if (!phoneIsValid) {
             disabled = true;
           }
         }
