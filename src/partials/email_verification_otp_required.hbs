@@ -1,0 +1,41 @@
+<div class="card card--wide">
+  <div class="org-logo">
+    <img class="org-logo__image" src="{{logo}}" alt="Company Logo"/>
+  </div>
+  <h1 class="heading">Email Verification</h1>
+  <form class="form" id="AuthnWidgetForm">
+    {{> errors}}
+    <div class="text-block">
+      <div class="text-block__text">
+        <p>A verification email was sent to <span style="font-weight:bold">{{email}}</span>.
+          Please check your email and enter the security code here.</p>
+        <div class="text-input__icon">
+          <input id="emailOtp" name="otp" type="text" class="text-input text-input--primary" value=""/>
+        </div>
+        <p>Need a new code? <a href="#" data-actionid="resendOtp">Resend</a></p>
+      </div>
+    </div>
+    <div class="button-set">
+      {{#with _links as |actions|}}
+        {{#if skipOtp}}
+          <button data-actionId="skipOtp" class="button brand-primary-bg">Skip for Now</button>
+        {{/if}}
+      {{/with}}
+      <button id="submit" data-actionId="checkOtp" type="submit" class="button button--primary brand-primary-bg">Continue</button>
+      <div class="text-block">
+        <a href="#" data-actionid="cancel">Cancel</a>
+      </div>
+      {{#if profileManagementUrl}}
+        <div class="text-block">
+          <a href="{{profileManagementUrl}}" target="_blank">Manage Profile</a>
+        </div>
+      {{/if}}
+    </div>
+  </form>
+  {{#ifEq actionid "resendOtp"}}
+    <div id="notification" class="icon-feedback icon-feedback--success icon-feedback--small">
+      <span class="icon-feedback__icon pingicon-ghost-error"></span>
+      <p class="icon-feedback__label">Please check your email and enter the security code here.</p>
+    </div>
+  {{/ifEq}}
+</div>
