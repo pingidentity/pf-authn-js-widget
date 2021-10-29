@@ -6,40 +6,81 @@
   <div style="display: none" id="unsupportedDeviceId" class="icon-feedback icon-feedback--timeout icon-feedback--error">
     <span class="icon-feedback__icon pingicon-ghost-error"></span>
     <p class="icon-feedback__label">
-      <p class="icon-feedback--error">Unsupported authenticator</p>
+    <p class="icon-feedback--error">Unsupported authenticator</p>
     </p>
   </div>
 
   <div style="display: none" id="consentRefusedId" class="icon-feedback icon-feedback--timeout icon-feedback--error">
     <span class="icon-feedback__icon pingicon-ghost-error"></span>
     <p class="icon-feedback__label">
-      <p class="icon-feedback--error">Unsupported authenticator or user refused consent</p>
+    <p class="icon-feedback--error">Unsupported authenticator or user refused consent</p>
     </p>
   </div>
 
   <form class="form" id="AuthnWidgetForm" data-actionId="activateSecurityKeyDevice">
     {{> errors}}
-  <div id="security_key_icon_container_id" class="tile-button__icon-container">
-    <h1 class="heading-text centered-text icon-heading" data-id="heading">
-      <svg viewBox="0 0 24 24" role="presentation" style="width: 32px; height: 32px;">
-        <path
-          d="M8 15C8.55 15 9 15.45 9 16C9 16.55 8.55 17 8 17C7.45 17 7 16.55 7 16C7 15.45 7.45 15 8 15M15.07 4.69L16.5 6.1L15.07 7.5L13.66 6.1L15.07 4.69M17.9 7.5L19.31 8.93L17.9 10.34L16.5 8.93L17.9 7.5M8 13C6.34 13 5 14.34 5 16C5 17.66 6.34 19 8 19C9.66 19 11 17.66 11 16C11 14.34 9.66 13 8 13M9.77 4.33L10.5 5.08L14.29 1.29C14.47 1.11 14.72 1 15 1C15.28 1 15.53 1.11 15.71 1.29L22.78 8.36L22.78 8.37C22.92 8.54 23 8.76 23 9C23 9.3 22.87 9.57 22.66 9.76L22.66 9.76L18.93 13.5L19.67 14.23L12.95 20.95C11.68 22.22 9.93 23 8 23C4.13 23 1 19.87 1 16C1 14.07 1.78 12.32 3.05 11.05L9.77 4.33M20.59 9L15 3.41L11.93 6.5L17.5 12.08L20.59 9Z"
-          style="fill: rgb(61, 69, 77);"></path>
-      </svg><span style="margin-left: .5em">Security Key</span>
-    </h1>
-  </div>
-   <div >
-    <div id="attestationRequiredId" class="text-block--overflow-wrap" style="margin-bottom: 30px;">
-      <p class="icon-feedback__label">Follow the directions your browser provides to finish security key pairing.</p>
-    </div>        
-    <input style="display:none" type="hidden" id="attestation" name="attestation" type="text" class="text-input text-input--primary" value=""/>
-    <input  style="display:none"  type="hidden" type="origin" id="origin" name="origin" type="text" class="text-input text-input--primary" value=""/>
-    <br>
-    <div class="text-block" data-id="textblock">
-      <div class="text-block--overflow-wrap">
-        <a tabindex="0" data-actionId="cancelDevicePairing" target="_self" class="anchor">
-          Cancel</a>
+    <div id="security_key_icon_container_id" class="tile-button__icon-container">
+      <h1 class="heading-text centered-text icon-heading" data-id="heading">
+        <svg viewBox="0 0 24 24" role="presentation" style="width: 32px; height: 32px;">
+          <path
+            d="M8 15C8.55 15 9 15.45 9 16C9 16.55 8.55 17 8 17C7.45 17 7 16.55 7 16C7 15.45 7.45 15 8 15M15.07 4.69L16.5 6.1L15.07 7.5L13.66 6.1L15.07 4.69M17.9 7.5L19.31 8.93L17.9 10.34L16.5 8.93L17.9 7.5M8 13C6.34 13 5 14.34 5 16C5 17.66 6.34 19 8 19C9.66 19 11 17.66 11 16C11 14.34 9.66 13 8 13M9.77 4.33L10.5 5.08L14.29 1.29C14.47 1.11 14.72 1 15 1C15.28 1 15.53 1.11 15.71 1.29L22.78 8.36L22.78 8.37C22.92 8.54 23 8.76 23 9C23 9.3 22.87 9.57 22.66 9.76L22.66 9.76L18.93 13.5L19.67 14.23L12.95 20.95C11.68 22.22 9.93 23 8 23C4.13 23 1 19.87 1 16C1 14.07 1.78 12.32 3.05 11.05L9.77 4.33M20.59 9L15 3.41L11.93 6.5L17.5 12.08L20.59 9Z"
+            style="fill: rgb(61, 69, 77);"></path>
+        </svg>
+        <span style="margin-left: .5em">Security Key</span>
+      </h1>
+    </div>
+    <div>
+      <div id="attestationRequiredId" class="text-block--overflow-wrap" style="margin-bottom: 30px;">
+        <p class="icon-feedback__label">Follow the directions your browser provides to finish security key pairing.</p>
+      </div>
+      <input style="display:none" type="hidden" id="attestation" name="attestation" type="text"
+             class="text-input text-input--primary" value=""/>
+      <input style="display:none" type="hidden" type="origin" id="origin" name="origin" type="text"
+             class="text-input text-input--primary" value=""/>
+      <br>
+      <div class="text-block" data-id="textblock">
+        <div class="text-block--overflow-wrap">
+          <a tabindex="0" data-actionId="cancelDevicePairing" target="_self" class="anchor">
+            Cancel</a>
+        </div>
       </div>
     </div>
   </form>
+  {{#ifSafari}}
+    <div id="userConsentModal" class="modal dialog show modal-width-small" style="display: block; top: 25%">
+      <div id="userConsentModalBackground" class="modal-bg" data-id="modal-bg" data-actionId="cancelDevicePairing"></div>
+      <div class="modal-content" tabindex="-1" data-id="modal-content"
+           style="min-width: 320px; width: 320px; height: auto;">
+                        <span>
+                            <div class="modal-body overflow-auto" data-id="modal-body">
+                                <h1 class="heading-text centered-text">Consent Required</h1>
+                                <div class="text-block" data-id="textblock">
+                                    <div class="text-block--overflow-wrap" style="-ms-word-break: normal">
+                                      To pair you will need to consent.
+                                    </div>
+                                </div>
+                                <div class="text-block">
+                                    <div class="stack" data-id="stack">
+                                        <div style="margin-top: 30px">
+                                            <button id="cancelUserConsent"
+                                                    class="button file-input--button brand-primary-bg"
+                                                    data-id="button" type="button"
+                                                    style="display: inline-block; width: 100px; margin-right: 10px"
+                                                    data-actionId="cancelDevicePairing">
+                                              Cancel
+                                            </button>
+                                            <button id="userConsent"
+                                                    class="button file-input--button button--primary brand-primary-bg"
+                                                    data-id="button" type="button"
+                                                    style="display: inline-block; width: 100px">
+                                              Consent
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </span>
+      </div>
+    </div>
+  {{/ifSafari}}
 </div>

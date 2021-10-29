@@ -9,6 +9,7 @@ import { completeStateCallback } from './utils/redirectless';
 import paOnAuthorizationRequest from './utils/paOnAuthorizationRequest';
 import paOnAuthorizationSuccess from './utils/paOnAuthorizationSuccess';
 import './scss/main.scss';
+import {isSafari} from "./utils/browsers";
 //uncomment to add your personal branding
 // import './scss/branding.scss';
 
@@ -112,6 +113,9 @@ export default class AuthnWidget {
     this.registerMfaEventHandler = this.registerMfaEventHandler.bind(this);
     this.registerMfaChangeDeviceEventHandler = this.registerMfaChangeDeviceEventHandler.bind(this);
     this.handleMfaDeviceChange = this.handleMfaDeviceChange.bind(this);
+    this.registerFidoUserConsentEventHandlers = this.registerFidoUserConsentEventHandlers.bind(this);
+    this.onFidoUserAuthNConsent = this.onFidoUserAuthNConsent.bind(this);
+    this.onFidoUserPairingConsent = this.onFidoUserPairingConsent.bind(this);
     this.registerMfaUsePasscodeEventHandler = this.registerMfaUsePasscodeEventHandler.bind(this);
     this.handleMfaUsePasscode = this.handleMfaUsePasscode.bind(this);
     this.postPushNotificationWait = this.postPushNotificationWait.bind(this);
@@ -162,6 +166,7 @@ export default class AuthnWidget {
     this.addEventHandler('OTP_REQUIRED', this.registerMfaChangeDeviceEventHandler);
     this.addEventHandler('ASSERTION_REQUIRED', this.registerMfaEventHandler);
     this.addEventHandler('ASSERTION_REQUIRED', this.registerMfaChangeDeviceEventHandler);
+    this.addEventHandler('ASSERTION_REQUIRED', () => this.registerFidoUserConsentEventHandlers(this.handleMfaDeviceChange, this.onFidoUserAuthNConsent));
     this.addPostRenderCallback('ASSERTION_REQUIRED', this.postAssertionRequired);
     this.addEventHandler('PUSH_CONFIRMATION_WAITING', this.registerMfaUsePasscodeEventHandler);
     this.addPostRenderCallback('PUSH_CONFIRMATION_WAITING', this.postPushNotificationWait);
@@ -178,7 +183,9 @@ export default class AuthnWidget {
     this.addPostRenderCallback('EMAIL_VERIFICATION_REQUIRED', this.postEmailVerificationRequired);
     this.addPostRenderCallback('TOTP_ACTIVATION_REQUIRED', this.postTOTPActivationRequired);
     this.addPostRenderCallback('PLATFORM_ACTIVATION_REQUIRED', this.postPlatformDeviceActivationRequired);
+    this.addEventHandler('PLATFORM_ACTIVATION_REQUIRED', () => this.registerFidoUserConsentEventHandlers(null, this.onFidoUserPairingConsent));
     this.addPostRenderCallback('SECURITY_KEY_ACTIVATION_REQUIRED', this.postSecurityKeyDeviceActivationRequired);
+    this.addEventHandler('SECURITY_KEY_ACTIVATION_REQUIRED', () => this.registerFidoUserConsentEventHandlers(null, this.onFidoUserPairingConsent));
     this.addEventHandler('DEVICE_PAIRING_METHOD_REQUIRED', this.registerMfaDevicePairingEventHandler);
     this.addPostRenderCallback('MOBILE_ACTIVATION_REQUIRED', this.postMobileActivationRequired);
     this.addEventHandler('VIP_AUTHENTICATION_REQUIRED', this.registerVIPAuthHandler);
@@ -493,7 +500,9 @@ export default class AuthnWidget {
         document.querySelector('#consentRefusedId').style.display = 'none';
       }
       else {
-        doRegisterWebAuthn(this, data.status);
+        if (!isSafari()) {
+          doRegisterWebAuthn(this, data.status);
+        }
       }
     });
   }
@@ -509,7 +518,9 @@ export default class AuthnWidget {
         document.querySelector('#consentRefusedId').style.display = 'none';
       }
       else {
-        doRegisterWebAuthn(this, data.status);
+        if (!isSafari()) {
+          doRegisterWebAuthn(this, data.status);
+        }
       }
     });
   }
@@ -546,7 +557,9 @@ export default class AuthnWidget {
       }
       else
       {
-        doWebAuthn(this);
+        if (!isSafari()) {
+          doWebAuthn(this);
+        }
       }
     });
   }
@@ -769,6 +782,37 @@ export default class AuthnWidget {
     }
     state.status = 'DEVICE_SELECTION_REQUIRED';
     this.render(this.store.getPreviousStore(), state);
+  }
+
+  async onFidoUserAuthNConsent(evt) {
+    evt.preventDefault();
+    document.querySelector('#userConsentModal').style.display = 'none';
+    document.body.style.overflow = "auto";
+    document.body.style.height = "auto";
+    await doWebAuthn(this);
+  }
+
+  async onFidoUserPairingConsent(evt) {
+    evt.preventDefault();
+    document.querySelector('#userConsentModal').style.display = 'none';
+    document.body.style.overflow = "auto";
+    document.body.style.height = "auto";
+    await doRegisterWebAuthn(this);
+  }
+
+  registerFidoUserConsentEventHandlers(onCancelUserConsent, onUserConsent) {
+    if (document.getElementById('userConsent') !== null) {
+      document.getElementById('userConsent')
+        .addEventListener('click', onUserConsent);
+    }
+    if (document.getElementById('cancelUserConsent') !== null) {
+      document.getElementById('cancelUserConsent')
+        .addEventListener('click', onCancelUserConsent);
+    }
+    if (document.getElementById('userConsentModalBackground') !== null) {
+      document.getElementById('userConsentModalBackground')
+        .addEventListener('click', onCancelUserConsent);
+    }
   }
 
   registerMfaUsePasscodeEventHandler() {

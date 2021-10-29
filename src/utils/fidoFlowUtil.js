@@ -38,7 +38,7 @@ function WebAuthnPlatformAuthentication(publicKeyCredentialRequestOptions) {
 		isWebAuthnPlatformAuthenticatorAvailable().then((result) => {
 			if (result) {
 				resolve(doWebAuthn());
-			} f
+			}
 			reject(Error("UnSupportedBrowserError"));
 		});
 	});
@@ -112,10 +112,10 @@ export function doRegisterWebAuthn(authnWidget, status) {
 	var authAbortSignal = window.PublicKeyCredential ? authAbortController.signal : null;
 	return new Promise((resolve, reject) => {
 		let data = authnWidget.store.getStore();
-		let options = JSON.parse(data.publicKeyCredentialCreationOptions);		
+		let options = JSON.parse(data.publicKeyCredentialCreationOptions);
 		let publicKeyCredential = {};
-		publicKeyCredential.rp = options.rp;		
-		publicKeyCredential.user = options.user;		
+		publicKeyCredential.rp = options.rp;
+		publicKeyCredential.user = options.user;
 		publicKeyCredential.user.id = new Uint8Array(options.user.id);
 		publicKeyCredential.challenge = new Uint8Array(options.challenge);
 		publicKeyCredential.pubKeyCredParams = options.pubKeyCredParams;
@@ -138,7 +138,7 @@ export function doRegisterWebAuthn(authnWidget, status) {
 
 		navigator.credentials.create({ "publicKey": publicKeyCredential, "signal": authAbortSignal })
 			.then(function (newCredentialInfo) {
-				// Send new credential info to server for verification and registration.				
+				// Send new credential info to server for verification and registration.
 				var publicKeyCredential = {};
 				if ('id' in newCredentialInfo) {
 					publicKeyCredential.id = newCredentialInfo.id;
@@ -167,8 +167,8 @@ export function doRegisterWebAuthn(authnWidget, status) {
 				console.log(err);
 				document.querySelector('#platform_icon_container_id').style.display = 'none';
 				document.querySelector('#attestationRequiredId').style.display = 'none';
-				document.querySelector('#unsupportedDeviceId').style.display = 'none'; 
-				document.querySelector('#consentRefusedId').style.display = 'block';				
+				document.querySelector('#unsupportedDeviceId').style.display = 'none';
+				document.querySelector('#consentRefusedId').style.display = 'block';
 			});
 	});
 }
@@ -248,5 +248,5 @@ function activateFIDODevice(publicKeyCredential, authnWidget, isPlatformDevice) 
 	{
 		authnWidget.store.dispatch('POST_FLOW', "activateSecurityKeyDevice", JSON.stringify(formData));
 	}
-	
+
 }

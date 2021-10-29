@@ -7,14 +7,14 @@
   <div style="display: none" id="unsupportedDeviceId" class="icon-feedback icon-feedback--timeout icon-feedback--error">
     <span class="icon-feedback__icon pingicon-ghost-error"></span>
     <p class="icon-feedback__label">
-      <p class="icon-feedback--error">Unsupported authenticator</p>
+    <p class="icon-feedback--error">Unsupported authenticator</p>
     </p>
   </div>
 
   <div style="display: none" id="consentRefusedId" class="icon-feedback icon-feedback--timeout icon-feedback--error">
     <span class="icon-feedback__icon pingicon-ghost-error"></span>
     <p class="icon-feedback__label">
-      <p class="icon-feedback--error">Unsupported authenticator or user refused consent</p>
+    <p class="icon-feedback--error">Unsupported authenticator or user refused consent</p>
     </p>
   </div>
 
@@ -23,13 +23,17 @@
     <div class="spinner spinner--margin-bottom-small" id="assertionRequiredSpinnerId">
       <div class="spinner__icon" data-id="spinner"></div>
     </div>
-    <div id="assertionRequiredAuthenticatingId" class="icon-feedback icon-feedback--success" style="margin-bottom: 30px;">
+    <div id="assertionRequiredAuthenticatingId" class="icon-feedback icon-feedback--success"
+         style="margin-bottom: 30px;">
       <p class="icon-feedback__label">Authenticating</p>
     </div>
-        {{> device_selection_body bodyText='Request sent to:'}}
-    <input style="display:none" type="hidden" id="assertion" name="assertion" type="text" class="text-input text-input--primary" value=""/>
-    <input  style="display:none"  type="hidden" type="origin" id="origin" name="origin" type="text" class="text-input text-input--primary" value=""/>
-    <input  style="display:none" type="hidden" type="compatibility" id="compatibility" name="compatibility" type="text" class="text-input text-input--primary" value=""/>
+    {{> device_selection_body bodyText='Request sent to:'}}
+    <input style="display:none" type="hidden" id="assertion" name="assertion" type="text"
+           class="text-input text-input--primary" value=""/>
+    <input style="display:none" type="hidden" type="origin" id="origin" name="origin" type="text"
+           class="text-input text-input--primary" value=""/>
+    <input style="display:none" type="hidden" type="compatibility" id="compatibility" name="compatibility" type="text"
+           class="text-input text-input--primary" value=""/>
     <br>
     <div class="text-block" data-id="textblock">
       <div class="text-block--overflow-wrap">
@@ -38,4 +42,40 @@
       </div>
     </div>
   </form>
+  {{#ifSafari}}
+    <div id="userConsentModal" class="modal dialog show modal-width-small" style="display: block; top: 25%">
+      <div id="userConsentModalBackground" class="modal-bg" data-id="modal-bg"></div>
+      <div class="modal-content" tabindex="-1" data-id="modal-content"
+           style="min-width: 320px; width: 320px; height: auto;">
+                        <span>
+                            <div class="modal-body overflow-auto" data-id="modal-body">
+                                <h1 class="heading-text centered-text">Consent Required</h1>
+                                <div class="text-block" data-id="textblock">
+                                    <div class="text-block--overflow-wrap" style="-ms-word-break: normal">
+                                      To authenticate you will need to consent.
+                                    </div>
+                                </div>
+                                <div class="text-block">
+                                    <div class="stack" data-id="stack">
+                                        <div style="margin-top: 30px">
+                                            <button id="cancelUserConsent"
+                                                    class="button file-input--button brand-primary-bg"
+                                                    data-id="button" type="button"
+                                                    style="display: inline-block; width: 100px; margin-right: 10px">
+                                              Cancel
+                                            </button>
+                                            <button id="userConsent"
+                                                    class="button file-input--button button--primary brand-primary-bg"
+                                                    data-id="button" type="button"
+                                                    style="display: inline-block; width: 100px">
+                                              Consent
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </span>
+      </div>
+    </div>
+  {{/ifSafari}}
 </div>
