@@ -12,14 +12,14 @@
   <form class="form form--margin-small" id="AuthnWidgetForm">
     <div class="button-set">
       <button data-actionId="poll" class="button button--primary brand-primary-bg">Continue</button>
+      <div class="text-block">
+        <a href="#" data-actionid="cancel">Cancel</a>
+      </div>
       {{#if profileManagementUrl}}
       <div class="text-block">
         <a href="{{profileManagementUrl}}" target="_blank">Manage Profile</a>
       </div>
       {{/if}}
-      <div class="text-block">
-        <a href="#" data-actionid="cancel">Cancel</a>
-      </div>
     </div>
   </form>
   {{#ifEq actionid "poll"}}
