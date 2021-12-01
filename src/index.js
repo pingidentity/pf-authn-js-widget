@@ -49,7 +49,8 @@ export default class AuthnWidget {
       'EMAIL_ACTIVATION_REQUIRED', 'SMS_PAIRING_TARGET_REQUIRED', 'SMS_ACTIVATION_REQUIRED',
       'VOICE_PAIRING_TARGET_REQUIRED', 'VOICE_ACTIVATION_REQUIRED', 'TOTP_ACTIVATION_REQUIRED', 'PLATFORM_ACTIVATION_REQUIRED',
       'SECURITY_KEY_ACTIVATION_REQUIRED', 'MOBILE_ACTIVATION_REQUIRED', 'MFA_DEVICE_PAIRING_METHOD_FAILED',
-      'VIP_ENROLLMENT', 'VIP_CREDENTIAL_REQUIRED', 'VIP_AUTHENTICATION_REQUIRED', 'VIP_CREDENTIAL_RESET_REQUIRED'];
+      'VIP_ENROLLMENT', 'VIP_CREDENTIAL_REQUIRED', 'VIP_AUTHENTICATION_REQUIRED', 'VIP_CREDENTIAL_RESET_REQUIRED',
+      'SHOCARD_REQUIRED', 'SHOCARD_COMPLETED', 'SHOCARD_FAILED', 'SHOCARD_TIMED_OUT'];
   }
 
   static get COMMUNICATION_ERROR_MSG() {
@@ -96,6 +97,7 @@ export default class AuthnWidget {
     this.openExternalAuthnPopup = this.openExternalAuthnPopup.bind(this);
     this.externalAuthnFailure = this.externalAuthnFailure.bind(this);
     this.postContinueAuthentication = this.postContinueAuthentication.bind(this);
+    this.postContinue = this.postContinue.bind(this);
     this.registerReopenPopUpHandler = this.registerReopenPopUpHandler.bind(this);
     this.handleReopenPopUp = this.handleReopenPopUp.bind(this);
     this.registerRegistrationLinks = this.registerRegistrationLinks.bind(this);
@@ -118,7 +120,7 @@ export default class AuthnWidget {
     this.postPushNotificationWait = this.postPushNotificationWait.bind(this);
     this.registerIdVerificationRequiredEventHandler = this.registerIdVerificationRequiredEventHandler.bind(this);
     this.postIdVerificationRequired = this.postIdVerificationRequired.bind(this);
-    this.handleIdVerificationInProgress = this.handleIdVerificationInProgress.bind(this);
+    this.handleInProgressPoll = this.handleInProgressPoll.bind(this);
     this.handleIdVerificationFailed = this.handleIdVerificationFailed.bind(this);
     this.checkSecurIdPinReset = this.checkSecurIdPinReset.bind(this);
     this.postAssertionRequired = this.postAssertionRequired.bind(this);
@@ -136,6 +138,8 @@ export default class AuthnWidget {
     this.pollMobileActivationState = this.pollMobileActivationState.bind(this);
     this.registerVIPAuthHandler = this.registerVIPAuthHandler.bind(this);
     this.vipAuthHandler = this.vipAuthHandler.bind(this);
+    this.postShoCardRequired = this.postShoCardRequired.bind(this);
+    this.shocardRequiredPoll = this.shocardRequiredPoll.bind(this);
     this.stateTemplates = new Map();  //state -> handlebar templates
     this.eventHandler = new Map();  //state -> eventHandlers
     this.postRenderCallbacks = new Map();
@@ -172,7 +176,7 @@ export default class AuthnWidget {
     this.addPostRenderCallback('MOBILE_PAIRING_REQUIRED', this.postContinueAuthentication);
     this.addEventHandler('ID_VERIFICATION_REQUIRED', this.registerIdVerificationRequiredEventHandler);
     this.addPostRenderCallback('ID_VERIFICATION_REQUIRED', this.postIdVerificationRequired);
-    this.addPostRenderCallback('ID_VERIFICATION_IN_PROGRESS', this.handleIdVerificationInProgress);
+    this.addPostRenderCallback('ID_VERIFICATION_IN_PROGRESS', this.handleInProgressPoll);
     this.addPostRenderCallback('ID_VERIFICATION_COMPLETED', this.postContinueAuthentication);
     this.addEventHandler('ID_VERIFICATION_FAILED', this.handleIdVerificationFailed);
     this.addEventHandler('SECURID_USER_PIN_RESET_REQUIRED', this.checkSecurIdPinReset);
@@ -183,6 +187,9 @@ export default class AuthnWidget {
     this.addEventHandler('DEVICE_PAIRING_METHOD_REQUIRED', this.registerMfaDevicePairingEventHandler);
     this.addPostRenderCallback('MOBILE_ACTIVATION_REQUIRED', this.postMobileActivationRequired);
     this.addEventHandler('VIP_AUTHENTICATION_REQUIRED', this.registerVIPAuthHandler);
+    this.addPostRenderCallback('SHOCARD_REQUIRED', this.postShoCardRequired);
+    this.addPostRenderCallback('SHOCARD_IN_PROGRESS', this.handleInProgressPoll);
+    this.addEventHandler('SHOCARD_COMPLETED', this.postContinue);
 
     this.actionModels.set('checkUsernamePassword', { required: ['username', 'password'], properties: ['username', 'password', 'rememberMyUsername', 'thisIsMyDevice', 'captchaResponse'] });
     this.actionModels.set('initiateAccountRecovery', { properties: ['usernameHint'] });
@@ -379,6 +386,12 @@ export default class AuthnWidget {
     }
     setTimeout(() => {
       this.store.dispatch('POST_FLOW', 'continueAuthentication', '{}');
+    }, 1000)
+  }
+
+  postContinue() {
+    setTimeout(() => {
+      this.store.dispatch('POST_FLOW', 'continue', '{}');
     }, 1000)
   }
 
@@ -936,7 +949,7 @@ export default class AuthnWidget {
     this.pollCheckGet(this.store.getStore().verificationCode, 5000);
   }
 
-  handleIdVerificationInProgress() {
+  handleInProgressPoll() {
     setTimeout(() => {
       this.store.dispatch('POST_FLOW', 'poll', '{}');
     }, 5000)
@@ -1348,6 +1361,31 @@ export default class AuthnWidget {
       }
       const data = { vipCredentialId };
       this.store.dispatch('POST_FLOW', "selectVIPCredential", JSON.stringify(data));
+    }
+  }
+
+  postShoCardRequired() {
+    this.shocardRequiredPoll(this.store.getStore().qrCodeUrl, 5000);
+  }
+
+  async shocardRequiredPoll(currentQrCodeUrl, timeout) {
+    let fetchUtil = this.store.fetchUtil;
+    let result = await fetchUtil.postFlow(this.store.flowId, 'poll', '{}');
+    let newState = await result.json()
+
+    let pollAgain =
+      (newState.status === 'SHOCARD_REQUIRED') &&
+      (newState.qrCodeUrl === currentQrCodeUrl);
+
+    if (!pollAgain) {
+      this.store
+        .dispatch('GET_FLOW')
+        .catch(() => this.generalErrorRenderer(AuthnWidget.COMMUNICATION_ERROR_MSG));
+    }
+    else {
+      setTimeout(() => {
+        this.shocardRequiredPoll(currentQrCodeUrl, timeout);
+      }, timeout)
     }
   }
 }

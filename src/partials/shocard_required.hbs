@@ -1,0 +1,30 @@
+<div class="card">
+  <div class="org-logo">
+    <img class="org-logo__image" src="{{logo}}" alt="Company Logo"/>
+  </div>
+  <div class="stack stack--small">
+      <h1 class="heading" data-id="heading">ShoCard</h1>
+      <h4 class="heading heading--4 text-block" data-id="heading">
+        Scan the QR code to securely sign on with your ShoCard App
+      </h4>
+    </div>
+    {{#if userMessage}}
+      <div class="feedback feedback--error" data-id="feedback">
+        <span class="feedback__icon pingicon-error-triangle"></span>
+        <div class="feedback__message">
+          <span>{{userMessage}}</span>
+        </div>
+      </div>
+    {{/if}}
+    <div class="text-block">
+      <img id="qrCode" width="175px" src="{{qrCodeUrl}}" alt="QR Code" />
+    </div>
+    <h4 class="heading heading--4 text-block" data-id="heading">
+      If this is your first time using the ShoCard ID Wallet, download the ShoCard App on your mobile device. Complete the setup wizard. You will be asked to take a live selfie and scan a copy of your government-issued ID, such as your driver's license or passport. After you finish the setup, scan the QR code above.
+    </h4>
+    <div class="text-block">
+      <div class="text-block--overflow-wrap">
+        <a tabindex="0" data-actionId="cancel" target="_self" class="anchor">Cancel</a>
+      </div>
+    </div>
+</div>
