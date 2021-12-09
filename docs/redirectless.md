@@ -5,7 +5,7 @@ Single-page web applications can also use redirectless mode if administrators co
 ## PingFederate configuration
 1. Follow the instructions at [README.md](../README.md#pingfederate-configuration) to configure the Authentication API in PingFederate.
 1. In the administrative console, go to Applications > OAuth > Clients and add a new OAuth 2.0 client.
-1. On the new client, select the 'Allow Authentication API OAuth Initiation' check box.
+1. On the new client, select the 'Allow Authentication API Redirectless Mode' check box ('Allow Authentication API OAuth Initiation' prior to 11.0).
 1. Select the 'Restrict Common Scopes' check box and the client's restricted scopes.
 1. Select the client's 'Allowed Grant Types'.
 
