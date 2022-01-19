@@ -1,0 +1,27 @@
+<div class="card">
+  <div class="org-logo">
+    <img class="org-logo__image" src="{{logo}}" alt="Company Logo"/>
+  </div>
+  {{> errors}}
+  {{> spinner}}
+  <div class="tile-selector tile-selector--stacked">
+  <form class="form form--margin-small" id="AuthnWidgetForm">
+    {{#each authenticators as |authenticator|}}
+        <div class="stack" data-id="stack">
+          <div class="tile-button__content-container">
+              <button class="button file-input--button button--tertiary" data-id="button"
+                      type="button" data-authenticator-selection="{{authenticator}}">
+              {{authenticator}}
+            </button>
+          </div>
+        </div>
+
+    {{/each}}
+  </form>
+  </div>
+  <div class="text-block">
+    <div class="text-block--overflow-wrap">
+      <a tabindex="0" data-actionId="cancel" target="_self" class="anchor">Cancel</a>
+    </div>
+  </div>
+</div>

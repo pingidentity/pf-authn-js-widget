@@ -1,0 +1,21 @@
+<div class="card">
+  <div class="org-logo">
+    <img class="org-logo__image" src="{{logo}}" alt="Company Logo" />
+  </div>
+  {{> errors}}
+  {{> spinner}}
+  <form class="form" id="AuthnWidgetForm">
+    <div class="float-label">
+      <input type="text" class="text-input float-label__input required" name="userId" id="username" />
+      <label class="float-label__label" for="username">Username</label>
+    </div>
+    <button id="submit" data-actionid="checkUserId" type="submit" class="button button--primary brand-primary-bg" disabled>
+      Next
+    </button>
+    <div class="text-block">
+      <div class="text-block--overflow-wrap">
+        <a tabindex="0" data-actionId="cancel" target="_self" class="anchor">Cancel</a>
+      </div>
+    </div>
+  </form>
+</div>
