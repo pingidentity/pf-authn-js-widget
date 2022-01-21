@@ -276,3 +276,29 @@ input:read-only {
 .popover-menu__item {
     white-space: nowrap;
 }
+
+.entrust {
+  &__grid {
+    justify-content: center;
+    display: flex;
+    flex-wrap: wrap;
+    box-sizing: border-box;
+  }
+  &__grid-item {
+    margin: 8px;
+    padding: 0 8px;
+    box-sizing: border-box;
+    border: solid 1px lightgray;
+    align-items: center;
+    minimum-width: 50px;
+    border-radius: 8px;
+    flex-direction: column;
+    text-align: center;
+  }
+
+  &__grid-item p {
+    font-size: 14px;
+    font-weight: 500;
+    margin: 8px 0px 0px;
+  }
+}
