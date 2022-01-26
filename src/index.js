@@ -139,6 +139,7 @@ export default class AuthnWidget {
     this.vipAuthHandler = this.vipAuthHandler.bind(this);
     this.registerEntrustHandler = this.registerEntrustHandler.bind(this);
     this.entrustHandler = this.entrustHandler.bind(this);
+    this.postInputRequired = this.postInputRequired.bind(this);
     this.stateTemplates = new Map();  //state -> handlebar templates
     this.eventHandler = new Map();  //state -> eventHandlers
     this.postRenderCallbacks = new Map();
@@ -187,6 +188,7 @@ export default class AuthnWidget {
     this.addPostRenderCallback('MOBILE_ACTIVATION_REQUIRED', this.postMobileActivationRequired);
     this.addEventHandler('VIP_AUTHENTICATION_REQUIRED', this.registerVIPAuthHandler);
     this.addEventHandler('AUTHENTICATOR_SELECTION_REQUIRED', this.registerEntrustHandler);
+    this.addPostRenderCallback('INPUT_REQUIRED', this.postInputRequired)
 
     this.actionModels.set('checkUsernamePassword', { required: ['username', 'password'], properties: ['username', 'password', 'rememberMyUsername', 'thisIsMyDevice', 'captchaResponse'] });
     this.actionModels.set('initiateAccountRecovery', { properties: ['usernameHint'] });
@@ -1372,6 +1374,14 @@ export default class AuthnWidget {
       this.store.dispatch('POST_FLOW', 'selectAuthenticator', JSON.stringify(data));
     } else {
       console.log("ERROR - Unable to dispatch authenticator selection as the target was null");
+    }
+  }
+
+  postInputRequired() {
+    let state = this.store.getState();
+    if (state.authenticator === 'TOKENPUSH') {
+      document.getElementById('passcodefield').style.display = 'none';
+      document.querySelector('#submit').disabled = false;
     }
   }
 }

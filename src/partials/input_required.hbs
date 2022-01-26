@@ -9,7 +9,10 @@
       <div class="spinner spinner--margin-bottom-small">
         <div class="spinner__icon" data-id="spinner"></div>
       </div>
-    {{else IfEq authenticator "GRID"}}
+      <div class="text-block--overflow-wrap" id="pushnotificationmessage">
+        Approve Push Notification, then click Submit
+      </div>
+    {{else ifEq authenticator "GRID"}}
       <div class="heading-text">
         <div class="text-block__text">Enter the response to the Grid Card challenge</div>
       </div>
@@ -27,11 +30,10 @@
         {{/each}}
       </div>
     {{/ifEq}}
-    <div class="float-label">
+    <div class="float-label" id="passcodefield">
       <input type="text" class="text-input float-label__input required" name="input" id="passcode"/>
       <label class="float-label__label" for="passcode">Enter passcode</label>
     </div>
-
 
     <button id="submit" data-actionid="checkInput" type="submit" class="button button--primary brand-primary-bg"
             disabled>
