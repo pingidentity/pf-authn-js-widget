@@ -1,26 +1,40 @@
-<div class="card">
-  <div class="org-logo">
-    <img class="org-logo__image" src="{{logo}}" alt="Company Logo"/>
-  </div>
-  {{> errors}}
-  {{> spinner}}
-  <div class="tile-selector tile-selector--stacked">
-    <form class="form form--margin-small" id="AuthnWidgetForm">
-      {{#each authenticators as |authenticator|}}
-        <div class="stack" data-id="stack">
-          <div class="tile-button__content-container">
-            <button class="button file-input--button button--secondary" data-id="button"
-                    type="button" data-authenticator-selection="{{authenticator}}">
-              {{authenticator}}
-            </button>
+<div class="card card--no-padding">
+  <div class="card__content">
+    <div class="org-logo">
+      <img class="org-logo__image" src="{{logo}}" alt="Company Logo"/>
+    </div>
+    <div class="stack stack--large">
+      {{> errors}}
+      {{> spinner}}
+      <div class="tile-selector tile-selector--stacked">
+        {{#each authenticators as |authenticator|}}
+          <div class="tile-button--side-icon tile-button tile-button--stacked-small"
+               data-id="tile-selector-button-$authenticator" role="button" tabindex="0">
+            <div class="tile-button__icon-container" data-authenticator-selection="{{authenticator}}">
+              <svg viewBox="0 0 24 24" role="presentation" style="width: 32px; height: 32px;">
+                <path
+                  d="M20,2A2,2 0 0,1 22,4V16A2,2 0 0,1 20,18H6L2,22V4C2,2.89 2.9,2 4,2H20M4,4V17.17L5.17,16H20V4H4M6,7H18V9H6V7M6,11H15V13H6V11Z"
+                  style="fill: rgb(61, 69, 77);"/>
+              </svg>
+            </div>
+            <div class="tile-button__content-container" data-authenticator-selection="{{authenticator}}">
+              <div
+                class="flex-row flex-row--align-stretch flex-row--justify-start flex-row--flex-direction-column flex-row--column-spacing-sm"
+                data-id="flex-row">
+                <div class="tile-button__title">{{authenticator}}</div>
+              </div>
+            </div>
           </div>
-        </div>
-      {{/each}}
+        {{/each}}
+      </div>
+
       <div class="text-block">
         <div class="text-block--overflow-wrap">
-          <a tabindex="0" data-actionId="cancel" target="_self" class="anchor">Cancel</a>
+          <div class="stack">
+            <a tabindex="0" data-actionId="cancel" target="_self" class="anchor">Cancel</a>
+          </div>
         </div>
       </div>
-    </form>
+    </div>
   </div>
 </div>
