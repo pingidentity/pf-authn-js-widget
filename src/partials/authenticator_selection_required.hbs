@@ -9,7 +9,7 @@
       <div class="tile-selector tile-selector--stacked">
         {{#each authenticators as |authenticator|}}
           <div class="tile-button--side-icon tile-button tile-button--stacked-small"
-               data-id="tile-selector-button-$authenticator" role="button" tabindex="0">
+               data-authenticator-selection="{{authenticator}}" role="button" tabindex="0">
             <div class="tile-button__icon-container" data-authenticator-selection="{{authenticator}}">
               <svg viewBox="0 0 24 24" role="presentation" style="width: 32px; height: 32px;">
                 <path
