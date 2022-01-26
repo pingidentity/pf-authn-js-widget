@@ -1377,8 +1377,8 @@ export default class AuthnWidget {
     }
   }
 
-  postInputRequired() {
-    let state = this.store.getState();
+  async postInputRequired() {
+    let state = await this.store.getState();
     if (state.authenticator === 'TOKENPUSH') {
       document.getElementById('passcodefield').style.display = 'none';
       document.querySelector('#submit').disabled = false;
