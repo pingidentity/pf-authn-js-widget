@@ -69,14 +69,9 @@
           <div class="tile-button__content">{{device.name}}</div>
           {{else if device.target}}
             {{#ifNotEq device.type "SECURITY_KEY"}}
-              {{#ifNotEq device.type "PLATFORM"}}
-                <div class="tile-button__content">{{device.target}}</div>
-              {{/ifNotEq}}
+              <div class="tile-button__content">{{device.target}}</div>
             {{/ifNotEq}}
             {{#ifEq device.type "SECURITY_KEY"}}
-              <div class="tile-button__content"></div>
-            {{/ifEq}}
-            {{#ifEq device.type "PLATFORM"}}
               <div class="tile-button__content"></div>
             {{/ifEq}}
           {{/ifEq}}
