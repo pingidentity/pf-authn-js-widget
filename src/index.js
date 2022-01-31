@@ -402,11 +402,13 @@ export default class AuthnWidget {
     evt.preventDefault();
     let source = evt.currentTarget;
     let rpId = window.location.hostname;
+    let userAgent = window.navigator.userAgent;
     if (source) {
       let devicePairingMethod = source.dataset['mfaDevicePairingSelection'].split('.');
       let data = {
         'devicePairingMethod': {
-          'deviceType': devicePairingMethod[0]
+          'deviceType': devicePairingMethod[0],
+          'userAgent': userAgent
         }
       };
       if (devicePairingMethod.length > 1 && devicePairingMethod[1] !== '') {
