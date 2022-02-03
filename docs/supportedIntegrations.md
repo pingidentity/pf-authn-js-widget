@@ -11,6 +11,7 @@ The widget is regularly updated to support more integrations.
 | [Agentless Integration Kit](https://docs.pingidentity.com/bundle/integrations/page/ygj1563994984859.html)                                                  | :heavy_check_mark:    | :heavy_check_mark:  |
 | [Amazon Cloud Identity Connector](https://docs.pingidentity.com/bundle/integrations/page/btb1568414204118.html)                                            | :heavy_check_mark:    | :heavy_check_mark:  |
 | [Apple Cloud Identity Connector](https://docs.pingidentity.com/bundle/integrations/page/cuf1572990949051.html)                                             | :heavy_check_mark:    | :heavy_check_mark:  |
+| [Azure AD Identity Protection Integration Kit](https://docs.pingidentity.com/bundle/pingfederate-azuread-identityprotection-ik/page/dsl1633639056209.html) | :heavy_check_mark:    | :heavy_check_mark:  |
 | [Duo Security (MFA)](https://docs.pingidentity.com/bundle/integrations/page/oca1563995007204.html)                                                         | :heavy_check_mark:    | :heavy_check_mark:  |
 | [End User Registration](https://docs.pingidentity.com/csh?Product=pf-latest&topicname=aga1564003007414.html)                                               | :heavy_check_mark:    | :heavy_check_mark:  |
 | [Entrust Identity Enterprise Integration Kit](https://docs.pingidentity.com/bundle/pingfederate-entrust-ik/page/qup1642091698958.html)                     | :heavy_check_mark:    | :heavy_check_mark:  |
@@ -28,7 +29,6 @@ The widget is regularly updated to support more integrations.
 | [PingOne Risk Management Integration Kit](https://docs.pingidentity.com/bundle/integrations/page/fnd1592583282135.html)                                    | :heavy_check_mark:    | :heavy_check_mark:  |
 | [PingOne Verify Integration Kit](https://docs.pingidentity.com/bundle/integrations/page/elk1607471062724.html)                                             | :heavy_check_mark:    | :heavy_check_mark:  |
 | [RSA SecurID Integration Kit](https://docs.pingidentity.com/bundle/integrations/page/ikv1563995044731.html)                                                | :heavy_check_mark:    | :heavy_check_mark:  |
+| [Symantec VIP Integration Kit](https://docs.pingidentity.com/bundle/integrations/page/fvd1563995058360.html)                                               | :heavy_check_mark:    | :heavy_check_mark:  |
 | [ThreatMetrix Integration Kit](https://docs.pingidentity.com/bundle/integrations/page/nnx1593461471877.html)                                               | :heavy_check_mark:    | :heavy_check_mark:  |
 | [Twitter Cloud Identity Connector](https://docs.pingidentity.com/bundle/integrations/page/cav1563995059579.html)                                           | :heavy_check_mark:    | :heavy_check_mark:  |
-| [Symantec VIP Integration Kit](https://docs.pingidentity.com/bundle/integrations/page/fvd1563995058360.html)                                               | :heavy_check_mark:    | :heavy_check_mark:  |
-| [Azure AD Identity Protection Integration Kit](https://docs.pingidentity.com/bundle/pingfederate-azuread-identityprotection-ik/page/dsl1633639056209.html) | :heavy_check_mark:    | :heavy_check_mark:  |azure-ad-identity-protection
