@@ -4,8 +4,8 @@ import 'core-js/stable';
 import 'regenerator-runtime/runtime'; //for async await
 import Store from './store';
 import redirectlessConfigValidator from './validators/redirectless';
-import {doRegisterWebAuthn, doWebAuthn, getCompatibility} from './utils/fidoFlowUtil';
-import {completeStateCallback} from './utils/redirectless';
+import { getCompatibility, doWebAuthn, doRegisterWebAuthn } from './utils/fidoFlowUtil';
+import { completeStateCallback } from './utils/redirectless';
 import paOnAuthorizationRequest from './utils/paOnAuthorizationRequest';
 import paOnAuthorizationSuccess from './utils/paOnAuthorizationSuccess';
 import './scss/main.scss';
