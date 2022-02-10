@@ -13,6 +13,13 @@ const redirectlessConfigValidator = (configuration) => {
     throw new Error('onAuthorizationSuccess attribute must be a function.');
   }
 
+  if (configuration.onAuthorizationFailed) {
+    const onAuthorizationFailed = configuration.onAuthorizationSuccess;
+    if(!validator.isFunction(onAuthorizationFailed)) {
+      throw new Error('onAuthorizationFailed attribute must be a function.');
+    }
+  }
+
   const onAuthorizationRequest = configuration.onAuthorizationRequest;
   const onAuthorizationRequestIsPresent = !validator.isEmpty(onAuthorizationRequest);
   if (onAuthorizationRequestIsPresent) {

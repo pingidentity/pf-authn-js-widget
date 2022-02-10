@@ -15,6 +15,7 @@ var config: IRedirectlessConfig = {
     client_id: 'id',
     response_type: 'response_type',
     onAuthorizationSuccess: (response: Response) => {},
+    onAuthorizationFailed: (response: Response) => {},
 }
 
 var authnWidget: IAuthnWidget = new AuthnWidget("localhost", options);
