@@ -77,8 +77,8 @@
         function initWidget(widget) {
           {{#if redirectless}}
           var config = {
-            client_id: 'ac_client', // redirectless requires this configuration
-            response_type: 'token', // redirectless requires this configuration
+            // client_id: '', // redirectless requires this configuration
+            // response_type: 'token', // redirectless requires this configuration
             onAuthorizationSuccess: function (response) {
               showResponse(JSON.stringify(response));
             },
