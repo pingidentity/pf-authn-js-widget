@@ -23,7 +23,7 @@ export function completeStateCallback(state, configuration) {
  */
 export function failedStateCallback(state, configuration) {
   if (state.status === 'FAILED') {
-    if(configuration.onAuthorizationFailed) {
+    if (configuration.onAuthorizationFailed) {
       configuration.onAuthorizationFailed(state);
     } else {
       console.log("No onAuthorizationFailed method passed in the configuration.");
