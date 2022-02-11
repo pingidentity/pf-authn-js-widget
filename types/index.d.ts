@@ -4,6 +4,7 @@ export interface IRedirectlessConfig {
   client_id?: string,
   response_type?: string,
   onAuthorizationSuccess: (response: Response) => void,
+  onAuthorizationFailed?: (response: Response) => void,
   onAuthorizationRequest?: () => Promise<Response>,
   scopes?: string[],
   state?: string

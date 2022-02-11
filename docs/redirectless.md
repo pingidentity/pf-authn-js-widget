@@ -23,6 +23,9 @@ var config = {
   response_type: 'token id_token',
   onAuthorizationSuccess: function (response) {
     console.log(response);
+  },
+  onAuthorizationFailed: function (response) {
+      console.log(response);
   }
 };
 authnWidget.initRedirectless(config);
@@ -30,7 +33,7 @@ authnWidget.initRedirectless(config);
 ## Configuration object
 There are two options for creating the configuration object to initiate the redirectless flow:
 1. Create a configuration object that contains the `onAuthorizationSuccess` function and the required attributes (such as `client_id`, `response_type`, etc.) used by the internal authorization request function.
-1. Create a configuration object that contains the `onAuthorizationRequest` and `onAuthorizationSuccess` functions.
+2. Create a configuration object that contains the `onAuthorizationRequest` and `onAuthorizationSuccess` functions.
 
 Use option 1 for most deployments. Use option 2 for advanced use-cases.
 
@@ -66,6 +69,19 @@ var config = {
 };
 ```
 
+### `onAuthorizationFailed` function
+This callback function returns the state of the Authentication API to the webpage containing the Authentication API widget when the authorization fails. The entire API state is passed to this function as the first argument when the Authentication API widget calls it.
+[PingAccess redirectless support](/docs/pingaccessRedirectless.md).
+
+Here is an example:
+```js
+var config = {
+  onAuthorizationFailed: function (response) {
+    console.log(response);
+  }
+};
+```
+
 ### Supported attributes
 The internal `onAuthorizationRequest` function supports the following attributes: `client_id`, `response_type`, `code_challenge`, `code_challenge_method`, `redirect_uri`, `scope`, `state`, `idp`, `pfidpadapterid`, `access_token_manager_id`, `aud`, `nonce`, `prompt`, `acr_values`, `max_age`, `login_hint`, `ui_locales`, `id_token_hint`, `claims_locales`. 
 
@@ -83,6 +99,9 @@ var config = {
   scopes: ['a', 'b', 'c'],
   onAuthorizationSuccess: function (response) {
     console.log(response.access_token);
+  },
+  onAuthorizationFailed: function (response) {
+      console.log(response);
   }
 };
 ```
@@ -96,6 +115,9 @@ var config = {
   response_type: 'id_token',
   onAuthorizationSuccess: function (response) {
     console.log(response.id_token);
+  },
+  onAuthorizationFailed: function (response) {
+    console.log(response);
   }
 };
 ```

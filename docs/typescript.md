@@ -53,7 +53,8 @@ This interface describes the redirectless configuration for the authnWidget. Ple
 | client_id               | string                              | true     |
 | response_type           | string                              | true     |
 | onAuthorizationSuccess  | ( response :  Response )  =>   void | false    |
-| onAuthorizationrRequest | ()  =>   Promise < Response >       | true     |
+| onAuthorizationRequest  | ()  =>   Promise < Response >       | true     |
+| onAuthorizationFailed   | ()  =>   Promise < Response >       | true     |
 | scopes                  | string[]                            | true     |
 | state                   | string                              | true     |
 

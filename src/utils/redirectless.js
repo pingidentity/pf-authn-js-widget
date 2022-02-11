@@ -16,6 +16,21 @@ export function completeStateCallback(state, configuration) {
 }
 
 /**
+ * Call onAuthorizationFailed when 'FAILED' state is reached.
+ *
+ * @param {JSON} state          The current state
+ * @param {JSON} configuration  The redirectless configuration object
+ */
+export function failedStateCallback(state, configuration) {
+  if (state.status === 'FAILED') {
+    if (configuration.onAuthorizationFailed) {
+      configuration.onAuthorizationFailed(state);
+    } else {
+      console.log("No onAuthorizationFailed method passed in the configuration.");
+    }
+  }
+}
+/**
  * Initialize the redirectless flow
  *
  * @param {string} baseUrl      The Base URL of the authorization server

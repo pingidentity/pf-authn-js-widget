@@ -1,6 +1,6 @@
 import AuthnWidget, { IAuthnWidget, IOptions, IRedirectlessConfig } from './index'
 
-var options: IOptions = {
+let options: IOptions = {
     divId: 'authnwidget',
     flowId: 'flowId',
     logo: 'logo',
@@ -11,13 +11,13 @@ var options: IOptions = {
     deviceProfileScript: 'deviceProfileScript'
 }
 
-var config: IRedirectlessConfig = {
+let config: IRedirectlessConfig = {
     client_id: 'id',
     response_type: 'response_type',
     onAuthorizationSuccess: (response: Response) => {},
 }
 
-var authnWidget: IAuthnWidget = new AuthnWidget("localhost", options);
+let authnWidget: IAuthnWidget = new AuthnWidget("localhost", options);
 
 if (config) {
     authnWidget.initRedirectless(config);

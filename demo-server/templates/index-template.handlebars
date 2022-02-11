@@ -59,6 +59,17 @@
             initWidget(authnWidget);
         }
 
+        function showResponse(text) {
+          var resultContainer = document.createElement('div');
+          resultContainer.classList.add('card');
+          resultContainer.style.overflowWrap = 'break-word';
+          resultContainer.style.marginTop = '20px';
+          resultContainer.style.fontFamily = 'monospace';
+          resultContainer.innerHTML = "";
+          resultContainer.appendChild(document.createTextNode(text));
+          document.getElementById('authnwidget').appendChild(resultContainer);
+        }
+
         /**
          * initialize the widget based on the operation mode
          */
@@ -68,15 +79,11 @@
             // client_id: '', // redirectless requires this configuration
             // response_type: 'token', // redirectless requires this configuration
             onAuthorizationSuccess: function (response) {
-              // success callback function
-              var resultContainer = document.createElement('div');
-              resultContainer.classList.add('card');
-              resultContainer.style.overflowWrap = 'break-word';
-              resultContainer.style.marginTop = '20px';
-              resultContainer.style.fontFamily = 'monospace';
-              resultContainer.innerHTML = "";
-              resultContainer.appendChild(document.createTextNode(JSON.stringify(response)));
-              document.getElementById('authnwidget').appendChild(resultContainer);
+              showResponse(JSON.stringify(response));
+            },
+            onAuthorizationFailed: function (response) {
+              alert("Failed");
+              showResponse(JSON.stringify(response));
             }
           };
           widget.initRedirectless(config);
