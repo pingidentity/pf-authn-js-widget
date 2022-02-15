@@ -49,7 +49,8 @@ export default class AuthnWidget {
       'EMAIL_ACTIVATION_REQUIRED', 'SMS_PAIRING_TARGET_REQUIRED', 'SMS_ACTIVATION_REQUIRED',
       'VOICE_PAIRING_TARGET_REQUIRED', 'VOICE_ACTIVATION_REQUIRED', 'TOTP_ACTIVATION_REQUIRED', 'PLATFORM_ACTIVATION_REQUIRED',
       'SECURITY_KEY_ACTIVATION_REQUIRED', 'MOBILE_ACTIVATION_REQUIRED', 'MFA_DEVICE_PAIRING_METHOD_FAILED',
-      'VIP_ENROLLMENT', 'VIP_CREDENTIAL_REQUIRED', 'VIP_AUTHENTICATION_REQUIRED', 'VIP_CREDENTIAL_RESET_REQUIRED'];
+      'VIP_ENROLLMENT', 'VIP_CREDENTIAL_REQUIRED', 'VIP_AUTHENTICATION_REQUIRED', 'VIP_CREDENTIAL_RESET_REQUIRED',
+      'USER_ID_REQUIRED','AUTHENTICATOR_SELECTION_REQUIRED', 'INPUT_REQUIRED'];
   }
 
   static get COMMUNICATION_ERROR_MSG() {
@@ -136,6 +137,9 @@ export default class AuthnWidget {
     this.pollMobileActivationState = this.pollMobileActivationState.bind(this);
     this.registerVIPAuthHandler = this.registerVIPAuthHandler.bind(this);
     this.vipAuthHandler = this.vipAuthHandler.bind(this);
+    this.registerEntrustHandler = this.registerEntrustHandler.bind(this);
+    this.entrustHandler = this.entrustHandler.bind(this);
+    this.postInputRequired = this.postInputRequired.bind(this);
     this.stateTemplates = new Map();  //state -> handlebar templates
     this.eventHandler = new Map();  //state -> eventHandlers
     this.postRenderCallbacks = new Map();
@@ -183,6 +187,8 @@ export default class AuthnWidget {
     this.addEventHandler('DEVICE_PAIRING_METHOD_REQUIRED', this.registerMfaDevicePairingEventHandler);
     this.addPostRenderCallback('MOBILE_ACTIVATION_REQUIRED', this.postMobileActivationRequired);
     this.addEventHandler('VIP_AUTHENTICATION_REQUIRED', this.registerVIPAuthHandler);
+    this.addEventHandler('AUTHENTICATOR_SELECTION_REQUIRED', this.registerEntrustHandler);
+    this.addPostRenderCallback('INPUT_REQUIRED', this.postInputRequired)
 
     this.actionModels.set('checkUsernamePassword', { required: ['username', 'password'], properties: ['username', 'password', 'rememberMyUsername', 'thisIsMyDevice', 'captchaResponse'] });
     this.actionModels.set('initiateAccountRecovery', { properties: ['usernameHint'] });
@@ -214,6 +220,9 @@ export default class AuthnWidget {
     this.actionModels.set('activateSecurityKeyDevice', {required: ['origin', 'attestation']});
     this.actionModels.set('submitVIPCredential', {required: ['vipCredentialId', 'securityCode']});
     this.actionModels.set('resetVIPCredential', {required: ['vipCredentialId', 'securityCode', 'nextSecurityCode']});
+    this.actionModels.set('checkUserId', {required: ['userid']});
+    this.actionModels.set('selectAuthenticator', {required: ['authenticator']});
+    this.actionModels.set('checkInput', {required: ['input']});
   }
 
   init() {
@@ -1351,6 +1360,31 @@ export default class AuthnWidget {
       }
       const data = { vipCredentialId };
       this.store.dispatch('POST_FLOW', "selectVIPCredential", JSON.stringify(data));
+    }
+  }
+
+  registerEntrustHandler() {
+    Array.from(document.querySelectorAll('[data-authenticator-selection]'))
+      .forEach(element => element.addEventListener('click', this.entrustHandler));
+  }
+
+  entrustHandler(evt) {
+    evt.preventDefault();
+    let source = evt.currentTarget;
+    if (source) {
+      let authenticator = source.dataset['authenticatorSelection'];
+      const data = {authenticator};
+      this.store.dispatch('POST_FLOW', 'selectAuthenticator', JSON.stringify(data));
+    } else {
+      console.log("ERROR - Unable to dispatch authenticator selection as the target was null");
+    }
+  }
+
+  async postInputRequired() {
+    let state = await this.store.getState();
+    if (state.authenticator === 'TOKENPUSH') {
+      document.getElementById('passcodefield').style.display = 'none';
+      document.querySelector('#submit').disabled = false;
     }
   }
 }

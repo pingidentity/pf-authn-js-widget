@@ -1,0 +1,48 @@
+<div class="card">
+  <div class="org-logo">
+    <img class="org-logo__image" src="{{logo}}" alt="Company Logo"/>
+  </div>
+  {{> errors}}
+  {{> spinner}}
+  <form class="form" id="AuthnWidgetForm">
+    {{#ifEq authenticator "TOKENPUSH"}}
+      <div class="spinner spinner--margin-bottom-small">
+        <div class="spinner__icon" data-id="spinner"></div>
+      </div>
+      <div class="text-block--overflow-wrap" id="pushnotificationmessage">
+        Approve Push Notification, then click Submit
+      </div>
+    {{else ifEq authenticator "GRID"}}
+      <div class="heading-text">
+        <div class="text-block__text">Enter the response to the Grid Card challenge</div>
+      </div>
+      {{#each gridChallenge.serialNumbers as |serialNumber|}}
+        <div class="text-block--overflow-wrap">
+          Serial number of grid cards that can be used
+          <div class="text-text-block--overflow-wrap">{{serialNumber}}</div>
+        </div>
+      {{/each}}
+      <div class="entrust__grid">
+        {{#each gridChallenge.cells as |cell|}}
+          <div class="entrust__grid-item">
+            {{cell}}
+          </div>
+        {{/each}}
+      </div>
+    {{/ifEq}}
+    <div class="float-label" id="passcodefield">
+      <input type="text" class="text-input float-label__input required" name="input" id="passcode"/>
+      <label class="float-label__label" for="passcode">Enter passcode</label>
+    </div>
+
+    <button id="submit" data-actionid="checkInput" type="submit" class="button button--primary brand-primary-bg"
+            disabled>
+      Submit
+    </button>
+    <div class="text-block">
+      <div class="text-block--overflow-wrap">
+        <a tabindex="0" data-actionId="cancel" target="_self" class="anchor">Cancel</a>
+      </div>
+    </div>
+  </form>
+</div>
