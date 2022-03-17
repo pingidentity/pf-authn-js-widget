@@ -50,7 +50,7 @@ export default class AuthnWidget {
       'VOICE_PAIRING_TARGET_REQUIRED', 'VOICE_ACTIVATION_REQUIRED', 'TOTP_ACTIVATION_REQUIRED', 'PLATFORM_ACTIVATION_REQUIRED',
       'SECURITY_KEY_ACTIVATION_REQUIRED', 'MOBILE_ACTIVATION_REQUIRED', 'MFA_DEVICE_PAIRING_METHOD_FAILED',
       'VIP_ENROLLMENT', 'VIP_CREDENTIAL_REQUIRED', 'VIP_AUTHENTICATION_REQUIRED', 'VIP_CREDENTIAL_RESET_REQUIRED',
-      'USER_ID_REQUIRED','AUTHENTICATOR_SELECTION_REQUIRED', 'INPUT_REQUIRED'];
+      'USER_ID_REQUIRED','AUTHENTICATOR_SELECTION_REQUIRED', 'INPUT_REQUIRED', 'FRAUD_EVALUATION_CHECK_REQUIRED'];
   }
 
   static get COMMUNICATION_ERROR_MSG() {
@@ -86,6 +86,8 @@ export default class AuthnWidget {
     let checkRecaptcha = options && options.checkRecaptcha;
     this.grecaptcha = options && options.grecaptcha;
     this.deviceProfileScript = options && options.deviceProfileScript;
+    this.fraudClientPlatform =  options && options.fraudClientPlatform;
+    this.fraudClientVersion =  options && options.fraudClientVersion;
     this.dispatch = this.dispatch.bind(this);
     this.render = this.render.bind(this);
     this.defaultEventHandler = this.defaultEventHandler.bind(this);
@@ -103,6 +105,7 @@ export default class AuthnWidget {
     this.handleRegisterUser = this.handleRegisterUser.bind(this);
     this.verifyRegistrationPassword = this.verifyRegistrationPassword.bind(this);
     this.postDeviceProfileAction = this.postDeviceProfileAction.bind(this);
+    this.postFraudSessionInfoAction = this.postFraudSessionInfoAction.bind(this);
     this.registerAgentlessHandler = this.registerAgentlessHandler.bind(this);
     this.handleAgentlessSignOn = this.handleAgentlessSignOn.bind(this);
     this.postEmptyAuthentication = this.postEmptyAuthentication.bind(this);
@@ -158,6 +161,7 @@ export default class AuthnWidget {
     this.addPostRenderCallback('EXTERNAL_AUTHENTICATION_REQUIRED', this.openExternalAuthnPopup);
     this.addPostRenderCallback('EXTERNAL_AUTHENTICATION_FAILED', this.externalAuthnFailure);
     this.addEventHandler('DEVICE_PROFILE_REQUIRED', this.postDeviceProfileAction);
+    this.addEventHandler('FRAUD_EVALUATION_CHECK_REQUIRED', this.postFraudSessionInfoAction);
     this.addEventHandler('REFERENCE_ID_REQUIRED', this.registerAgentlessHandler);
     this.addPostRenderCallback('AUTHENTICATION_REQUIRED', this.postEmptyAuthentication);
     this.addPostRenderCallback('MFA_COMPLETED', this.postContinueAuthentication);
@@ -223,6 +227,7 @@ export default class AuthnWidget {
     this.actionModels.set('checkUserId', {required: ['userid']});
     this.actionModels.set('selectAuthenticator', {required: ['authenticator']});
     this.actionModels.set('checkInput', {required: ['input']});
+    this.actionModels.set('submitFraudSessionInfo', { required: ['sessionId', 'clientPlatform', 'clientAction'] });
   }
 
   init() {
@@ -595,6 +600,19 @@ export default class AuthnWidget {
         });
       }
     });
+  }
+
+  postFraudSessionInfoAction() {
+    let script;
+    let sessionID = this.getBrowserFlowId();
+    let fraudClientInfo = {
+        "sessionId": sessionID,
+        "clientToken": window["_securedTouchToken"],
+        "clientAction": "login",
+        "clientPlatform": this.fraudClientPlatform,
+        "clientVersion": this.fraudClientVersion,
+      };
+    this.store.dispatch('POST_FLOW', 'submitFraudSessionInfo', JSON.stringify(fraudClientInfo));
   }
 
   postDeviceProfileAction() {
