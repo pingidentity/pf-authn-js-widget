@@ -321,6 +321,7 @@ export default class AuthnWidget {
 
   registerRegistrationLinks() {
     Array.from(document.querySelectorAll('[data-registrationactionid]')).forEach(element => element.addEventListener('click', this.handleRegisterUser));
+    this.store.registrationflow = true;
     Array.from(document.querySelectorAll("select.required, input[type='date'].required, input.required[type='checkbox']")).forEach(element => element.addEventListener('change', this.enableSubmit));
     Array.from(document.querySelectorAll("input[type='password']")).forEach(element => element.addEventListener('input', this.verifyRegistrationPassword));
   }
@@ -605,10 +606,13 @@ export default class AuthnWidget {
   postFraudSessionInfoAction() {
     let script;
     let sessionID = this.getBrowserFlowId();
+    let clientAction = "login";
+    if (this.store.registrationflow == true)
+      clientAction = "registration";
     let fraudClientInfo = {
         "sessionId": sessionID,
         "clientToken": window["_securedTouchToken"],
-        "clientAction": "login",
+        "clientAction": clientAction,
         "clientPlatform": this.fraudClientPlatform,
         "clientVersion": this.fraudClientVersion,
       };
