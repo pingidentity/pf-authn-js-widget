@@ -36,7 +36,6 @@ module.exports = function (field_info) {
         '  <input type="' + field_info.type.toLowerCase() + '"' +
         '         class="' + css_classes + ' text-input float-label__input"' +
         '         id="' + escaped_id + '"' +
-        '         data-st-field="' + escaped_id + '"' +
         '         name="' + escaped_id + '"' +
         '         placeholder="' + escaped_label + '"' +
         '         value="' + field_value + '"' +

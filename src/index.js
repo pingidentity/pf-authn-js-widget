@@ -130,6 +130,7 @@ export default class AuthnWidget {
     this.postPlatformDeviceActivationRequired = this.postPlatformDeviceActivationRequired.bind(this);
     this.postSecurityKeyDeviceActivationRequired = this.postSecurityKeyDeviceActivationRequired.bind(this);
     this.postDeviceSelectionRequired = this.postDeviceSelectionRequired.bind(this);
+    this.postRegistrationRequired = this.postRegistrationRequired.bind(this);
     this.showDeviceManagementPopup = this.showDeviceManagementPopup.bind(this);
     this.hideDeviceManagementPopup = this.hideDeviceManagementPopup.bind(this);
     this.pollCheckGet = this.pollCheckGet.bind(this);
@@ -155,6 +156,7 @@ export default class AuthnWidget {
     this.addEventHandler('USERNAME_PASSWORD_REQUIRED', this.registerAltAuthSourceLinks);
     this.addEventHandler('REGISTRATION_REQUIRED', this.registerRegistrationLinks);
     this.addEventHandler('REGISTRATION_REQUIRED', this.registerAltAuthSourceLinks);
+    this.addPostRenderCallback('REGISTRATION_REQUIRED', this.postRegistrationRequired);
     this.addEventHandler('EXTERNAL_AUTHENTICATION_COMPLETED', this.postContinueAuthentication);
     this.addEventHandler('EXTERNAL_AUTHENTICATION_REQUIRED', this.registerReopenPopUpHandler);
     this.addPostRenderCallback('RESUME', this.resumeToPf);
@@ -321,7 +323,6 @@ export default class AuthnWidget {
 
   registerRegistrationLinks() {
     Array.from(document.querySelectorAll('[data-registrationactionid]')).forEach(element => element.addEventListener('click', this.handleRegisterUser));
-    this.store.registrationflow = true;
     Array.from(document.querySelectorAll("select.required, input[type='date'].required, input.required[type='checkbox']")).forEach(element => element.addEventListener('change', this.enableSubmit));
     Array.from(document.querySelectorAll("input[type='password']")).forEach(element => element.addEventListener('input', this.verifyRegistrationPassword));
   }
@@ -570,6 +571,17 @@ export default class AuthnWidget {
     });
   }
 
+  postRegistrationRequired() {
+    this.store.registrationflow = true;
+
+    // Uncomment two lines below and update the id to match element ID of username field //
+    // var usernameElement = document.getElementById(<USERNAME_FIELD_ELEMENT_ID>);
+    // usernameElement.setAttribute("data-st-field", 'username');
+    // Example:
+    // var usernameElement = document.getElementById('Email');
+    // usernameElement.setAttribute("data-st-field", 'username');
+  }
+
   postDeviceSelectionRequired() {
     let data = this.store.getStore();
     if(data.userSelectedDefault === false)
@@ -604,7 +616,7 @@ export default class AuthnWidget {
   }
 
   postFraudSessionInfoAction() {
-    let script;
+    // Session ID here is set to use Flow ID by default but it must be handled by client app //
     let sessionID = this.getBrowserFlowId();
     let clientAction = "login";
     if (this.store.registrationflow == true)
