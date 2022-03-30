@@ -10,7 +10,7 @@ Depending on your adapter configuration, you might need to take additional steps
 
 1\. Add the following to your application's sign-on page.
 * Copy appId and secret from securedtouch dashboard for _<APP_ID>_ and _<APP_SECRET>_
-* Update _<ST_URL>_ to your env - e.g. https://p1f-api.pingone.com/
+* Update _<ST_URL>_ to the data collection endpoint URL in your env - e.g. https://p1f-api.pingone.com/
 
 ```javascript
 <!-- Enable below script integrating with Fraud IK -->
