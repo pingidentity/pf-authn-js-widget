@@ -86,6 +86,7 @@ export default class AuthnWidget {
     let checkRecaptcha = options && options.checkRecaptcha;
     this.grecaptcha = options && options.grecaptcha;
     this.deviceProfileScript = options && options.deviceProfileScript;
+    this.fraudClientSessionID =  options && options.fraudClientSessionID;
     this.fraudClientPlatform =  options && options.fraudClientPlatform;
     this.fraudClientVersion =  options && options.fraudClientVersion;
     this.dispatch = this.dispatch.bind(this);
@@ -616,13 +617,11 @@ export default class AuthnWidget {
   }
 
   postFraudSessionInfoAction() {
-    // Session ID here is set to use Flow ID by default but it must be handled by client app //
-    let sessionID = this.getBrowserFlowId();
     let clientAction = "login";
     if (this.store.registrationflow == true)
       clientAction = "registration";
     let fraudClientInfo = {
-        "sessionId": sessionID,
+        "sessionId": this.fraudClientSessionID,
         "clientToken": window["_securedTouchToken"],
         "clientAction": clientAction,
         "clientPlatform": this.fraudClientPlatform,

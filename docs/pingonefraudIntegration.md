@@ -9,8 +9,7 @@ Depending on your adapter configuration, you might need to take additional steps
 ### Setup
 
 1\. Add the following to your application's sign-on page.
-* Copy appId and secret from securedtouch dashboard for _<APP_ID>_ and _<APP_SECRET>_
-* Update _<ST_URL>_ to the data collection endpoint URL in your env - e.g. https://p1f-api.pingone.com/
+* Copy the App ID, Client Secret, and Data collection endpoint URL from the PingOne Fraud dashboard and insert them for _<APP_ID>_, _<APP_SECRET>_, and _<ST_URL>_
 
 ```javascript
 <!-- Enable below script integrating with Fraud IK -->
@@ -48,14 +47,12 @@ Depending on your adapter configuration, you might need to take additional steps
 ```
 2\. Where your web application initializes `PfAuthnWidget`, adjust _<FRAUD_CLIENT_PLATFORM>_ and _<FRAUD_CLIENT_VERSION>_ as appropriate to the application
 ```javascript
-var authnWidget = new PfAuthnWidget('https://localhost:9031', { divId: 'authnwidget', fraudClientPlatform: <FRAUD_CLIENT_PLATFORM>, fraudClientVersion: <FRAUD_CLIENT_VERSION>});
+var authnWidget = new PfAuthnWidget('https://localhost:9031', { divId: 'authnwidget', fraudClientPlatform: <FRAUD_CLIENT_PLATFORM>, fraudClientVersion: <FRAUD_CLIENT_VERSION>, fraudClientSessionID: <FRAUD_CLIENT_SESSION_ID>});
 authnWidget.init();
 ```
-3\. Ensure that PingOne Fraud SDK is initialized by calling securedTouchInitLoad method upon load. PingOne Fraud requires client application to handle session id. The code below uses PF flow ID for session ID as a placeholder. When this is updated to custom logic, ensure the session ID in _postFraudSessionInfoAction()_ code in _index.js_ is updated appropriately.
+3\. Ensure that PingOne Fraud SDK is initialized by calling securedTouchInitLoad method upon load. PingOne Fraud requires client application to handle session id.
 ```javascript
-  // Session ID here is set to use Flow ID by default but it must be handled by client app //
-  let appSessionId = authnWidget.store.flowId;
-  securedTouchInitLoad(null /* userId */, appSessionId /* appSessionId */);
+  securedTouchInitLoad(null /* userId */, <FRAUD_CLIENT_SESSION_ID> /* appSessionId */);
 ```
 
 4\. For registration flow use case,  update _postRegistrationRequired()_ method in _index.js_ to add tag to the username field configured in local identity profile registration flow template. 
