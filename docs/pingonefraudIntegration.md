@@ -45,11 +45,12 @@ Depending on your adapter configuration, you might need to take additional steps
             });
         }
 ```
-2\. Where your web application initializes `PfAuthnWidget`, adjust _<FRAUD_CLIENT_PLATFORM>_ and _<FRAUD_CLIENT_VERSION>_ as appropriate to the application
+2\. Where your web application initializes `PfAuthnWidget`, adjust _<FRAUD_CLIENT_PLATFORM>_ and _<FRAUD_CLIENT_VERSION>_ as appropriate to the application. The _<FRAUD_CLIENT_SESSION_ID>_ should be the unique identifier for the session.
 ```javascript
 var authnWidget = new PfAuthnWidget('https://localhost:9031', { divId: 'authnwidget', fraudClientPlatform: <FRAUD_CLIENT_PLATFORM>, fraudClientVersion: <FRAUD_CLIENT_VERSION>, fraudClientSessionID: <FRAUD_CLIENT_SESSION_ID>});
 authnWidget.init();
 ```
+
 3\. Ensure that PingOne Fraud SDK is initialized by calling securedTouchInitLoad method upon load. PingOne Fraud requires client application to handle session id.
 ```javascript
   securedTouchInitLoad(null /* userId */, <FRAUD_CLIENT_SESSION_ID> /* appSessionId */);
