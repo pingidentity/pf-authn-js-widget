@@ -618,7 +618,7 @@ export default class AuthnWidget {
 
   postFraudSessionInfoAction() {
     let clientAction = "login";
-    if (this.store.registrationflow == true)
+    if (this.store.registrationflow === true)
       clientAction = "registration";
     let fraudClientInfo = {
         "sessionId": this.fraudClientSessionID,
