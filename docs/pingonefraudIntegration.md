@@ -46,31 +46,36 @@ Depending on your adapter configuration, you might need to take additional steps
         }
 ```
 2\. Where your web application initializes `PfAuthnWidget`, adjust _<FRAUD_CLIENT_PLATFORM>_ and _<FRAUD_CLIENT_VERSION>_ as appropriate to the application. The _<FRAUD_CLIENT_SESSION_ID>_ should be the unique identifier for the session.
-```javascript
+
+<FRAUD_CLIENT_PLATFORM>: The client that triggered the flow. This can be one of the following: ANDROID, IOS, or WEB.This field is case sensitive. Use uppercase letters.
+
+<FRAUD_CLIENT_VERSION>: The version of the client used, expressed only in numbers separated by periods (such as 1, 1.2 or 1.2.1).
+
+For registration flow use case,  pass the function that sets tag to the username field configured in local identity profile registration flow template.
+
+```code
+var config = {
+    registrationFlowAddTag: function () {
+        // Match element ID of username field //
+        // var usernameElement = document.getElementById(<USERNAME_FIELD_ELEMENT_ID>);
+        // usernameElement.setAttribute("data-st-field", 'username');
+        // Example:
+        // var usernameElement = document.getElementById('Email');
+        // usernameElement.setAttribute("data-st-field", 'username');
+        }
+};
+
 var authnWidget = new PfAuthnWidget('https://localhost:9031', {
     divId: 'authnwidget',
     fraudClientPlatform: <FRAUD_CLIENT_PLATFORM>,
     fraudClientVersion: <FRAUD_CLIENT_VERSION>,
-    fraudClientSessionID: <FRAUD_CLIENT_SESSION_ID>
+    fraudClientSessionID: <FRAUD_CLIENT_SESSION_ID>,
+    registrationFlowConfig: config
 });
 authnWidget.init();
 ```
 
 3\. Ensure that PingOne Fraud SDK is initialized by calling securedTouchInitLoad method upon load. PingOne Fraud requires client application to handle session id.
-```javascript
-  securedTouchInitLoad(null /* userId */, <FRAUD_CLIENT_SESSION_ID> /* appSessionId */);
-```
-
-4\. For registration flow use case,  update _postRegistrationRequired()_ method in _index.js_ to add tag to the username field configured in local identity profile registration flow template. 
-```javascript
-postRegistrationRequired() {
-   this.store.registrationflow = true;
- 
-   // Uncomment two lines below and update the id to match element ID of username field //
-   // var usernameElement = document.getElementById(<USERNAME_FIELD_ELEMENT_ID>);
-   // usernameElement.setAttribute("data-st-field", 'username');
-   // Example:
-   // var usernameElement = document.getElementById('Email');
-   // usernameElement.setAttribute("data-st-field", 'username');
- }
+```code
+securedTouchInitLoad(null /* userId */, <FRAUD_CLIENT_SESSION_ID> /* appSessionId */);
 ```

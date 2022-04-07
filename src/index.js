@@ -89,6 +89,7 @@ export default class AuthnWidget {
     this.fraudClientSessionID =  options && options.fraudClientSessionID;
     this.fraudClientPlatform =  options && options.fraudClientPlatform;
     this.fraudClientVersion =  options && options.fraudClientVersion;
+    this.registrationFlowConfig = options && options.registrationFlowConfig;
     this.dispatch = this.dispatch.bind(this);
     this.render = this.render.bind(this);
     this.defaultEventHandler = this.defaultEventHandler.bind(this);
@@ -574,13 +575,8 @@ export default class AuthnWidget {
 
   postRegistrationRequired() {
     this.store.registrationflow = true;
-
-    // Uncomment two lines below and update the id to match element ID of username field //
-    // var usernameElement = document.getElementById(<USERNAME_FIELD_ELEMENT_ID>);
-    // usernameElement.setAttribute("data-st-field", 'username');
-    // Example:
-    // var usernameElement = document.getElementById('Email');
-    // usernameElement.setAttribute("data-st-field", 'username');
+    if(this.registrationFlowConfig && this.registrationFlowConfig.registrationFlowAddTag)
+      this.registrationFlowConfig.registrationFlowAddTag();
   }
 
   postDeviceSelectionRequired() {
