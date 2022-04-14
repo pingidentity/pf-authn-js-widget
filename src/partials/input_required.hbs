@@ -12,6 +12,17 @@
       <div class="text-block--overflow-wrap" id="pushnotificationmessage">
         Approve Push Notification, then click Submit
       </div>
+    {{else ifEq authenticator "KBA"}}
+      <div class="heading-text">
+        <div class="text-block__text">Enter answers to your questions.</div>
+      </div>
+      {{#each kbaChallenge.userQuestions as |kbaQuestion|}}
+      <div class="float-label" id="kbaFields">
+        <label class="label-text" for="{{kbaQuestion.id}}">{{kbaQuestion.question}}</label>
+        <input type="text" class="text-input float-label__input required"
+               placeholder="Answer" name="kbaAnswer" id="{{kbaQuestion.id}}" value="" required />
+      </div>
+      {{/each}}
     {{else ifEq authenticator "GRID"}}
       <div class="heading-text">
         <div class="text-block__text">Enter the response to the Grid Card challenge</div>
@@ -30,12 +41,13 @@
         {{/each}}
       </div>
     {{/ifEq}}
-    <div class="float-label" id="passcodefield">
-      <input type="text" class="text-input float-label__input required" name="input" id="passcode"/>
-      <label class="float-label__label" for="passcode">Enter passcode</label>
-    </div>
-
-    <button id="submit" data-actionid="checkInput" type="submit" class="button button--primary brand-primary-bg"
+    {{#ifNotEq authenticator "KBA"}}
+      <div class="float-label" id="passcodefield">
+        <input type="text" class="text-input float-label__input required" name="input" id="passcode"/>
+        <label class="float-label__label" for="passcode">Enter passcode</label>
+      </div>
+    {{/ifNotEq}}
+    <button id="submit" data-checkInput="checkInput" type="submit" class="button button--primary brand-primary-bg"
             disabled>
       Submit
     </button>

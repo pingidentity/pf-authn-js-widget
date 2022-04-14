@@ -140,6 +140,8 @@ export default class AuthnWidget {
     this.registerEntrustHandler = this.registerEntrustHandler.bind(this);
     this.entrustHandler = this.entrustHandler.bind(this);
     this.postInputRequired = this.postInputRequired.bind(this);
+    this.registerInputRequired = this.registerInputRequired.bind(this);
+    this.inputRequiredHandler = this.inputRequiredHandler.bind(this);
     this.stateTemplates = new Map();  //state -> handlebar templates
     this.eventHandler = new Map();  //state -> eventHandlers
     this.postRenderCallbacks = new Map();
@@ -188,7 +190,8 @@ export default class AuthnWidget {
     this.addPostRenderCallback('MOBILE_ACTIVATION_REQUIRED', this.postMobileActivationRequired);
     this.addEventHandler('VIP_AUTHENTICATION_REQUIRED', this.registerVIPAuthHandler);
     this.addEventHandler('AUTHENTICATOR_SELECTION_REQUIRED', this.registerEntrustHandler);
-    this.addPostRenderCallback('INPUT_REQUIRED', this.postInputRequired)
+    this.addPostRenderCallback('INPUT_REQUIRED', this.postInputRequired);
+    this.addEventHandler('INPUT_REQUIRED', this.registerInputRequired);
 
     this.actionModels.set('checkUsernamePassword', { required: ['username', 'password'], properties: ['username', 'password', 'rememberMyUsername', 'thisIsMyDevice', 'captchaResponse'] });
     this.actionModels.set('initiateAccountRecovery', { properties: ['usernameHint'] });
@@ -1387,4 +1390,44 @@ export default class AuthnWidget {
       document.querySelector('#submit').disabled = false;
     }
   }
+
+  registerInputRequired() {
+    Array.from(document.querySelectorAll('[data-checkInput]'))
+      .forEach(element => element.addEventListener('click', this.inputRequiredHandler));
+    }
+
+  /**
+   * Handles the different types of data required for the INPUT_REQUIRED use-case for entrust.
+   *
+   * @param evt
+   */
+  inputRequiredHandler(evt) {
+      evt.preventDefault();
+      let source = evt.currentTarget;
+      if (source) {
+        let answers = [];
+        let data = {};
+        // Get the answers from the KBA Answer field
+        let answerElements = document.getElementsByName('kbaAnswer');
+        for (let i = 0; i < answerElements.length; i++) {
+          let answer = {};
+          let input = answerElements[i];
+          answer.id = input.id;
+          answer.answer = input.value;
+          answers.push({...answer});
+        }
+        data.answers = answers;
+
+        // Either the KBA fields are visible or the passcode field is visible
+        let inputElement = document.getElementById('passcode');
+        if (null !== inputElement) {
+          let input = inputElement.value;
+          data.input = input;
+        }
+        this.store.dispatch('POST_FLOW', 'checkInput', JSON.stringify(data));
+      }
+      else {
+        console.log("ERROR - Unable to dispatch authenticator selection as the target was null");
+      }
+    }
 }
