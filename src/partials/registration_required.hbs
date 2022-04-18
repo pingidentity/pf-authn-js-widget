@@ -25,7 +25,7 @@
     <div class="stack stack--small">
       <div class="float-label"><input type="password"
                                       class="text-input float-label__input required"
-                                      id="password" name="password"
+                                      id="password" name="password" "data-st-field"="password"
                                       placeholder="Password"/><label
               class="float-label__label"
               for="password">Password</label></div>
@@ -34,7 +34,7 @@
         <div id="passwordStatus" class="text-input__icon text-input__icon--error" style="display: none"></div>
         <input type="password"
                class="text-input float-label__input required"
-               id="newpassword" name="newpassword"
+               id="newpassword" name="newpassword" "data-st-field"="newpassword"
                placeholder="Verify Password"/>
         <label class="float-label__label" for="newpassword">Verify New Password</label>
       </div>
@@ -49,8 +49,7 @@
         </label>
       </div>
     {{/if}}
-    <button id="submit" data-registrationactionid="registerUser" type="submit"
-            class="button button--primary brand-primary-bg" disabled>
+    <button id="submit" data-registrationactionid="registerUser" type="submit" data-st-tag="registration.registration_attempt" class="button button--primary brand-primary-bg" disabled>
       Save
     </button>
     {{#with _links as |actions|}}
