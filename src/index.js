@@ -140,7 +140,7 @@ export default class AuthnWidget {
     this.registerAuthenticationRequiredHandler = this.registerAuthenticationRequiredHandler.bind(this);
     this.handleSelectAuthenticatorHandler = this.handleSelectAuthenticatorHandler.bind(this);
     this.renderPostInputRequiredState = this.renderPostInputRequiredState.bind(this);
-    this.registerInputRequiredState = this.registerInputRequiredState.bind(this);
+    this.registerInputRequiredHandler = this.registerInputRequiredHandler.bind(this);
     this.inputRequiredHandler = this.inputRequiredHandler.bind(this);
     this.stateTemplates = new Map();  //state -> handlebar templates
     this.eventHandler = new Map();  //state -> eventHandlers
@@ -191,7 +191,7 @@ export default class AuthnWidget {
     this.addEventHandler('VIP_AUTHENTICATION_REQUIRED', this.registerVIPAuthHandler);
     this.addEventHandler('AUTHENTICATOR_SELECTION_REQUIRED', this.registerAuthenticationRequiredHandler);
     this.addPostRenderCallback('INPUT_REQUIRED', this.renderPostInputRequiredState);
-    this.addEventHandler('INPUT_REQUIRED', this.registerInputRequiredState);
+    this.addEventHandler('INPUT_REQUIRED', this.registerInputRequiredHandler);
 
     this.actionModels.set('checkUsernamePassword', { required: ['username', 'password'], properties: ['username', 'password', 'rememberMyUsername', 'thisIsMyDevice', 'captchaResponse'] });
     this.actionModels.set('initiateAccountRecovery', { properties: ['usernameHint'] });
@@ -1400,7 +1400,7 @@ export default class AuthnWidget {
     }
   }
 
-  registerInputRequiredState() {
+  registerInputRequiredHandler() {
     Array.from(document.querySelectorAll('[data-checkInput]'))
       .forEach(element => element.addEventListener('click', this.inputRequiredHandler));
     }
