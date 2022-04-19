@@ -12,6 +12,7 @@ export default class Store {
     this.fetchUtil = new FetchUtil(baseUrl, useActionParam);
     this.checkRecaptcha = checkRecaptcha;
     this.pendingState = {};
+    this.registrationflow = false;
   }
 
   getStore() {
