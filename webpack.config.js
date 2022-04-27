@@ -44,6 +44,11 @@ module.exports = (env, argv) => {
       umdNamedDefine: true,
     },
     devtool: 'source-map',
+    resolve: {
+      alias: {
+        'handlebars': 'handlebars/dist/handlebars.js'
+      }
+    },
     module: {
       rules: [
         {
@@ -124,7 +129,6 @@ module.exports = (env, argv) => {
         filename: '[name]-styles.css',
         chunkFilename: '[id].css',
       }),
-      // new BundleAnalyzerPlugin(),
     ],
   }
 }

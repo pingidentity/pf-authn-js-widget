@@ -24,11 +24,17 @@ module.exports = function (api) {
         loose: true,
       },
     ],
+    [
+      "@babel/plugin-proposal-private-property-in-object",
+      {
+        loose: true
+      }
+    ],
     "@babel/plugin-transform-arrow-functions",
     [
       "@babel/plugin-proposal-private-methods",
       {
-        "loose": true
+        loose: true
       }
     ]
 
