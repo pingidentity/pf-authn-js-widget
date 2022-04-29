@@ -2,6 +2,7 @@ const path = require('path')
 const webpack = require('webpack')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const devServer = require('./demo-server')
+const templates = require("./demo-server/templates");
 // const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 const PATHS = {
   dist: path.join(__dirname, 'dist'),
@@ -15,7 +16,7 @@ module.exports = (env, argv) => {
   return {
     devServer: {
       hot: true,
-      before: function (app, server) {
+      setupMiddlewares: (middlewares, server) => {
         var options = {
           baseUrl: argv.baseurl,
           operationMode: argv.operationmode || 'default'
@@ -26,12 +27,14 @@ module.exports = (env, argv) => {
         console.log('#');
         console.log('#############################################');
         console.log('');
-        devServer(app, server, options);
+        devServer(server, options);
+
+        return middlewares;
       },
-      contentBase: [path.join(__dirname, 'src')],
+      static: [path.join(__dirname, 'src')],
       compress: true,
       port: 8443,
-      https: true,
+      server: 'https',
     },
     entry: ['formdata-polyfill', 'whatwg-fetch', path.join(PATHS.src, 'index')],
     output: {
