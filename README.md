@@ -61,10 +61,50 @@ If you do not wish to use the development server provided by webpack, change the
 
 # Installation
 
-There are two ways to get the widget. You can build and install it locally on your development machine or get it as a node dependency.
+There are three ways to get the widget. You can include it from Ping Identity's CDN, build and install it locally on your development machine or get it as a node dependency.
 You also need a running PingFederate instance that is version 9.3 or above.
 
-## Option 1: Building the Widget
+## Option 1: Using CDN Links:
+
+A pre-built widget is available for incorporating directly into your application. All versions of the widget, starting with 1.7.0, will be available via CDN.
+
+To include the latest released version the following links can be used: 
+- https://downloads.pingidentity.com/pf-authn-widget/latest/pf.authn-widget.js
+- https://downloads.pingidentity.com/pf-authn-widget/latest/main-styles.css
+
+To include a specific version of the widget, replace `latest` with the version required.
+- https://downloads.pingidentity.com/pf-authn-widget/1.7.0/pf.authn-widget.js
+- https://downloads.pingidentity.com/pf-authn-widget/1.7.0/main-styles.css
+
+A working example that utilizes the pre-built widget would look like:
+```html
+<html>
+  <head>
+    <title>Authentication API Sample App</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <script src="https://downloads.pingidentity.com/pf-authn-widget/latest/pf.authn-widget.js"></script>        
+    <link rel="stylesheet" type="text/css" href="https://assets.pingone.com/ux/end-user/0.36.1/end-user.css">
+    <link rel="stylesheet" type="text/css" href="https://downloads.pingidentity.com/pf-authn-widget/latest/main-styles.css">
+    <script>
+      function load() {
+        var authnWidget = new PfAuthnWidget("{{baseUrl}}", { divId: 'authnwidget' });
+        authnWidget.init()
+      }
+      window.onload = load;
+    </script>
+  </head>
+
+  <body>
+    <div class="content" style="padding: 30px">
+      <div class="heading">Authentication Application</div>
+      <div id="authnwidget"></div>
+    </div>
+  </body>
+</html>
+```
+
+## Option 2: Building the Widget
 
 Before installing, make sure you have [node.js](https://nodejs.org/en/) installed. Then check out this repository.
 
@@ -80,7 +120,7 @@ Click the start SSO link on the IdP Connection in PingFederate or start an OAuth
 
 Note: A 'flowId' value is required for the widget to interact with PingFederate, which is created when PingFederate redirects to the widget.
 
-## Option 2: Adding the Widget as a Node Module
+## Option 3: Adding the Widget as a Node Module
 
 This is a good choice if you already have a node project with `package.json` and can just add this widget as a dependency.
 
