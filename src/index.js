@@ -154,7 +154,7 @@ export default class AuthnWidget {
     this.actionModels = new Map();
     this.store = new Store(flowId, baseUrl, checkRecaptcha, options);
     this.store.registerListener(this.render);
-    AuthnWidget.CORE_STATES.forEach(state => this.registerState(state));
+    AuthnWidget.CORE_STATES.forEach(state => this.registerState(state), this);
 
     this.addEventHandler('IDENTIFIER_REQUIRED', this.registerIdFirstLinks);
     this.addEventHandler('USERNAME_PASSWORD_REQUIRED', this.registerAltAuthSourceLinks);
