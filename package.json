@@ -5,9 +5,9 @@
   "main": "./dist/pf.authn-widget.js",
   "types": "types/index.d.ts",
   "scripts": {
-    "start": "cross-env-shell webpack-dev-server --config webpack.config.js --env baseurl=$BASEURL --env operationmode=$OPERATIONMODE",
-    "build": "webpack --mode production  --progress --profile --color",
-    "dev": "webpack --mode development --progress --profile --color",
+    "start": "cross-env-shell webpack-dev-server --config webpack.config.js --env baseurl=$BASEURL --env operationmode=$OPERATIONMODE --mode=production",
+    "build": "webpack --mode=production  --progress --profile --color",
+    "dev": "webpack --mode=development --progress --profile --color",
     "clean": "rimraf dist test/coverage",
     "lint": "eslint ./src/**.js",
     "coverage": "jest --coverage --config=jest.config.js",
@@ -22,7 +22,7 @@
     "url": "git@github.com:pingidentity/pf-authn-js-widget.git"
   },
   "engines": {
-    "node": ">=12.0.0 <=17.0.0"
+    "node": ">=14.0.0 <=17.0.0"
   },
   "keywords": [
     "PingFederate",
