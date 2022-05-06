@@ -66,22 +66,26 @@
         <div class="text-block__text">Enter your temporary access code.</div>
       </div>
     {{/ifEq}}
-    {{#ifNotEq authenticator "KBA"}}
-      <div class="float-label" id="passcodefield">
-        <input type="text" class="text-input float-label__input required" name="input" id="passcode"/>
-        {{#ifEq authenticator "EMAIL OTP"}}
-          <label class="float-label__label" for="passcode">Enter OTP</label>
-        {{else ifEq authenticator "SMS OTP"}}
-          <label class="float-label__label" for="passcode">Enter OTP</label>
-        {{else ifEq authenticator "VOICE OTP"}}
-          <label class="float-label__label" for="passcode">Enter OTP</label>
-        {{else ifEq authenticator "TOKEN"}}
-          <label class="float-label__label" for="passcode">Enter Token Code</label>
-        {{else ifEq authenticator "TEMP_ACCESS_CODE"}}
-          <label class="float-label__label" for="passcode">Enter Temporary Access Code</label>
-        {{/ifEq}}
-      </div>
-    {{/ifNotEq}}
+
+    <div class="float-label" id="passcodefield">
+      <input type="text" class="text-input float-label__input required" name="input" id="passcode"/>
+      {{#ifEq authenticator "EMAIL OTP"}}
+        <label class="float-label__label" for="passcode">Enter OTP</label>
+      {{else ifEq authenticator "SMS OTP"}}
+        <label class="float-label__label" for="passcode">Enter OTP</label>
+      {{else ifEq authenticator "VOICE OTP"}}
+        <label class="float-label__label" for="passcode">Enter OTP</label>
+      {{else ifEq authenticator "TOKEN"}}
+        <label class="float-label__label" for="passcode">Enter Token Code</label>
+      {{else ifEq authenticator "TEMP_ACCESS_CODE"}}
+        <label class="float-label__label" for="passcode">Enter Temporary Access Code</label>
+      {{else ifEq authenticator "GRID"}}
+        <label class="float-label__label" for="passcode">{{gridChallenge.cells}}</label>
+      {{else}}
+        <label class="float-label__label" for="passcode">Enter passcode</label>
+      {{/ifEq}}
+    </div>
+
     <button id="submit" data-checkInput="checkInput" type="submit" class="button button--primary brand-primary-bg"
             disabled>
       Submit
