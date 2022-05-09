@@ -67,6 +67,7 @@
       </div>
     {{/ifEq}}
 
+  {{#ifNotEq authenticator "KBA"}}
     <div class="float-label" id="passcodefield">
       <input type="text" class="text-input float-label__input required" name="input" id="passcode"/>
       {{#ifEq authenticator "EMAIL OTP"}}
@@ -85,6 +86,7 @@
         <label class="float-label__label" for="passcode">Enter passcode</label>
       {{/ifEq}}
     </div>
+  {{/ifNotEq}}
 
     <button id="submit" data-checkInput="checkInput" type="submit" class="button button--primary brand-primary-bg"
             disabled>
