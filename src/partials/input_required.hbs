@@ -17,6 +17,18 @@
       <div class="text-block--overflow-wrap" id="pushnotificationmessage">
         Approve Push Notification, then click Submit
       </div>
+    {{else ifEq authenticator "SMARTCREDENTIALPUSH"}}
+      <div class="heading-text">
+        <div class="text-block__text">
+          Confirm the authentication request displayed on your Entrust Mobile Smart Credential Application.
+        </div>
+      </div>
+      <div class="spinner spinner--margin-bottom-small">
+        <div class="spinner__icon" data-id="spinner"></div>
+      </div>
+      <div class="text-block--overflow-wrap" id="pushnotificationmessage">
+        Approve Challenge, then click Submit
+      </div>
     {{else ifEq authenticator "KBA"}}
       <div class="heading-text">
         <div class="text-block__text">Enter answers to your questions.</div>

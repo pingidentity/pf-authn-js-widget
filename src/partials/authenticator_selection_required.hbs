@@ -57,6 +57,19 @@
                       id="Icon-Kba" fill="#757575"></path>
                   </g>
                 </svg>
+              {{else ifEq authenticator "SMARTCREDENTIALPUSH"}}
+                <svg viewBox="0 0 24 24" role="presentation" style="width: 32px; height: 32px;">
+                  <g id="smartcredentialpush" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                    <path
+                      d="M17,1 L7,1 C5.9,1 5,1.9 5,3 L5,6 L7,6 L7,4 L17,4 L17,20 L7,20 L7,18 L5,18 L5,21 C5,22.1 5.9,23 7,23 L17,23 C18.1,23 19,22.1 19,21 L19,3 C19,1.9 18.1,1 17,1 Z"
+                      id="Icon-Smartcredentialpush" fill="#757575">
+                    </path>
+                    <path
+                      d="M7,11 L4,11 L4,14 L7,14 L7,11 Z M6,13 L5,13 L5,12 L6,12 L6,13 Z M10,12 L10,11 L9,11 L9,10 C9,9.45 8.55,9 8,9 L7,9 L7,8 L6,8 L6,9 L5,9 L5,8 L4,8 L4,9 L3,9 C2.45,9 2,9.45 2,10 L2,11 L1,11 L1,12 L2,12 L2,13 L1,13 L1,14 L2,14 L2,15 C2,15.55 2.45,16 3,16 L4,16 L4,17 L5,17 L5,16 L6,16 L6,17 L7,17 L7,16 L8,16 C8.55,16 9,15.55 9,15 L9,14 L10,14 L10,13 L9,13 L9,12 L10,12 Z M8,15 L3,15 L3,10 L8,10 L8,15 Z"
+                      id="Icon-Smartcredentialpush" fill="#757575">
+                    </path>
+                  </g>
+                </svg>
               {{else ifEq authenticator "TOKEN"}}
                 <svg viewBox="0 0 24 24" role="presentation" style="width: 32px; height: 32px;">
                   <g id="token" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
@@ -109,6 +122,8 @@
                   <div class="tile-button__title">Grid Card Authentication</div>
                 {{else ifEq authenticator "KBA"}}
                   <div class="tile-button__title">Knowledge-based Authentication</div>
+                {{else ifEq authenticator "SMARTCREDENTIALPUSH"}}
+                  <div class="tile-button__title">Smart Credential Push Authentication</div>
                 {{else ifEq authenticator "TOKEN"}}
                   <div class="tile-button__title">Token Authentication</div>
                 {{else ifEq authenticator "TOKENPUSH"}}
