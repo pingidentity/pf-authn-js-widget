@@ -1397,7 +1397,7 @@ export default class AuthnWidget {
 
   registerAuthenticationRequiredHandler() {
     Array.from(document.querySelectorAll('[data-authenticator-selection]'))
-      .forEach(element => element.addEventListener('click', this.selectAuthenticatorHandler));
+      .forEach(element => element.addEventListener('click', this.selectAuthenticatorHandler), this);
   }
 
   /**
@@ -1418,12 +1418,12 @@ export default class AuthnWidget {
   }
 
   /**
-   * Hides the passcode field if the authenticator is TOKENPUSH.
+   * Hides the passcode field if the authenticator is TOKENPUSH and SMARTCREDENTIALPUSH.
    * @returns {Promise<void>}
    */
   async postInputRequired() {
     let state = await this.store.getState();
-    if (state.authenticator === 'TOKENPUSH') {
+    if (state.authenticator === 'TOKENPUSH' || state.authenticator === 'SMARTCREDENTIALPUSH') {
       document.getElementById('passcodefield').style.display = 'none';
       document.querySelector('#submit').disabled = false;
     }
@@ -1431,7 +1431,7 @@ export default class AuthnWidget {
 
   registerInputRequiredHandler() {
     Array.from(document.querySelectorAll('[data-checkInput]'))
-      .forEach(element => element.addEventListener('click', this.checkInputHandler));
+      .forEach(element => element.addEventListener('click', this.checkInputHandler), this);
     }
 
   /**
