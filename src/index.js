@@ -56,7 +56,7 @@ export default class AuthnWidget {
       'VOICE_PAIRING_TARGET_REQUIRED', 'VOICE_ACTIVATION_REQUIRED', 'TOTP_ACTIVATION_REQUIRED', 'PLATFORM_ACTIVATION_REQUIRED',
       'SECURITY_KEY_ACTIVATION_REQUIRED', 'MOBILE_ACTIVATION_REQUIRED', 'MFA_DEVICE_PAIRING_METHOD_FAILED',
       'VIP_ENROLLMENT', 'VIP_CREDENTIAL_REQUIRED', 'VIP_AUTHENTICATION_REQUIRED', 'VIP_CREDENTIAL_RESET_REQUIRED',
-      'USER_ID_REQUIRED', 'AUTHENTICATOR_SELECTION_REQUIRED', 'INPUT_REQUIRED', 'ENTRUST_FAILED', 'FRAUD_EVALUATION_CHECK_REQUIRED']
+      'USER_ID_REQUIRED', 'AUTHENTICATOR_SELECTION_REQUIRED', 'INPUT_REQUIRED', 'ENTRUST_FAILED', 'FRAUD_EVALUATION_CHECK_REQUIRED', 'AUTHENTICATION_CODE_RESPONSE_REQUIRED']
       .concat(oauthUserAuthorizationStates);
   }
 
@@ -144,6 +144,8 @@ export default class AuthnWidget {
     this.checkSecurIdPinReset = this.checkSecurIdPinReset.bind(this);
     this.postAssertionRequired = this.postAssertionRequired.bind(this);
     this.postTOTPActivationRequired = this.postTOTPActivationRequired.bind(this);
+    this.postAuthenticationCodeResponseRequired = this.postAuthenticationCodeResponseRequired.bind(this);
+    this.postAuthenticationCodeExpired = this.postAuthenticationCodeExpired.bind(this);
     this.postPlatformDeviceActivationRequired = this.postPlatformDeviceActivationRequired.bind(this);
     this.postSecurityKeyDeviceActivationRequired = this.postSecurityKeyDeviceActivationRequired.bind(this);
     this.postDeviceSelectionRequired = this.postDeviceSelectionRequired.bind(this);
@@ -193,6 +195,7 @@ export default class AuthnWidget {
     this.addEventHandler('ASSERTION_REQUIRED', this.registerMfaEventHandler);
     this.addEventHandler('ASSERTION_REQUIRED', this.registerMfaChangeDeviceEventHandler);
     this.addPostRenderCallback('ASSERTION_REQUIRED', this.postAssertionRequired);
+    this.addPostRenderCallback('AUTHENTICATION_CODE_RESPONSE_REQUIRED', this.postAuthenticationCodeResponseRequired);
     this.addEventHandler('PUSH_CONFIRMATION_WAITING', this.registerMfaUsePasscodeEventHandler);
     this.addPostRenderCallback('PUSH_CONFIRMATION_WAITING', this.postPushNotificationWait);
     this.addEventHandler('PUSH_CONFIRMATION_WAITING', this.registerMfaChangeDeviceEventHandler);
@@ -520,6 +523,33 @@ export default class AuthnWidget {
           console.error(error);
         }
       });
+  }
+
+  async postAuthenticationCodeResponseRequired()
+  {
+    let data = this.store.getStore();
+    var QRCode = require('qrcode');
+    QRCode.toCanvas(document.getElementById('qrcode'), data.uri, { 'width': 128, 'height': 128 },
+      function (error) {
+        if (error) {
+          document.getElementById("scan-message").innerText =
+          `Scan the code displayed to finish authentication.`;
+          console.error(error);
+        }
+      });
+    let pollState = await this.store.getState();
+    if (pollState.status === 'AUTHENTICATION_CODE_RESPONSE_REQUIRED') {
+      // continue waiting
+      clearTimeout(this.pollPushNoticationState);
+      this.pollPushNoticationState = setTimeout(() => {
+        this.postPushNotificationWait();
+      }, 1000);
+    } else {
+      clearTimeout(this.pollPushNoticationState);
+      this.store
+        .dispatch('GET_FLOW')
+        .catch(() => this.generalErrorRenderer(AuthnWidget.COMMUNICATION_ERROR_MSG));
+    }
   }
 
   postPlatformDeviceActivationRequired() {
