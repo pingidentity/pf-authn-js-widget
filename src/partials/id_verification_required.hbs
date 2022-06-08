@@ -2,21 +2,27 @@
   <div class="org-logo">
     <img class="org-logo__image" src="{{logo}}" alt="Company Logo"/>
   </div>
-  <form class="form form--spacing-lg" id="AuthnWidgetForm">
+  <form class="form form--spacing-lg" id="AuthnWidgetForm" style="margin-left:30px;margin-right:30px;">
     <div class="stack stack--small">
-      <h1 class="heading" data-id="heading">Verification Required</h1>
+      <h1 id="requiredHeader" class="heading" data-id="heading">
+        {{#if errorDetails}}
+          Sorry, Something Went Wrong
+        {{else}}
+          Verification Required
+        {{/if}}
+      </h1>
       <h4 id="requiredDescription" class="heading heading--4 text-block" data-id="heading">
-        Download the <b>{{verifyAppName}}</b> app for iOS or Android, then scan this QR code, or enter the verification code to verify yourself.
+        {{#if errorDetails}}
+          We had a problem on our side. Scan the QR code using your mobile device's camera and compare the verification code to the one shown on your device. Select Cancel to send a web link via text or email.
+        {{else}}
+          Click on the web link sent to your mobile device or scan the QR code using your mobile device's camera. Compare the verification code to the one shown on your device.
+        {{/if}}
       </h4>
-      <h4 id="errorDescription" class="heading heading--4 text-block" data-id="heading" style="display: none">
-        To retry verification, scan the QR code or enter the verification code.
+      <h1 id="startedHeader" class="heading" data-id="heading" style="display: none">Verification Started</h1>
+      <h4 id="startedDescription" class="heading heading--4 text-block" data-id="heading" style="display: none">
+        Follow the instructions on your mobile device to complete the verification process. Scan the QR code to resume the process. Select Cancel to start over.
       </h4>
     </div>
-    {{#if userMessages}}
-    <div class="feedback" style="justify-content: center">
-      {{> errors}}
-    </div>
-    {{/if}}
     <div id="qrCodeBlock" class="text-block" style="display: none">
       <img id="qrCode" height="150px" width="150px" alt="QR Code" src=""/>
     </div>
@@ -27,12 +33,9 @@
           {{verificationCode}}
         </div>
       </div>
-      <button id="copy" class="button button--tertiary">Copy</button>
     </div>
     <div class="text-block">
-      <div class="text-block--overflow-wrap">
-        <a tabindex="0" data-actionId="cancelAuthentication" target="_self" class="anchor">Cancel</a>
-      </div>
+      <a tabindex="0" id="retryVerification" target="_self" class="anchor">Cancel</a>
     </div>
   </form>
 </div>

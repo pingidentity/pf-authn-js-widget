@@ -2,18 +2,22 @@
   <div class="org-logo">
     <img class="org-logo__image" src="{{logo}}" alt="Company Logo" />
   </div>
-  <div class="icon-feedback icon-feedback--timeout icon-feedback--error">
-    <span class="icon-feedback__icon pingicon-ghost-error"></span>
-    <p class="icon-feedback__label">
-      <p class="icon-feedback--error">Verification Failed</p>
-    </p>
+  <div class="icon-feedback icon-feedback--timeout icon-feedback--error" style="margin-bottom:0">
+    <span class="icon-feedback__icon pingicon-ghost-error" style="margin-bottom:0"></span>
   </div>
-  <div class="text-block text-block--small" data-id="textblock">
-    <div id="errorMessage" class="text-block--overflow-wrap">Error Message</div>
-  </div>
-  <div class="text-block" data-id="textblock">
-    <div class="text-block--overflow-wrap">
-      <a tabindex="0" data-actionId="cancelAuthentication" target="_self" class="anchor">Cancel</a>
+  <h4 id="failedDescription" class="heading heading--4 text-block" style="margin:15px;" data-id="heading">
+    {{#if txId}}
+      Please contact the helpdesk and provide the information below, or please try again by selecting Cancel.
+    {{else}}
+      Please contact the helpdesk for more information, or please try again by selecting Cancel.
+    {{/if}}
+  </h4>
+  {{#if txId}}
+    <div class="text-block text-block--small" data-id="textblock">
+      <div id="errorMessage" class="text-block--overflow-wrap">Transaction ID: {{txId}}</div>
     </div>
+  {{/if}}
+  <div class="text-block" data-id="textblock">
+    <a tabindex="0" data-actionId="retryVerification" target="_self" class="anchor">Cancel</a>
   </div>
 </div>
