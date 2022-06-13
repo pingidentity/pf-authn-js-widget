@@ -5,20 +5,19 @@
   <form class="form form--spacing-lg" id="AuthnWidgetForm">
     <div class="stack stack--small">
       <h1 id="header" class="heading" data-id="heading">Verification Required</h1>
-      <h4 id="description" class="heading heading--4 text-block" style="margin:27px;margin-top:0;" data-id="heading">
+      <h4 id="description" class="heading heading--4 text-block idv-desc" data-id="heading">
         Select a method to receive a web link on your mobile device to start the verification process, or select the QR Code button.
       </h4>
-      <div id="errorBlock" class="feedback feedback--error" style="display: none; justify-content: center; margin: 15px;" data-id="feedback">
-        <span class="feedback__icon pingicon-error-triangle"></span>
-        <div id="errorMessage" style="width: auto" class="feedback__message">{{errorMessage}}</div>
+      <div class="idv-center">
+        {{> errors}}
       </div>
 
-      <div id="options" class="heading heading--4" style="margin-left:10px;" data-id="heading">
+      <div id="options" class="heading heading--4 idv-left" data-id="heading">
         {{#if phones.length}}
           <div class="stack stack--small" data-id="textblock">
             <input type="radio" id="mobileRadio" name="radioGroup" value="mobileRadio">
-            <label for="mobileRadio" style="width:50px">Mobile</label>
-            <select name="mobiles" id="mobiles" style="width:180px;">
+            <label for="mobileRadio" class="idv-ddlabel">Mobile</label>
+            <select name="mobiles" id="mobiles" class="idv-ddbox">
               {{#each phones}}
                 <option value={{this.[0]}}>{{this.[1]}}</option>
               {{/each}}
@@ -29,8 +28,8 @@
         {{#if emails.length}}
           <div class="stack stack--small" data-id="textblock">
             <input type="radio" id="emailRadio" name="radioGroup" value="emailRadio">
-            <label for="emailRadio" style="width:50px">Email</label>
-            <select name="emails" id="emails" style="width:180px;">
+            <label for="emailRadio" class="idv-ddlabel">Email</label>
+            <select name="emails" id="emails" class="idv-ddbox">
               {{#each emails}}
                 <option value={{this.[0]}}>{{this.[1]}}</option>
               {{/each}}
@@ -38,24 +37,24 @@
           </div>
         {{/if}}
       </div>
-      <h4 id="note" class="heading heading--4 text-page-subtitle text-block" style="margin-left:27px;margin-right:40px;" data-id="heading">
+      <h4 id="note" class="heading heading--4 text-page-subtitle text-block idv-note" data-id="heading">
         <i>Update your account profile if you do not see the correct information.</i>
       </h4>
 
-      <table style="width:100%;padding:25px;padding-bottom:0">
-        <tr>
-          <td>
-            <button id="qrbtn" class="button button--tertiary button--primary" type="button" style="font-size:15px;width:100px;">
-	            QR Code
+      <div class="idv-btntbl idv-btntbl-down">
+        <div class="idv-btnrow">
+          <div class="idv-btncell">
+            <button id="qrbtn" class="button button--tertiary button--primary idv-btn idv-btn-small" type="button">
+              QR Code
             </button>
-          </td>
-          <td>
-            <button id="nextbtn" class="button button--tertiary button--primary" type="button" style="font-size:15px;width:100px;" disabled>
+          </div>
+          <div class="idv-btncell">
+            <button id="nextbtn" class="button button--tertiary button--primary idv-btn idv-btn-small" type="button" disabled>
               Next
             </button>
-          </td>
-        </tr>
-      </table>
+          </div>
+        </div>
+      </div>
     </div>
     <div class="text-block">
       <a tabindex="0" id="retryoptions" data-actionId="retryVerification" target="_self" class="anchor">Cancel</a>

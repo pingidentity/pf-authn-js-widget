@@ -137,7 +137,7 @@ export default class Store {
         if (this.state.code && !this.state.userMessage) {
           this.state.userMessage = `The server returned "${this.state.code}" code. Please contact your system administrator.`;
         }
-      } else if (json.status === 'ID_VERIFICATION_REQUIRED') {
+      } else if (json.status === 'ID_VERIFICATION_REQUIRED' || json.status === 'ID_VERIFICATION_OPTIONS') {
         let errors = this.getErrorDetails(json);
         delete combinedData.failedValidators;
         delete combinedData.satisfiedValidators;
@@ -216,6 +216,11 @@ export default class Store {
         json.errorDetails.forEach(msg => {
           errors.userMessages.push(msg.userMessage);
         })
+      }
+    }
+    else if (json.status === 'ID_VERIFICATION_OPTIONS') {
+      if (json.errorMessage) {
+        errors.userMessages.push(json.errorMessage);
       }
     }
     return errors;

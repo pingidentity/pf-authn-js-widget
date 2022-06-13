@@ -2,17 +2,17 @@
   <div class="org-logo">
     <img class="org-logo__image" src="{{logo}}" alt="Company Logo"/>
   </div>
-  <form class="form form--spacing-lg" id="AuthnWidgetForm" style="margin-left:30px;margin-right:30px;">
+  <form class="form form--spacing-lg idv-form" id="AuthnWidgetForm">
     <div class="stack stack--small">
       <h1 id="requiredHeader" class="heading" data-id="heading">
-        {{#if errorDetails}}
+        {{#if errJson}}
           Sorry, Something Went Wrong
         {{else}}
           Verification Required
         {{/if}}
       </h1>
       <h4 id="requiredDescription" class="heading heading--4 text-block" data-id="heading">
-        {{#if errorDetails}}
+        {{#if errJson}}
           We had a problem on our side. Scan the QR code using your mobile device's camera and compare the verification code to the one shown on your device. Select Cancel to send a web link via text or email.
         {{else}}
           Click on the web link sent to your mobile device or scan the QR code using your mobile device's camera. Compare the verification code to the one shown on your device.

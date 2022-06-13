@@ -297,3 +297,56 @@ input:read-only {
     text-align: center;
   }
 }
+
+.idv-btntbl {
+  display: table;
+  width: 100%;
+}
+.idv-btnrow {
+  display: table-row;
+}
+.idv-btncell {
+  display: table-cell;
+}
+.idv-btntbl-down {
+  padding: 25px;
+  padding-bottom: 0;
+  width: 85%;
+}
+.idv-btn {
+  font-size: 15px;
+  height: 30px;
+}
+.idv-btn-small {
+  width: 100px;
+}
+.idv-center {
+  margin: 30px;
+}
+.idv-center-small {
+  margin: 15px 20px;
+}
+.idv-note {
+  margin-left: 30px;
+  margin-right: 40px;
+}
+.idv-form {
+  margin-left: 30px;
+  margin-right: 30px;
+}
+.idv-desc {
+  margin: 30px;
+  margin-top: 0;
+}
+.idv-ddlabel {
+  width: 50px;
+}
+.idv-ddbox {
+  width: 180px;
+}
+.idv-left {
+  margin-left:10px;
+}
+.idv-bottom {
+  margin-bottom: 0;
+}

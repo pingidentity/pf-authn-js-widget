@@ -1044,7 +1044,7 @@ export default class AuthnWidget {
   }
 
   handleIdVerificationDevice() {
-    document.getElementById('icon').src = this.store.baseUrl + "/assets/images/newtab.svg";
+    document.getElementById('icon').src = "/assets/images/newtab.svg";
     document.getElementById('other').addEventListener('click', this.deviceAuthentication);
     document.getElementById('self').addEventListener('click', this.deviceAuthentication);
   }
@@ -1071,7 +1071,6 @@ export default class AuthnWidget {
       document.getElementById("retryoptions").style.display = "none";
     }
     if (data.errorMessage) {
-      document.getElementById("errorBlock").style.display = "flex";
       document.getElementById("nextbtn").disabled = true;
     } else {
       if (data.emails.length) {
