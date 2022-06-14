@@ -145,7 +145,6 @@ export default class AuthnWidget {
     this.postAssertionRequired = this.postAssertionRequired.bind(this);
     this.postTOTPActivationRequired = this.postTOTPActivationRequired.bind(this);
     this.postAuthenticationCodeResponseRequired = this.postAuthenticationCodeResponseRequired.bind(this);
-    this.postAuthenticationCodeExpired = this.postAuthenticationCodeExpired.bind(this);
     this.postPlatformDeviceActivationRequired = this.postPlatformDeviceActivationRequired.bind(this);
     this.postSecurityKeyDeviceActivationRequired = this.postSecurityKeyDeviceActivationRequired.bind(this);
     this.postDeviceSelectionRequired = this.postDeviceSelectionRequired.bind(this);
