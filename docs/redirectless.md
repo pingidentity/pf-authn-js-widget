@@ -31,9 +31,10 @@ var config = {
 authnWidget.initRedirectless(config);
 ```
 ## Configuration object
-There are two options for creating the configuration object to initiate the redirectless flow:
+There are multiple options for creating the configuration object to initiate the redirectless flow:
 1. Create a configuration object that contains the `onAuthorizationSuccess` function and the required attributes (such as `client_id`, `response_type`, etc.) used by the internal authorization request function.
-2. Create a configuration object that contains the `onAuthorizationRequest` and `onAuthorizationSuccess` functions.
+1. Create a configuration object containing the `onAuthorizationSuccess` function with the `interactWith` attribute set to `PfAuthnWidget.INTERACT_WITH_USER_AUTHZ`. This configuration initiates the Authentication API Widget to interact with the OAuth 2.0 Device Authorization's User Authorization endpoint.
+1. Create a configuration object that contains the `onAuthorizationRequest` and `onAuthorizationSuccess` functions. 
 
 Use option 1 for most deployments. Use option 2 for advanced use-cases.
 
@@ -120,6 +121,22 @@ var config = {
     console.log(response);
   }
 };
+```
+
+## OAuth 2.0 Device Authorization
+This code snippet demonstrates how to configure the Authentication API Widget to interact with PingFederate's User Authorization endpoint
+```js
+var authnWidget = new PfAuthnWidget("https://localhost", { divId: 'authnwidget' });
+var config = {
+  interactWith: PfAuthnWidget.INTERACT_WITH_USER_AUTHZ,
+  onAuthorizationSuccess: function (response) {
+    console.log('success');
+  },
+  onAuthorizationFailed: function (response) {
+    console.log('fail');
+  }
+};
+authnWidget.initRedirectless(config);
 ```
 ## Starting webpack-dev-server with redirectless support
 To configure and start the webpack-dev-server with redirectless support:

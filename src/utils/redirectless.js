@@ -3,6 +3,18 @@ const allowedAuthRequestParameters = ['client_id', 'response_type', 'code_challe
   'redirect_uri', 'scope', 'state', 'idp', 'pfidpadapterid', 'access_token_manager_id', 'aud', 'nonce', 'prompt',
   'acr_values', 'max_age', 'login_hint', 'ui_locales', 'id_token_hint', 'claims_locales'];
 
+export const INTERACT_WITH_USER_AUTHZ = 'userAuthz';
+
+/**
+ * Check if the redirectless configuration object is set for user authz interaction.
+ *
+ * @param {JSON} configuration  The redirectless configuration object
+ */
+export function isInteractWithUserAuthz(configuration) {
+  return configuration.interactWith &&
+    configuration.interactWith.toLowerCase() === INTERACT_WITH_USER_AUTHZ.toLowerCase()
+}
+
 /**
  * Call onAuthorizationSuccess when 'COMPLETED' state is reached.
  *
@@ -30,6 +42,7 @@ export function failedStateCallback(state, configuration) {
     }
   }
 }
+
 /**
  * Initialize the redirectless flow
  *
@@ -40,13 +53,25 @@ export function initRedirectless(baseUrl, configuration) {
   if (configuration.onAuthorizationRequest) {
     return configuration.onAuthorizationRequest();
   } else {
-    const authUrl = generateAuthorizationUrl(baseUrl, configuration);
+    const authUrl = isInteractWithUserAuthz(configuration)
+      ? generateUserAuthorizationUrl(baseUrl, configuration)
+      : generateAuthorizationUrl(baseUrl, configuration);
     const options = {
       method: 'GET',
       credentials: 'include'
     }
     return fetch(authUrl, options);
   }
+}
+
+/**
+ * Generate the user authorization URL to interact with the authorization server.
+ *
+ * @param {string} baseUrl The Base URL of the authorization server
+ * @param {JSON} configuration The configuration object used to generate the authorization URL
+ */
+function generateUserAuthorizationUrl(baseUrl, configuration) {
+  return generateAuthorizationUrl(baseUrl, configuration, '/as/user_authz.oauth2')
 }
 
 /**
