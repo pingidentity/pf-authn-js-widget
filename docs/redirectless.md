@@ -33,7 +33,7 @@ authnWidget.initRedirectless(config);
 ## Configuration object
 There are multiple options for creating the configuration object to initiate the redirectless flow:
 1. Create a configuration object that contains the `onAuthorizationSuccess` function and the required attributes (such as `client_id`, `response_type`, etc.) used by the internal authorization request function.
-1. Create a configuration object containing the `onAuthorizationSuccess` function with the `interactWith` attribute set to `PfAuthnWidget.INTERACT_WITH_USER_AUTHZ`. This configuration initiates the Authentication API Widget to interact with the OAuth 2.0 Device Authorization's User Authorization endpoint.
+1. Create a configuration object containing the `onAuthorizationSuccess` function with the `flowType` attribute set to `PfAuthnWidget.FLOW_TYPE_USER_AUTHZ`. This configuration initiates the Authentication API Widget to interact with the OAuth 2.0 Device Authorization's User Authorization endpoint. Optionally, `user_code` attribute can be provided and passed to the user authorization endpoint as a query parameter. You can find more information about the Authentication API widget OAuth 2.0 Device Authorization configuration [here](#oauth-2.0-device-authorization).
 1. Create a configuration object that contains the `onAuthorizationRequest` and `onAuthorizationSuccess` functions. 
 
 Use option 1 for most deployments. Use option 2 for advanced use-cases.
@@ -128,7 +128,9 @@ This code snippet demonstrates how to configure the Authentication API Widget to
 ```js
 var authnWidget = new PfAuthnWidget("https://localhost", { divId: 'authnwidget' });
 var config = {
-  interactWith: PfAuthnWidget.INTERACT_WITH_USER_AUTHZ,
+  flowType: PfAuthnWidget.FLOW_TYPE_USER_AUTHZ,
+  // the optional user_code parameter
+  // user_code: "A1B2-C3D4",
   onAuthorizationSuccess: function (response) {
     console.log('success');
   },
@@ -138,6 +140,7 @@ var config = {
 };
 authnWidget.initRedirectless(config);
 ```
+
 ## Starting webpack-dev-server with redirectless support
 To configure and start the webpack-dev-server with redirectless support:
 1. Update the demo server's [index template](../demo-server/templates/index-template.handlebars) file with a configuration object. Configuration object examples are available in the [Configuration object examples](#configuration-object-examples) section of this document.

@@ -3,16 +3,15 @@ const allowedAuthRequestParameters = ['client_id', 'response_type', 'code_challe
   'redirect_uri', 'scope', 'state', 'idp', 'pfidpadapterid', 'access_token_manager_id', 'aud', 'nonce', 'prompt',
   'acr_values', 'max_age', 'login_hint', 'ui_locales', 'id_token_hint', 'claims_locales'];
 
-export const INTERACT_WITH_USER_AUTHZ = 'userAuthz';
+export const FLOW_TYPE_USER_AUTHZ = 1;
 
 /**
  * Check if the redirectless configuration object is set for user authz interaction.
  *
  * @param {JSON} configuration  The redirectless configuration object
  */
-export function isInteractWithUserAuthz(configuration) {
-  return configuration.interactWith &&
-    configuration.interactWith.toLowerCase() === INTERACT_WITH_USER_AUTHZ.toLowerCase()
+export function isUserAuthzFlowType(configuration) {
+  return FLOW_TYPE_USER_AUTHZ === configuration.flowType
 }
 
 /**
@@ -53,7 +52,7 @@ export function initRedirectless(baseUrl, configuration) {
   if (configuration.onAuthorizationRequest) {
     return configuration.onAuthorizationRequest();
   } else {
-    const authUrl = isInteractWithUserAuthz(configuration)
+    const authUrl = isUserAuthzFlowType(configuration)
       ? generateUserAuthorizationUrl(baseUrl, configuration)
       : generateAuthorizationUrl(baseUrl, configuration);
     const options = {
@@ -71,7 +70,11 @@ export function initRedirectless(baseUrl, configuration) {
  * @param {JSON} configuration The configuration object used to generate the authorization URL
  */
 function generateUserAuthorizationUrl(baseUrl, configuration) {
-  return generateAuthorizationUrl(baseUrl, configuration, '/as/user_authz.oauth2')
+  let endpoint = '/as/user_authz.oauth2';
+  if (configuration.user_code) {
+    endpoint = endpoint.concat('?user_code=').concat(configuration.user_code);
+  }
+  return generateAuthorizationUrl(baseUrl, configuration, endpoint)
 }
 
 /**

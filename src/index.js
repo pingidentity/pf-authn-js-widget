@@ -5,7 +5,7 @@ import 'regenerator-runtime/runtime'; //for async await
 import Store from './store';
 import redirectlessConfigValidator from './validators/redirectless';
 import { getCompatibility, doWebAuthn, doRegisterWebAuthn } from './utils/fidoFlowUtil';
-import { completeStateCallback, failedStateCallback, INTERACT_WITH_USER_AUTHZ } from './utils/redirectless';
+import { completeStateCallback, failedStateCallback, FLOW_TYPE_USER_AUTHZ } from './utils/redirectless';
 import paOnAuthorizationRequest from './utils/paOnAuthorizationRequest';
 import paOnAuthorizationSuccess from './utils/paOnAuthorizationSuccess';
 import './scss/main.scss';
@@ -72,8 +72,8 @@ export default class AuthnWidget {
     return "PingFederate Base URL is required."
   }
 
-  static get INTERACT_WITH_USER_AUTHZ() {
-    return INTERACT_WITH_USER_AUTHZ
+  static get FLOW_TYPE_USER_AUTHZ() {
+    return FLOW_TYPE_USER_AUTHZ
   }
 
   static paOnAuthorizationRequest = paOnAuthorizationRequest;

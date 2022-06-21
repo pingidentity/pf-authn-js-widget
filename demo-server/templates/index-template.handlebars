@@ -76,7 +76,9 @@
         function initWidget(widget) {
           {{#if redirectless}}
           var config = {
-            // interactWith: PfAuthnWidget.INTERACT_WITH_USER_AUTHZ,
+            // flowType: PfAuthnWidget.FLOW_TYPE_USER_AUTHZ,
+            // the optional user_code parameter
+            // user_code: "A1B2-C3D4",
             // client_id: '', // redirectless requires this configuration
             // response_type: 'token', // redirectless requires this configuration
             onAuthorizationSuccess: function (response) {
