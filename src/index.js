@@ -33,6 +33,14 @@ export default class AuthnWidget {
   }
 
   static get CORE_STATES() {
+    const idVerificationStates = [
+      'ID_VERIFICATION_FAILED',
+      'ID_VERIFICATION_REQUIRED',
+      'ID_VERIFICATION_TIMED_OUT',
+      'ID_VERIFICATION_DEVICE',
+      'ID_VERIFICATION_OPTIONS',
+    ];
+
     return ['USERNAME_PASSWORD_REQUIRED', 'MUST_CHANGE_PASSWORD', 'CHANGE_PASSWORD_EXTERNAL', 'NEW_PASSWORD_RECOMMENDED',
       'NEW_PASSWORD_REQUIRED', 'SUCCESSFUL_PASSWORD_CHANGE', 'ACCOUNT_RECOVERY_USERNAME_REQUIRED',
       'ACCOUNT_RECOVERY_OTL_VERIFICATION_REQUIRED', 'RECOVERY_CODE_REQUIRED', 'PASSWORD_RESET_REQUIRED',
@@ -41,9 +49,7 @@ export default class AuthnWidget {
       'EXTERNAL_AUTHENTICATION_COMPLETED', 'EXTERNAL_AUTHENTICATION_FAILED', 'EXTERNAL_AUTHENTICATION_REQUIRED',
       'DEVICE_PROFILE_REQUIRED', 'REGISTRATION_REQUIRED', 'REFERENCE_ID_REQUIRED','CURRENT_CREDENTIALS_REQUIRED',
       'DEVICE_SELECTION_REQUIRED', 'MFA_COMPLETED', 'MFA_FAILED', 'OTP_REQUIRED', 'ASSERTION_REQUIRED',
-      'PUSH_CONFIRMATION_REJECTED', 'PUSH_CONFIRMATION_TIMED_OUT', 'PUSH_CONFIRMATION_WAITING',
-      'ID_VERIFICATION_FAILED', 'ID_VERIFICATION_REQUIRED', 'ID_VERIFICATION_TIMED_OUT', 'ACCOUNT_LINKING_FAILED',
-      'ID_VERIFICATION_DEVICE', 'ID_VERIFICATION_OPTIONS',
+      'PUSH_CONFIRMATION_REJECTED', 'PUSH_CONFIRMATION_TIMED_OUT', 'PUSH_CONFIRMATION_WAITING', 'ACCOUNT_LINKING_FAILED',
       'SECURID_CREDENTIAL_REQUIRED', 'SECURID_NEXT_TOKENCODE_REQUIRED', 'SECURID_REAUTHENTICATION_REQUIRED',
       'SECURID_SYSTEM_PIN_RESET_REQUIRED', 'SECURID_USER_PIN_RESET_REQUIRED', 'EMAIL_VERIFICATION_REQUIRED', 'EMAIL_VERIFICATION_OTP_REQUIRED',
       'MFA_SETUP_REQUIRED', 'DEVICE_PAIRING_METHOD_REQUIRED', 'EMAIL_PAIRING_TARGET_REQUIRED',
@@ -51,7 +57,8 @@ export default class AuthnWidget {
       'VOICE_PAIRING_TARGET_REQUIRED', 'VOICE_ACTIVATION_REQUIRED', 'TOTP_ACTIVATION_REQUIRED', 'PLATFORM_ACTIVATION_REQUIRED',
       'SECURITY_KEY_ACTIVATION_REQUIRED', 'MOBILE_ACTIVATION_REQUIRED', 'MFA_DEVICE_PAIRING_METHOD_FAILED',
       'VIP_ENROLLMENT', 'VIP_CREDENTIAL_REQUIRED', 'VIP_AUTHENTICATION_REQUIRED', 'VIP_CREDENTIAL_RESET_REQUIRED',
-      'USER_ID_REQUIRED','AUTHENTICATOR_SELECTION_REQUIRED', 'INPUT_REQUIRED', 'ENTRUST_FAILED', 'FRAUD_EVALUATION_CHECK_REQUIRED'];
+      'USER_ID_REQUIRED','AUTHENTICATOR_SELECTION_REQUIRED', 'INPUT_REQUIRED', 'ENTRUST_FAILED', 'FRAUD_EVALUATION_CHECK_REQUIRED']
+      .concat(idVerificationStates);
   }
 
   static get COMMUNICATION_ERROR_MSG() {
@@ -1022,12 +1029,16 @@ export default class AuthnWidget {
     }
 
     clearTimeout(this.pollCheckGetHandler);
+    // make cancel button non-clickable after one click
+    event.target.style.pointerEvents = "none";
 
     let actionId = event.target.id;
     let data = this.store;
     data.prevState = data.state;
+    // store.reduce is used to prevent notifyListener from being called at the end of store.dispatch
+    // when polling is in progress and flow is not available so previous state is returned;
+    // don't start extra polling tasks during resubmission of retryVerification request.
     data.state = await this.store.reduce('POST_FLOW', actionId);
-    data.state = await this.store.getStore();
     if (data.prevState.username && !data.state.username) {
       data.state.username = data.prevState.username;
     }
@@ -1062,8 +1073,8 @@ export default class AuthnWidget {
       document.getElementById("description").innerHTML = "Select a method to receive a web link on your mobile device to start the verification process.";
       document.getElementById("qrbtn").style.display = "none";
       
-      var radios = document.getElementsByName("radioGroup");
-      for (var i = 0; i < radios.length; i++) {
+      const radios = document.getElementsByName("radioGroup");
+      for (let i = 0; i < radios.length; i++) {
         radios[i].checked = true;
       }
       document.getElementById("nextbtn").disabled = false;
@@ -1091,19 +1102,19 @@ export default class AuthnWidget {
   optionsAuthentication(event) {
     console.log("selected option: " + event.target.id);
     document.getElementById("AuthnWidgetForm").style.pointerEvents = "none";
-    var email = null;
-    var phone = null;
-    var qrOnly = event.target.id === "qrbtn";
+    let email = null;
+    let phone = null;
+    const qrOnly = event.target.id === "qrbtn";
     if (qrOnly === true) {
       console.log("skip notification, show qr code only");
     } else if (document.querySelector('input[name="radioGroup"]:checked')) {
       const radio = document.querySelector('input[name="radioGroup"]:checked').value;
       if (radio === "emailRadio") {
-        var select = document.getElementById("emails");
+        const select = document.getElementById("emails");
         email = select.options[select.selectedIndex].value;
         console.log("selected email: "+email);
       } else if (radio === "mobileRadio") {
-        var select = document.getElementById("mobiles");
+        const select = document.getElementById("mobiles");
         phone = select.options[select.selectedIndex].value;
         console.log("selected phone: "+phone);
       }
