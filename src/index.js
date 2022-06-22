@@ -1055,7 +1055,6 @@ export default class AuthnWidget {
   }
 
   handleIdVerificationDevice() {
-    document.getElementById('icon').src = "/assets/images/newtab.svg";
     document.getElementById('other').addEventListener('click', this.deviceAuthentication);
     document.getElementById('self').addEventListener('click', this.deviceAuthentication);
   }
