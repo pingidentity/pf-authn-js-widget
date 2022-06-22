@@ -37,7 +37,7 @@ Create a configuration object that contains the `onAuthorizationSuccess` functio
 This option should support majority of deployments.
 ### Advanced
 Create a configuration object that contains the `onAuthorizationRequest` and `onAuthorizationSuccess` functions. This option is for advanced use-cases.
-### OAuth 2.0 Device Authorization
+### OAuth 2.0 Device Authorization Grant
 Create a configuration object containing the `onAuthorizationSuccess` function and a `flowType` attribute set to `PfAuthnWidget.FLOW_TYPE_USER_AUTHZ`. This configuration initializes the Authentication API Widget to interact with PingFederate's user authorization endpoint. Optionally, the `user_code` attribute can be provided. If provided, it is passed to the user authorization endpoint as a query parameter, which will trigger a state where the user must confirm the code (rather than having to enter it). An example is present [here](#oauth-20-device-authorization).
 
 ### Callback function descriptions
