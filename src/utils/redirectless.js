@@ -3,6 +3,7 @@ const allowedAuthRequestParameters = ['client_id', 'response_type', 'code_challe
   'redirect_uri', 'scope', 'state', 'idp', 'pfidpadapterid', 'access_token_manager_id', 'aud', 'nonce', 'prompt',
   'acr_values', 'max_age', 'login_hint', 'ui_locales', 'id_token_hint', 'claims_locales'];
 
+export const FLOW_TYPE_AUTHZ = 0;
 export const FLOW_TYPE_USER_AUTHZ = 1;
 
 /**
@@ -11,7 +12,16 @@ export const FLOW_TYPE_USER_AUTHZ = 1;
  * @param {JSON} configuration  The redirectless configuration object
  */
 export function isUserAuthzFlowType(configuration) {
-  return FLOW_TYPE_USER_AUTHZ === configuration.flowType
+  return FLOW_TYPE_USER_AUTHZ === configuration.flowType;
+}
+
+/**
+ * Check if the redirectless configuration object is set for authz interaction.
+ *
+ * @param {JSON} configuration  The redirectless configuration object
+ */
+export function isAuthzFlowType(configuration) {
+  return !configuration.flowType || FLOW_TYPE_AUTHZ === configuration.flowType;
 }
 
 /**

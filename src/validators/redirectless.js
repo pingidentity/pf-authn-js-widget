@@ -1,5 +1,5 @@
 import validator from 'validate.js';
-import { isUserAuthzFlowType } from '../utils/redirectless'
+import { isUserAuthzFlowType, isAuthzFlowType } from '../utils/redirectless'
 
 const redirectlessConfigValidator = (configuration) => {
   if (validator.isEmpty(configuration)) {
@@ -30,8 +30,10 @@ const redirectlessConfigValidator = (configuration) => {
       // OAuth 2.0 Device Authorization Grant user authorization interaction
       // does not require any other attributes to initialize.
       return;
-    } else {
+    } else if (isAuthzFlowType(configuration)) {
       validateWithoutOnAuthorizationRequest(configuration);
+    } else {
+      throw new Error('Invalid flow type');
     }
   }
 }
