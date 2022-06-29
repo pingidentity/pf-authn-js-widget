@@ -4,6 +4,11 @@
   </div>
   {{> errors}}
   {{> spinner}}
+  <div class="text-block">
+    <div class="text-block--overflow-wrap">
+      Confirm the activation code displayed on your device.
+    </div>
+  </div>
   <form class="form" id="AuthnWidgetForm">
     <div class="float-label">
       <input type="text" class="text-input float-label__input required" id="userCode" data-st-field="userCode"
@@ -12,7 +17,7 @@
     </div>
     <button id="submit" data-actionid="confirmUserCode" type="submit" data-st-tag="userCode.userCode_confirm_attempt"
       class="button button--primary brand-primary-bg" disabled>
-      Submit
+      Confirm
     </button>
   </form>
 </div>

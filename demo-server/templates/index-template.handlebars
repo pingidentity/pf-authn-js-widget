@@ -77,6 +77,7 @@
           {{#if redirectless}}
           // "client_id" and "response_type" attributes are used to initiate OAuth 2.0 Authorization.
           // Optionally "flowType" can be set to "PfAuthnWidget.FLOW_TYPE_AUTHZ" value.
+          // The default value of "flowType" is "PfAuthnWidget.FLOW_TYPE_AUTHZ" if it's not present.
           //
           // "flowType" and "user_code" attributes must be used to initiate the OAuth 2.0 Device
           // Authorization Grant user authorization.
