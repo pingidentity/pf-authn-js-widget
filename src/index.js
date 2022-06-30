@@ -138,6 +138,8 @@ export default class AuthnWidget {
     this.handleIdVerificationOptions = this.handleIdVerificationOptions.bind(this);
     this.optionsAuthentication = this.optionsAuthentication.bind(this);
     this.handleRetryVerification = this.handleRetryVerification.bind(this);
+    this.handleCancelAuthentication = this.handleCancelAuthentication.bind(this);
+    this.postIdVerificationTimedOut = this.postIdVerificationTimedOut.bind(this);
     this.checkSecurIdPinReset = this.checkSecurIdPinReset.bind(this);
     this.postAssertionRequired = this.postAssertionRequired.bind(this);
     this.postTOTPActivationRequired = this.postTOTPActivationRequired.bind(this);
@@ -200,6 +202,7 @@ export default class AuthnWidget {
     this.addPostRenderCallback('ID_VERIFICATION_REQUIRED', this.postIdVerificationRequired);
     this.addPostRenderCallback('ID_VERIFICATION_IN_PROGRESS', this.handleIdVerificationInProgress);
     this.addPostRenderCallback('ID_VERIFICATION_COMPLETED', this.postContinueAuthentication);
+    this.addPostRenderCallback('ID_VERIFICATION_TIMED_OUT', this.postIdVerificationTimedOut);
     this.addEventHandler('ID_VERIFICATION_DEVICE', this.handleIdVerificationDevice);
     this.addEventHandler('ID_VERIFICATION_OPTIONS', this.handleIdVerificationOptions);
     this.addEventHandler('SECURID_USER_PIN_RESET_REQUIRED', this.checkSecurIdPinReset);
@@ -1054,9 +1057,24 @@ export default class AuthnWidget {
     }
   }
 
+  async handleCancelAuthentication(event) {
+    await this.store.dispatch('POST_FLOW', event.target.id);
+    const state = this.store.state;
+    // cancel in login flow goes to login screen
+    // cancel in registration flow renders registration_failed error in a separate page
+    if (state.status !== 'USERNAME_PASSWORD_REQUIRED') {
+      this.generalErrorRenderer(state.userMessages);
+    }
+  }
+
+  postIdVerificationTimedOut() {
+    document.getElementById('cancelAuthentication').addEventListener('click', this.handleCancelAuthentication);
+  }
+
   handleIdVerificationDevice() {
     document.getElementById('other').addEventListener('click', this.deviceAuthentication);
     document.getElementById('self').addEventListener('click', this.deviceAuthentication);
+    document.getElementById('cancelAuthentication').addEventListener('click', this.handleCancelAuthentication);
   }
 
   deviceAuthentication(event) {
@@ -1077,7 +1095,7 @@ export default class AuthnWidget {
         radios[i].checked = true;
       }
       document.getElementById("nextbtn").disabled = false;
-      document.getElementById("canceloptions").style.display = "block";
+      document.getElementById("cancelAuthentication").style.display = "block";
       document.getElementById("retryoptions").style.display = "none";
     }
     if (data.errorMessage) {
@@ -1092,6 +1110,7 @@ export default class AuthnWidget {
       document.getElementById('qrbtn').addEventListener('click', this.optionsAuthentication);
       document.getElementById('nextbtn').addEventListener('click', this.optionsAuthentication);
     }
+    document.getElementById('cancelAuthentication').addEventListener('click', this.handleCancelAuthentication);
   }
 
   optionsRadioSelected() {
