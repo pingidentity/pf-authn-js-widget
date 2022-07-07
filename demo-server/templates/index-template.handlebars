@@ -75,7 +75,17 @@
          */
         function initWidget(widget) {
           {{#if redirectless}}
+          // "client_id" and "response_type" attributes are used to initiate OAuth 2.0 Authorization.
+          // Optionally "flowType" can be set to "PfAuthnWidget.FLOW_TYPE_AUTHZ" value.
+          // The default value of "flowType" is "PfAuthnWidget.FLOW_TYPE_AUTHZ" if it's not present.
+          //
+          // "flowType" and "user_code" attributes must be used to initiate the OAuth 2.0 Device
+          // Authorization Grant user authorization.
+          // "user_code" is an optional parameter
           var config = {
+            // flowType: PfAuthnWidget.FLOW_TYPE_USER_AUTHZ, // user authorization requires this configuration
+            // user_code: "A1B2-C3D4", // optional for user authorization
+            // flowType: PfAuthnWidget.FLOW_TYPE_AUTHZ, // Optional parameter
             // client_id: '', // redirectless requires this configuration
             // response_type: 'token', // redirectless requires this configuration
             onAuthorizationSuccess: function (response) {

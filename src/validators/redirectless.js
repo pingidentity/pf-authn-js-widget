@@ -1,4 +1,5 @@
 import validator from 'validate.js';
+import { isUserAuthzFlowType, isAuthzFlowType } from '../utils/redirectless'
 
 const redirectlessConfigValidator = (configuration) => {
   if (validator.isEmpty(configuration)) {
@@ -14,7 +15,7 @@ const redirectlessConfigValidator = (configuration) => {
   }
 
   if (configuration.onAuthorizationFailed) {
-    const onAuthorizationFailed = configuration.onAuthorizationSuccess;
+    const onAuthorizationFailed = configuration.onAuthorizationFailed;
     if (!validator.isFunction(onAuthorizationFailed)) {
       throw new Error('onAuthorizationFailed attribute must be a function.');
     }
@@ -25,7 +26,15 @@ const redirectlessConfigValidator = (configuration) => {
   if (onAuthorizationRequestIsPresent) {
     validateWithOnAuthorizationRequest(onAuthorizationRequest)
   } else {
-    validateWithoutOnAuthorizationRequest(configuration);
+    if (isUserAuthzFlowType(configuration)) {
+      // OAuth 2.0 Device Authorization Grant user authorization interaction
+      // does not require any other attributes to initialize.
+      return;
+    } else if (isAuthzFlowType(configuration)) {
+      validateWithoutOnAuthorizationRequest(configuration);
+    } else {
+      throw new Error('Invalid flow type');
+    }
   }
 }
 

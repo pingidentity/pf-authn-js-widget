@@ -5,7 +5,7 @@ import 'regenerator-runtime/runtime'; //for async await
 import Store from './store';
 import redirectlessConfigValidator from './validators/redirectless';
 import { getCompatibility, doWebAuthn, doRegisterWebAuthn } from './utils/fidoFlowUtil';
-import { completeStateCallback, failedStateCallback } from './utils/redirectless';
+import { completeStateCallback, failedStateCallback, FLOW_TYPE_USER_AUTHZ, FLOW_TYPE_AUTHZ } from './utils/redirectless';
 import paOnAuthorizationRequest from './utils/paOnAuthorizationRequest';
 import paOnAuthorizationSuccess from './utils/paOnAuthorizationSuccess';
 import './scss/main.scss';
@@ -33,6 +33,12 @@ export default class AuthnWidget {
   }
 
   static get CORE_STATES() {
+    const oauthUserAuthorizationStates = [
+      'OAUTH_DEVICE_USER_CODE_REQUIRED',
+      'OAUTH_DEVICE_USER_CODE_CONFIRMATION_REQUIRED',
+      'OAUTH_DEVICE_COMPLETED'
+    ]
+
     return ['USERNAME_PASSWORD_REQUIRED', 'MUST_CHANGE_PASSWORD', 'CHANGE_PASSWORD_EXTERNAL', 'NEW_PASSWORD_RECOMMENDED',
       'NEW_PASSWORD_REQUIRED', 'SUCCESSFUL_PASSWORD_CHANGE', 'ACCOUNT_RECOVERY_USERNAME_REQUIRED',
       'ACCOUNT_RECOVERY_OTL_VERIFICATION_REQUIRED', 'RECOVERY_CODE_REQUIRED', 'PASSWORD_RESET_REQUIRED',
@@ -50,7 +56,8 @@ export default class AuthnWidget {
       'VOICE_PAIRING_TARGET_REQUIRED', 'VOICE_ACTIVATION_REQUIRED', 'TOTP_ACTIVATION_REQUIRED', 'PLATFORM_ACTIVATION_REQUIRED',
       'SECURITY_KEY_ACTIVATION_REQUIRED', 'MOBILE_ACTIVATION_REQUIRED', 'MFA_DEVICE_PAIRING_METHOD_FAILED',
       'VIP_ENROLLMENT', 'VIP_CREDENTIAL_REQUIRED', 'VIP_AUTHENTICATION_REQUIRED', 'VIP_CREDENTIAL_RESET_REQUIRED',
-      'USER_ID_REQUIRED','AUTHENTICATOR_SELECTION_REQUIRED', 'INPUT_REQUIRED', 'ENTRUST_FAILED', 'FRAUD_EVALUATION_CHECK_REQUIRED'];
+      'USER_ID_REQUIRED', 'AUTHENTICATOR_SELECTION_REQUIRED', 'INPUT_REQUIRED', 'ENTRUST_FAILED', 'FRAUD_EVALUATION_CHECK_REQUIRED']
+      .concat(oauthUserAuthorizationStates);
   }
 
   static get COMMUNICATION_ERROR_MSG() {
@@ -63,6 +70,14 @@ export default class AuthnWidget {
 
   static get BASE_URL_REQUIRED_MSG() {
     return "PingFederate Base URL is required."
+  }
+
+  static get FLOW_TYPE_USER_AUTHZ() {
+    return FLOW_TYPE_USER_AUTHZ
+  }
+
+  static get FLOW_TYPE_AUTHZ() {
+    return FLOW_TYPE_AUTHZ;
   }
 
   static paOnAuthorizationRequest = paOnAuthorizationRequest;
@@ -235,6 +250,8 @@ export default class AuthnWidget {
     this.actionModels.set('selectAuthenticator', {required: ['authenticator']});
     this.actionModels.set('checkInput', {required: ['input']});
     this.actionModels.set('submitFraudSessionInfo', { required: ['sessionId', 'clientPlatform', 'clientAction'] });
+    this.actionModels.set('submitUserCode', { required: ['userCode'] })
+    this.actionModels.set('confirmUserCode', { required: ['userCode'] })
   }
 
   init() {
@@ -492,8 +509,7 @@ export default class AuthnWidget {
     this.checkPopupStatus(windowReference);
   }
 
-  postTOTPActivationRequired()
-  {
+  postTOTPActivationRequired() {
     let data = this.store.getStore();
     var QRCode = require('qrcode');
     QRCode.toCanvas(document.getElementById('qrcode'), data.keyUri, { 'width': 128, 'height': 128 },
@@ -539,8 +555,7 @@ export default class AuthnWidget {
     });
   }
 
-  postAssertionRequired()
-  {
+  postAssertionRequired() {
     let data = this.store.getStore();
     var selectedDevice = data.devices.filter(device => {return device.id === data.selectedDeviceRef.id;});
     getCompatibility().then(value => {
@@ -559,18 +574,14 @@ export default class AuthnWidget {
           document.querySelector('#unsupportedDeviceId').style.display = 'block';
           document.querySelector('#changeDevice').style.display = 'none';
           document.querySelector('#deviceInfoBlockId').style.display = 'none';
-        }
-        else
-        {
+        } else {
           // Hide spinner and info section, show error so user can go back to device selection if required or cancel
           document.querySelector('#assertionRequiredSpinnerId').style.display = 'none';
           document.querySelector('#assertionRequiredAuthenticatingId').style.display = 'none';
           document.querySelector('#unsupportedDeviceId').style.display = 'block';
           document.querySelector('#deviceInfoBlockId').style.display = 'none';
         }
-      }
-      else
-      {
+      } else {
         doWebAuthn(this);
       }
     });
@@ -584,8 +595,7 @@ export default class AuthnWidget {
 
   postDeviceSelectionRequired() {
     let data = this.store.getStore();
-    if(data.userSelectedDefault === false)
-    {
+    if (data.userSelectedDefault === false) {
       var deviceKebabMenus = document.querySelectorAll('#kebab-menu-icon-id');
       [].forEach.call(deviceKebabMenus, function(deviceKebabMenu) {
         deviceKebabMenu.style.display = "none";
@@ -593,15 +603,12 @@ export default class AuthnWidget {
     }
 
     getCompatibility().then(value => {
-      if (value === 'SECURITY_KEY_ONLY')
-      {
+      if (value === 'SECURITY_KEY_ONLY') {
         var platformDevices = document.querySelectorAll("[id^='PLATFORM-']");
         [].forEach.call(platformDevices, function(platformDevice) {
           platformDevice.style.display = "none";
         });
-      }
-      else if (value === 'NONE')
-      {
+      } else if (value === 'NONE') {
         var platformDevices = document.querySelectorAll("[id^='PLATFORM-']");
         [].forEach.call(platformDevices, function(platformDevice) {
           platformDevice.style.display = "none";
@@ -954,9 +961,7 @@ export default class AuthnWidget {
     {
       document.getElementById("requiredDescription").style.display = "none";
       document.getElementById("errorDescription").style.display = "block";
-    }
-    else
-    {
+    } else {
       document.getElementById("requiredDescription").style.display = "block";
       document.getElementById("errorDescription").style.display = "none";
     }
@@ -989,8 +994,7 @@ export default class AuthnWidget {
   handleIdVerificationFailed() {
     let data = this.store.getStore();
 
-    if (data.errorDetails !== undefined)
-    {
+    if (data.errorDetails !== undefined) {
       document.getElementById("errorMessage").innerHTML = this.makeIdVerificationErrorMessage(data.errorDetails);
     }
   }
@@ -1432,7 +1436,7 @@ export default class AuthnWidget {
   registerInputRequiredHandler() {
     Array.from(document.querySelectorAll('[data-checkInput]'))
       .forEach(element => element.addEventListener('click', this.checkInputHandler), this);
-    }
+  }
 
   /**
    * Handles the different types of data required for the INPUT_REQUIRED use-case for entrust.
