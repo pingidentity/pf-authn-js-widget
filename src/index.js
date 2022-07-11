@@ -513,7 +513,7 @@ export default class AuthnWidget {
 
   postTOTPActivationRequired() {
     let data = this.store.getStore();
-    var QRCode = require('qrcode');
+    let QRCode = require('qrcode');
     QRCode.toCanvas(document.getElementById('qrcode'), data.keyUri, { 'width': 128, 'height': 128 },
       function (error) {
         if (error) {
@@ -527,7 +527,7 @@ export default class AuthnWidget {
   async postAuthenticationCodeResponseRequired()
   {
     let data = this.store.getStore();
-    var QRCode = require('qrcode');
+    let QRCode = require('qrcode');
     QRCode.toCanvas(document.getElementById('qrcode'), data.uri, { 'width': 128, 'height': 128 },
       function (error) {
         if (error) {
