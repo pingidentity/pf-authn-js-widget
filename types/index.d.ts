@@ -23,7 +23,7 @@ export interface IOptions {
 
 export interface IAuthnWidget {
   init(): void;
-  initRedirectless(redirectlessConfig: RedirectlessConfig): void;
+  initRedirectless(redirectlessConfig: IRedirectlessConfig): void;
   dispatchPendingState(token: string): void;
   clearPendingState(): void;
 }
@@ -31,7 +31,7 @@ export interface IAuthnWidget {
 export default class AuthnWidget implements IAuthnWidget {
   constructor(baseUrl: string, options: IOptions);
   init(): void;
-  initRedirectless(redirectlessConfig: RedirectlessConfig): void;
+  initRedirectless(redirectlessConfig: IRedirectlessConfig): void;
   dispatchPendingState(token: string): void;
   clearPendingState(): void;
 }
