@@ -1,0 +1,23 @@
+<div class="card">
+  <div class="org-logo">
+    <img class="org-logo__image" src="{{logo}}" alt="Company Logo" />
+  </div>
+  {{> errors}}
+  {{> spinner}}
+  <div class="text-block">
+    <div class="text-block--overflow-wrap">
+      Confirm the activation code displayed on your device.
+    </div>
+  </div>
+  <form class="form" id="AuthnWidgetForm">
+    <div class="float-label">
+      <input type="text" class="text-input float-label__input required" id="userCode" data-st-field="userCode"
+        name="userCode" placeholder="B3C4-D6F7" value="{{userCode}}" readonly />
+      <label class="float-label__label" for="userCode">Activation code</label>
+    </div>
+    <button id="submit" data-actionid="confirmUserCode" type="submit" data-st-tag="userCode.userCode_confirm_attempt"
+      class="button button--primary brand-primary-bg" disabled>
+      Confirm
+    </button>
+  </form>
+</div>

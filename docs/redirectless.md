@@ -31,13 +31,17 @@ var config = {
 authnWidget.initRedirectless(config);
 ```
 ## Configuration object
-There are two options for creating the configuration object to initiate the redirectless flow:
-1. Create a configuration object that contains the `onAuthorizationSuccess` function and the required attributes (such as `client_id`, `response_type`, etc.) used by the internal authorization request function.
-2. Create a configuration object that contains the `onAuthorizationRequest` and `onAuthorizationSuccess` functions.
+There are multiple options for creating the configuration object to initiate the redirectless flow:
+### Simple
+Create a configuration object that contains the `onAuthorizationSuccess` function and the required attributes (such as `client_id`, `response_type`, etc.) used by the internal authorization request function.
+This option should support majority of deployments.
+### Advanced
+Create a configuration object that contains the `onAuthorizationRequest` and `onAuthorizationSuccess` functions. This option is for advanced use-cases.
+### OAuth 2.0 Device Authorization Grant
+Create a configuration object containing the `onAuthorizationSuccess` function and a `flowType` attribute set to `PfAuthnWidget.FLOW_TYPE_USER_AUTHZ`. This configuration initializes the Authentication API Widget to interact with PingFederate's user authorization endpoint. Optionally, the `user_code` attribute can be provided. If provided, it is passed to the user authorization endpoint as a query parameter, which will trigger a state where the user must confirm the code (rather than having to enter it). An example is present [here](#oauth-20-device-authorization).
 
-Use option 1 for most deployments. Use option 2 for advanced use-cases.
-
-### `onAuthorizationRequest` function
+### Callback function descriptions
+#### `onAuthorizationRequest` function
 This callback function is called during the authorization request. It has no arguments and it's expected to return a JavaScript `Promise`, which completes the authorization request call to PingFederate.
 [PingAccess redirectless support](/docs/pingaccessRedirectless.md).
 
@@ -56,7 +60,7 @@ var config = {
 ```
 The `options` attribute `credentials: 'include'` is required to ensure the browser correctly handles PingFederate's session cookie.
 
-### `onAuthorizationSuccess` function
+#### `onAuthorizationSuccess` function
 This callback function returns the result of the transaction to the webpage containing the Authentication API widget. The protocol response is passed to this function as the first argument when the Authentication API widget calls it.
 [PingAccess redirectless support](/docs/pingaccessRedirectless.md).
 
@@ -69,7 +73,7 @@ var config = {
 };
 ```
 
-### `onAuthorizationFailed` function
+#### `onAuthorizationFailed` function
 This callback function returns the state of the Authentication API to the webpage containing the Authentication API widget when the authorization fails. The entire API state is passed to this function as the first argument when the Authentication API widget calls it.
 [PingAccess redirectless support](/docs/pingaccessRedirectless.md).
 
@@ -83,9 +87,9 @@ var config = {
 ```
 
 ### Supported attributes
-The internal `onAuthorizationRequest` function supports the following attributes: `client_id`, `response_type`, `code_challenge`, `code_challenge_method`, `redirect_uri`, `scope`, `state`, `idp`, `pfidpadapterid`, `access_token_manager_id`, `aud`, `nonce`, `prompt`, `acr_values`, `max_age`, `login_hint`, `ui_locales`, `id_token_hint`, `claims_locales`. 
+The internal implementation of `onAuthorizationRequest` function supports the following attributes: `client_id`, `response_type`, `code_challenge`, `code_challenge_method`, `redirect_uri`, `scope`, `state`, `idp`, `pfidpadapterid`, `access_token_manager_id`, `aud`, `nonce`, `prompt`, `acr_values`, `max_age`, `login_hint`, `ui_locales`, `id_token_hint`, `claims_locales`.
 
-The `client_id` and `response_type` attributes are required if `onAuthorizationRequest` is not present. 
+The `client_id` and `response_type` attributes are required if `onAuthorizationRequest` is not present or the `flowType` value is __not__ `PfAuthnWidget.FLOW_TYPE_USER_AUTHZ`.
 
 The key-value pairs will be appended to the authorization request URL, their values will be URL encoded, and arrays will be concatenated and URL encoded into one string.
 
@@ -121,6 +125,26 @@ var config = {
   }
 };
 ```
+
+### OAuth 2.0 Device Authorization
+This code snippet demonstrates how to configure the Authentication API Widget to interact with PingFederate's User Authorization endpoint
+```js
+var pingfederateUrl = 'https://localhost'
+var authnWidget = new PfAuthnWidget(pingfederateUrl, { divId: 'authnwidget' });
+var config = {
+  flowType: PfAuthnWidget.FLOW_TYPE_USER_AUTHZ,
+  // the optional user_code parameter
+  // user_code: "A1B2-C3D4",
+  onAuthorizationSuccess: function (response) {
+    console.log('success');
+  },
+  onAuthorizationFailed: function (response) {
+    console.log('fail');
+  }
+};
+authnWidget.initRedirectless(config);
+```
+
 ## Starting webpack-dev-server with redirectless support
 To configure and start the webpack-dev-server with redirectless support:
 1. Update the demo server's [index template](../demo-server/templates/index-template.handlebars) file with a configuration object. Configuration object examples are available in the [Configuration object examples](#configuration-object-examples) section of this document.

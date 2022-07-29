@@ -18,8 +18,8 @@ module.exports = (env, argv) => {
       hot: true,
       setupMiddlewares: (middlewares, server) => {
         var options = {
-          baseUrl: argv.baseurl,
-          operationMode: argv.operationmode || 'default'
+          baseUrl: env.baseurl,
+          operationMode: env.operationmode || 'default'
         }
         console.log('#############################################');
         console.log('#');

@@ -3,6 +3,27 @@ const allowedAuthRequestParameters = ['client_id', 'response_type', 'code_challe
   'redirect_uri', 'scope', 'state', 'idp', 'pfidpadapterid', 'access_token_manager_id', 'aud', 'nonce', 'prompt',
   'acr_values', 'max_age', 'login_hint', 'ui_locales', 'id_token_hint', 'claims_locales'];
 
+export const FLOW_TYPE_AUTHZ = 0;
+export const FLOW_TYPE_USER_AUTHZ = 1;
+
+/**
+ * Check if the redirectless configuration object is set for user authz interaction.
+ *
+ * @param {JSON} configuration  The redirectless configuration object
+ */
+export function isUserAuthzFlowType(configuration) {
+  return FLOW_TYPE_USER_AUTHZ === configuration.flowType;
+}
+
+/**
+ * Check if the redirectless configuration object is set for authz interaction.
+ *
+ * @param {JSON} configuration  The redirectless configuration object
+ */
+export function isAuthzFlowType(configuration) {
+  return !configuration.flowType || FLOW_TYPE_AUTHZ === configuration.flowType;
+}
+
 /**
  * Call onAuthorizationSuccess when 'COMPLETED' state is reached.
  *
@@ -30,6 +51,7 @@ export function failedStateCallback(state, configuration) {
     }
   }
 }
+
 /**
  * Initialize the redirectless flow
  *
@@ -40,13 +62,29 @@ export function initRedirectless(baseUrl, configuration) {
   if (configuration.onAuthorizationRequest) {
     return configuration.onAuthorizationRequest();
   } else {
-    const authUrl = generateAuthorizationUrl(baseUrl, configuration);
+    const authUrl = isUserAuthzFlowType(configuration)
+      ? generateUserAuthorizationUrl(baseUrl, configuration)
+      : generateAuthorizationUrl(baseUrl, configuration);
     const options = {
       method: 'GET',
       credentials: 'include'
     }
     return fetch(authUrl, options);
   }
+}
+
+/**
+ * Generate the user authorization URL to interact with the authorization server.
+ *
+ * @param {string} baseUrl The Base URL of the authorization server
+ * @param {JSON} configuration The configuration object used to generate the authorization URL
+ */
+function generateUserAuthorizationUrl(baseUrl, configuration) {
+  let endpoint = '/as/user_authz.oauth2';
+  if (configuration.user_code) {
+    endpoint = endpoint.concat('?user_code=').concat(configuration.user_code);
+  }
+  return generateAuthorizationUrl(baseUrl, configuration, endpoint)
 }
 
 /**
