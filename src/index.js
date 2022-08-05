@@ -37,7 +37,12 @@ export default class AuthnWidget {
       'OAUTH_DEVICE_USER_CODE_REQUIRED',
       'OAUTH_DEVICE_USER_CODE_CONFIRMATION_REQUIRED',
       'OAUTH_DEVICE_COMPLETED'
-    ];
+    ]
+
+    const oneTimeDeviceOtpStates = [
+      'ONE_TIME_DEVICE_OTP_METHOD_TYPE_INPUT_REQUIRED',
+      'ONE_TIME_DEVICE_OTP_INPUT_REQUIRED'
+    ]
 
     const idVerificationStates = [
       'ID_VERIFICATION_FAILED',
@@ -45,7 +50,7 @@ export default class AuthnWidget {
       'ID_VERIFICATION_TIMED_OUT',
       'ID_VERIFICATION_DEVICE',
       'ID_VERIFICATION_OPTIONS',
-    ];
+    ]
 
     return ['USERNAME_PASSWORD_REQUIRED', 'MUST_CHANGE_PASSWORD', 'CHANGE_PASSWORD_EXTERNAL', 'NEW_PASSWORD_RECOMMENDED',
       'NEW_PASSWORD_REQUIRED', 'SUCCESSFUL_PASSWORD_CHANGE', 'ACCOUNT_RECOVERY_USERNAME_REQUIRED',
@@ -63,9 +68,11 @@ export default class AuthnWidget {
       'VOICE_PAIRING_TARGET_REQUIRED', 'VOICE_ACTIVATION_REQUIRED', 'TOTP_ACTIVATION_REQUIRED', 'PLATFORM_ACTIVATION_REQUIRED',
       'SECURITY_KEY_ACTIVATION_REQUIRED', 'MOBILE_ACTIVATION_REQUIRED', 'MFA_DEVICE_PAIRING_METHOD_FAILED',
       'VIP_ENROLLMENT', 'VIP_CREDENTIAL_REQUIRED', 'VIP_AUTHENTICATION_REQUIRED', 'VIP_CREDENTIAL_RESET_REQUIRED',
-      'USER_ID_REQUIRED', 'AUTHENTICATOR_SELECTION_REQUIRED', 'INPUT_REQUIRED', 'ENTRUST_FAILED', 'FRAUD_EVALUATION_CHECK_REQUIRED', 'AUTHENTICATION_CODE_RESPONSE_REQUIRED']
-      .concat(oauthUserAuthorizationStates)
-      .concat(idVerificationStates);
+      'USER_ID_REQUIRED', 'AUTHENTICATOR_SELECTION_REQUIRED', 'INPUT_REQUIRED', 'ENTRUST_FAILED', 'FRAUD_EVALUATION_CHECK_REQUIRED', 'AUTHENTICATION_CODE_RESPONSE_REQUIRED'
+    ]
+    .concat(oauthUserAuthorizationStates)
+    .concat(oneTimeDeviceOtpStates)
+    .concat(idVerificationStates);
   }
 
   static get COMMUNICATION_ERROR_MSG() {
@@ -135,13 +142,16 @@ export default class AuthnWidget {
     this.handleAgentlessSignOn = this.handleAgentlessSignOn.bind(this);
     this.postEmptyAuthentication = this.postEmptyAuthentication.bind(this);
     this.handleMfaDeviceSelection = this.handleMfaDeviceSelection.bind(this);
+    this.handleMfaOneTimeDeviceSelection = this.handleMfaOneTimeDeviceSelection.bind(this);
     this.handleMfaSetDefaultDeviceSelection = this.handleMfaSetDefaultDeviceSelection.bind(this);
     this.handleAddMfaMethod = this.handleAddMfaMethod.bind(this);
     this.handleCancelAddMfaMethod = this.handleCancelAddMfaMethod.bind(this);
     this.handleContinueAddMfaMethod = this.handleContinueAddMfaMethod.bind(this);
     this.registerMfaEventHandler = this.registerMfaEventHandler.bind(this);
+    this.registerMfaOneTimeDeviceChangeEventHandler = this.registerMfaOneTimeDeviceChangeEventHandler.bind(this);
     this.registerMfaChangeDeviceEventHandler = this.registerMfaChangeDeviceEventHandler.bind(this);
     this.handleMfaDeviceChange = this.handleMfaDeviceChange.bind(this);
+    this.handleMfaOneTimeDeviceChange = this.handleMfaOneTimeDeviceChange.bind(this);
     this.registerMfaUsePasscodeEventHandler = this.registerMfaUsePasscodeEventHandler.bind(this);
     this.handleMfaUsePasscode = this.handleMfaUsePasscode.bind(this);
     this.postPushNotificationWait = this.postPushNotificationWait.bind(this);
@@ -158,6 +168,7 @@ export default class AuthnWidget {
     this.checkSecurIdPinReset = this.checkSecurIdPinReset.bind(this);
     this.postAssertionRequired = this.postAssertionRequired.bind(this);
     this.postTOTPActivationRequired = this.postTOTPActivationRequired.bind(this);
+    this.postOTPRequired = this.postOTPRequired.bind(this);
     this.postAuthenticationCodeResponseRequired = this.postAuthenticationCodeResponseRequired.bind(this);
     this.postPlatformDeviceActivationRequired = this.postPlatformDeviceActivationRequired.bind(this);
     this.postSecurityKeyDeviceActivationRequired = this.postSecurityKeyDeviceActivationRequired.bind(this);
@@ -203,8 +214,11 @@ export default class AuthnWidget {
     this.addPostRenderCallback('MFA_COMPLETED', this.postContinueAuthentication);
     this.addEventHandler('DEVICE_SELECTION_REQUIRED', this.registerMfaEventHandler);
     this.addPostRenderCallback('DEVICE_SELECTION_REQUIRED', this.postDeviceSelectionRequired);
+    this.addEventHandler('ONE_TIME_DEVICE_OTP_METHOD_TYPE_INPUT_REQUIRED', this.registerMfaEventHandler);
+    this.addEventHandler('ONE_TIME_DEVICE_OTP_INPUT_REQUIRED', this.registerMfaOneTimeDeviceChangeEventHandler);
     this.addEventHandler('OTP_REQUIRED', this.registerMfaEventHandler);
     this.addEventHandler('OTP_REQUIRED', this.registerMfaChangeDeviceEventHandler);
+    this.addPostRenderCallback('OTP_REQUIRED', this.postOTPRequired);
     this.addEventHandler('ASSERTION_REQUIRED', this.registerMfaEventHandler);
     this.addEventHandler('ASSERTION_REQUIRED', this.registerMfaChangeDeviceEventHandler);
     this.addPostRenderCallback('ASSERTION_REQUIRED', this.postAssertionRequired);
