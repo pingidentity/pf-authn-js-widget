@@ -1,0 +1,33 @@
+<div class="card">
+  <div class="org-logo">
+    <img class="org-logo__image" src="{{logo}}" alt="Company Logo"/>
+  </div>
+  <form class="form form--spacing-lg idv-form" id="AuthnWidgetForm">
+    <div class="stack stack--small">
+      <h1 id="header" class="heading" data-id="heading">Verification Required</h1>
+      <h4 id="description" class="heading heading--4 text-block" data-id="heading">
+        If you are already on your mobile device, select This Device to open a web link on your mobile device to start the verification process, otherwise select the Other Device button.
+      </h4>
+    </div>
+    <div class="org-logo idv-center">
+      <div id="icon" class="org-logo__image idv-newtab"></div>
+    </div>
+    <div class="idv-btntbl">
+      <div class="idv-btnrow">
+        <div class="idv-btncell">
+          <button id="other" class="button button--tertiary button--primary idv-btn" type="button">
+            Other Device
+          </button>
+        </div>
+        <div class="idv-btncell">
+          <button id="self" class="button button--tertiary button--primary idv-btn" type="button">
+            This Device
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="text-block">
+      <a tabindex="0" id="cancelAuthentication" target="_self" class="anchor">Cancel</a>
+    </div>
+  </form>
+</div>

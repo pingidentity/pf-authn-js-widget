@@ -44,6 +44,14 @@ export default class AuthnWidget {
       'ONE_TIME_DEVICE_OTP_INPUT_REQUIRED'
     ]
 
+    const idVerificationStates = [
+      'ID_VERIFICATION_FAILED',
+      'ID_VERIFICATION_REQUIRED',
+      'ID_VERIFICATION_TIMED_OUT',
+      'ID_VERIFICATION_DEVICE',
+      'ID_VERIFICATION_OPTIONS',
+    ]
+
     return ['USERNAME_PASSWORD_REQUIRED', 'MUST_CHANGE_PASSWORD', 'CHANGE_PASSWORD_EXTERNAL', 'NEW_PASSWORD_RECOMMENDED',
       'NEW_PASSWORD_REQUIRED', 'SUCCESSFUL_PASSWORD_CHANGE', 'ACCOUNT_RECOVERY_USERNAME_REQUIRED',
       'ACCOUNT_RECOVERY_OTL_VERIFICATION_REQUIRED', 'RECOVERY_CODE_REQUIRED', 'PASSWORD_RESET_REQUIRED',
@@ -52,8 +60,7 @@ export default class AuthnWidget {
       'EXTERNAL_AUTHENTICATION_COMPLETED', 'EXTERNAL_AUTHENTICATION_FAILED', 'EXTERNAL_AUTHENTICATION_REQUIRED',
       'DEVICE_PROFILE_REQUIRED', 'REGISTRATION_REQUIRED', 'REFERENCE_ID_REQUIRED','CURRENT_CREDENTIALS_REQUIRED',
       'DEVICE_SELECTION_REQUIRED', 'MFA_COMPLETED', 'MFA_FAILED', 'OTP_REQUIRED', 'ASSERTION_REQUIRED',
-      'PUSH_CONFIRMATION_REJECTED', 'PUSH_CONFIRMATION_TIMED_OUT', 'PUSH_CONFIRMATION_WAITING',
-      'ID_VERIFICATION_FAILED', 'ID_VERIFICATION_REQUIRED', 'ID_VERIFICATION_TIMED_OUT', 'ACCOUNT_LINKING_FAILED',
+      'PUSH_CONFIRMATION_REJECTED', 'PUSH_CONFIRMATION_TIMED_OUT', 'PUSH_CONFIRMATION_WAITING', 'ACCOUNT_LINKING_FAILED',
       'SECURID_CREDENTIAL_REQUIRED', 'SECURID_NEXT_TOKENCODE_REQUIRED', 'SECURID_REAUTHENTICATION_REQUIRED',
       'SECURID_SYSTEM_PIN_RESET_REQUIRED', 'SECURID_USER_PIN_RESET_REQUIRED', 'EMAIL_VERIFICATION_REQUIRED', 'EMAIL_VERIFICATION_OTP_REQUIRED',
       'MFA_SETUP_REQUIRED', 'DEVICE_PAIRING_METHOD_REQUIRED', 'EMAIL_PAIRING_TARGET_REQUIRED',
@@ -64,7 +71,8 @@ export default class AuthnWidget {
       'USER_ID_REQUIRED', 'AUTHENTICATOR_SELECTION_REQUIRED', 'INPUT_REQUIRED', 'ENTRUST_FAILED', 'FRAUD_EVALUATION_CHECK_REQUIRED', 'AUTHENTICATION_CODE_RESPONSE_REQUIRED'
     ]
     .concat(oauthUserAuthorizationStates)
-    .concat(oneTimeDeviceOtpStates);
+    .concat(oneTimeDeviceOtpStates)
+    .concat(idVerificationStates);
   }
 
   static get COMMUNICATION_ERROR_MSG() {
@@ -150,7 +158,13 @@ export default class AuthnWidget {
     this.registerIdVerificationRequiredEventHandler = this.registerIdVerificationRequiredEventHandler.bind(this);
     this.postIdVerificationRequired = this.postIdVerificationRequired.bind(this);
     this.handleIdVerificationInProgress = this.handleIdVerificationInProgress.bind(this);
-    this.handleIdVerificationFailed = this.handleIdVerificationFailed.bind(this);
+    this.handleIdVerificationDevice = this.handleIdVerificationDevice.bind(this);
+    this.deviceAuthentication = this.deviceAuthentication.bind(this);
+    this.handleIdVerificationOptions = this.handleIdVerificationOptions.bind(this);
+    this.optionsAuthentication = this.optionsAuthentication.bind(this);
+    this.handleRetryVerification = this.handleRetryVerification.bind(this);
+    this.handleCancelAuthentication = this.handleCancelAuthentication.bind(this);
+    this.postIdVerificationTimedOut = this.postIdVerificationTimedOut.bind(this);
     this.checkSecurIdPinReset = this.checkSecurIdPinReset.bind(this);
     this.postAssertionRequired = this.postAssertionRequired.bind(this);
     this.postTOTPActivationRequired = this.postTOTPActivationRequired.bind(this);
@@ -219,7 +233,9 @@ export default class AuthnWidget {
     this.addPostRenderCallback('ID_VERIFICATION_REQUIRED', this.postIdVerificationRequired);
     this.addPostRenderCallback('ID_VERIFICATION_IN_PROGRESS', this.handleIdVerificationInProgress);
     this.addPostRenderCallback('ID_VERIFICATION_COMPLETED', this.postContinueAuthentication);
-    this.addEventHandler('ID_VERIFICATION_FAILED', this.handleIdVerificationFailed);
+    this.addPostRenderCallback('ID_VERIFICATION_TIMED_OUT', this.postIdVerificationTimedOut);
+    this.addEventHandler('ID_VERIFICATION_DEVICE', this.handleIdVerificationDevice);
+    this.addEventHandler('ID_VERIFICATION_OPTIONS', this.handleIdVerificationOptions);
     this.addEventHandler('SECURID_USER_PIN_RESET_REQUIRED', this.checkSecurIdPinReset);
     this.addPostRenderCallback('EMAIL_VERIFICATION_REQUIRED', this.postEmailVerificationRequired);
     this.addPostRenderCallback('TOTP_ACTIVATION_REQUIRED', this.postTOTPActivationRequired);
@@ -1045,31 +1061,21 @@ export default class AuthnWidget {
   async registerIdVerificationRequiredEventHandler() {
     let data = this.store.getStore();
 
-    if (data.errorDetails !== undefined)
-    {
-      document.getElementById("requiredDescription").style.display = "none";
-      document.getElementById("errorDescription").style.display = "block";
-    } else {
-      document.getElementById("requiredDescription").style.display = "block";
-      document.getElementById("errorDescription").style.display = "none";
-    }
-
-    const options = {
-      method: 'GET'
-    }
-    let qrUrlRespone = await fetch(data.qrUrl, options);
-    let qrCode = await qrUrlRespone.text();
-    document.getElementById('qrCode').src = qrCode;
+    document.getElementById('qrCode').src = data.qrUrl || "";
     document.getElementById('qrCodeBlock').style.display = 'block';
 
-    var verificationCodeToken = data.verificationCode.match(/.{1,4}/g);
-    document.getElementById('verificationCode').innerHTML = verificationCodeToken.join(' ');
+    document.getElementById('verificationCode').innerHTML = data.verificationCode || "";
+
+    document.getElementById('retryVerification').addEventListener('click', this.handleRetryVerification);
+
+    if (data.newTab && data.webVerificationUrl !== undefined &&
+        (this.store.getPreviousStore().verificationCode !== data.verificationCode)) {
+      console.log("web link opens newtab: " + data.webVerificationUrl);
+      window.open(data.webVerificationUrl, '_blank');
+    }
   }
 
   postIdVerificationRequired() {
-    document.getElementById('copy')
-            .addEventListener('click', this.copyCode);
-
     this.pollCheckGet(this.store.getStore().verificationCode, 5000);
   }
 
@@ -1079,28 +1085,22 @@ export default class AuthnWidget {
     }, 5000)
   }
 
-  handleIdVerificationFailed() {
-    let data = this.store.getStore();
-
-    if (data.errorDetails !== undefined) {
-      document.getElementById("errorMessage").innerHTML = this.makeIdVerificationErrorMessage(data.errorDetails);
-    }
-  }
-
-  copyCode(event) {
-    event.preventDefault();
-    let range = document.createRange();
-    range.selectNode(document.getElementById('verificationCode'));
-    window.getSelection().removeAllRanges();
-    window.getSelection().addRange(range);
-    document.execCommand('copy');
-    window.getSelection().removeAllRanges();
-  }
-
   async pollCheckGet(currentVerificationCode, timeout) {
     let fetchUtil = this.store.fetchUtil;
     let result = await fetchUtil.postFlow(this.store.flowId, 'poll', '{}');
     let newState = await result.json();
+
+    if (newState.txStatus === 'INITIATED')
+    {
+      document.getElementById("requiredHeader").style.display = "none";
+      document.getElementById("requiredDescription").style.display = "none";
+      document.getElementById("startedHeader").style.display = "block";
+      document.getElementById("startedDescription").style.display = "block";
+    }
+    if (newState.code === 'RESOURCE_NOT_FOUND') {
+      console.log("resource not found, stop polling flow");
+      return;
+    }
 
     let pollAgain =
       (newState.status === 'ID_VERIFICATION_REQUIRED') &&
@@ -1112,27 +1112,128 @@ export default class AuthnWidget {
         .catch(() => this.generalErrorRenderer(AuthnWidget.COMMUNICATION_ERROR_MSG));
     }
     else {
-      setTimeout(() => {
+      this.pollCheckGetHandler = setTimeout(() => {
         this.pollCheckGet(currentVerificationCode, timeout);
-      }, timeout)
+      }, timeout);
     }
   }
 
-  makeIdVerificationErrorMessage(errorDetails) {
-    var errorMessage = '';
+  async handleRetryVerification(event, cnt) {
+    const maxretries = 10;
+    if (cnt === undefined) cnt = 1;
+    else if (cnt > maxretries) {
+      console.log("exceeded max retries, stop sending retry request");
+      return;
+    }
 
-    errorDetails.forEach(errorDetail =>
-      {
-        if (errorMessage === '') {
-          errorMessage = errorDetail.userMessage
-        }
-        else {
-          var append = '<br>' + errorDetail.userMessage
-          errorMessage += append
-        }
-      })
+    clearTimeout(this.pollCheckGetHandler);
+    // make cancel button non-clickable after one click
+    event.target.style.pointerEvents = "none";
 
-    return errorMessage;
+    let actionId = event.target.id;
+    let data = this.store;
+    data.prevState = data.state;
+    // store.reduce is used to prevent notifyListener from being called at the end of store.dispatch
+    // when polling is in progress and flow is not available so previous state is returned;
+    // don't start extra polling tasks during resubmission of retryVerification request.
+    data.state = await this.store.reduce('POST_FLOW', actionId);
+    if (data.prevState.username && !data.state.username) {
+      data.state.username = data.prevState.username;
+    }
+    console.log('dispatching retry: ' + actionId+" #"+cnt);
+    console.log(data.state);
+
+    if (data.state.status === 'ID_VERIFICATION_REQUIRED') {
+      console.log("not returning to first screen, resubmiting post request in 1 second");
+      await new Promise(r => setTimeout(r, 1000));
+      this.handleRetryVerification(event, cnt+1);
+    } else {
+      this.store.notifyListeners();
+    }
+  }
+
+  async handleCancelAuthentication(event) {
+    await this.store.dispatch('POST_FLOW', event.target.id);
+    const state = this.store.state;
+    // cancel in login flow goes to login screen
+    // cancel in registration flow renders registration_failed error in a separate page
+    if (state.status !== 'USERNAME_PASSWORD_REQUIRED') {
+      this.generalErrorRenderer(state.userMessages);
+    }
+  }
+
+  postIdVerificationTimedOut() {
+    document.getElementById('cancelAuthentication').addEventListener('click', this.handleCancelAuthentication);
+  }
+
+  handleIdVerificationDevice() {
+    document.getElementById('other').addEventListener('click', this.deviceAuthentication);
+    document.getElementById('self').addEventListener('click', this.deviceAuthentication);
+    document.getElementById('cancelAuthentication').addEventListener('click', this.handleCancelAuthentication);
+  }
+
+  deviceAuthentication(event) {
+    console.log("selected device: " + event.target.id);
+    document.getElementById("AuthnWidgetForm").style.pointerEvents = "none";
+    const data = { "deviceAuthentication": event.target.id };
+    this.store.dispatch('POST_FLOW', "deviceAuthentication", JSON.stringify(data));
+  }
+
+  handleIdVerificationOptions() {
+    let data = this.store.getStore();
+    if (data.forcePolicy) {
+      document.getElementById("description").innerHTML = "Select a method to receive a web link on your mobile device to start the verification process.";
+      document.getElementById("qrbtn").style.display = "none";
+      
+      const radios = document.getElementsByName("radioGroup");
+      for (let i = 0; i < radios.length; i++) {
+        radios[i].checked = true;
+      }
+      document.getElementById("nextbtn").disabled = false;
+      document.getElementById("cancelAuthentication").style.display = "block";
+      document.getElementById("retryoptions").style.display = "none";
+    }
+    if (data.errorMessage) {
+      document.getElementById("nextbtn").disabled = true;
+    } else {
+      if (data.emails.length) {
+        document.getElementById('emailRadio').addEventListener('click', this.optionsRadioSelected);
+      }
+      if (data.phones.length) {
+        document.getElementById('mobileRadio').addEventListener('click', this.optionsRadioSelected);
+      }
+      document.getElementById('qrbtn').addEventListener('click', this.optionsAuthentication);
+      document.getElementById('nextbtn').addEventListener('click', this.optionsAuthentication);
+    }
+    document.getElementById('cancelAuthentication').addEventListener('click', this.handleCancelAuthentication);
+  }
+
+  optionsRadioSelected() {
+    document.getElementById("nextbtn").disabled = false;
+  }
+
+  optionsAuthentication(event) {
+    console.log("selected option: " + event.target.id);
+    document.getElementById("AuthnWidgetForm").style.pointerEvents = "none";
+    let email = null;
+    let phone = null;
+    const qrOnly = event.target.id === "qrbtn";
+    if (qrOnly === true) {
+      console.log("skip notification, show qr code only");
+    } else if (document.querySelector('input[name="radioGroup"]:checked')) {
+      const radio = document.querySelector('input[name="radioGroup"]:checked').value;
+      if (radio === "emailRadio") {
+        const select = document.getElementById("emails");
+        email = select.options[select.selectedIndex].value;
+        console.log("selected email: "+email);
+      } else if (radio === "mobileRadio") {
+        const select = document.getElementById("mobiles");
+        phone = select.options[select.selectedIndex].value;
+        console.log("selected phone: "+phone);
+      }
+    }
+    const data = { "email": email, "phone": phone, "optionsAuthentication": true };
+    this.store.dispatch('POST_FLOW', "optionsAuthentication", JSON.stringify(data));
   }
 
   checkSecurIdPinReset() {
