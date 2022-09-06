@@ -143,6 +143,13 @@ export default class Store {
         delete combinedData.satisfiedValidators;
         delete combinedData.userMessages;
         combinedData = { ...errors, ...this.state };
+      } else if (json.status === 'OAUTH_DEVICE_USER_CODE_REQUIRED') {
+        let errors = this.getErrorDetails(json);
+        delete combinedData.authnError;
+        delete combinedData.failedValidators;
+        delete combinedData.satisfiedValidators;
+        delete combinedData.userMessages;
+        combinedData = { ...errors, ...this.state };
       }
     } else {
       if (json.code === 'RESOURCE_NOT_FOUND') {
@@ -203,24 +210,26 @@ export default class Store {
           }
           errors.userMessages.push(userMessage);
         });
-      }
-      else {
+      } else {
         errors.userMessages = json.userMessage;
       }
-    }
-    else if (json.code === 'RESOURCE_NOT_FOUND') {
+    } else if (json.code === 'RESOURCE_NOT_FOUND') {
       errors.userMessages = json.message;
-    }
-    else if (json.status === 'ID_VERIFICATION_REQUIRED') {
+    } else if (json.status === 'ID_VERIFICATION_REQUIRED') {
       if (json.errorDetails) {
         json.errorDetails.forEach(msg => {
           errors.userMessages.push(msg.userMessage);
         })
       }
-    }
-    else if (json.status === 'ID_VERIFICATION_OPTIONS') {
+    } else if (json.status === 'ID_VERIFICATION_OPTIONS') {
       if (json.errorMessage) {
         errors.userMessages.push(json.errorMessage);
+      }
+    } else if (json.status === 'OAUTH_DEVICE_USER_CODE_REQUIRED') {
+      if (json.authnError && json.authnError.details) {
+        json.authnError.details.forEach(detail => {
+          errors.userMessages.push(detail.userMessage);
+        });
       }
     }
     return errors;
