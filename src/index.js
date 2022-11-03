@@ -68,7 +68,8 @@ export default class AuthnWidget {
       'VOICE_PAIRING_TARGET_REQUIRED', 'VOICE_ACTIVATION_REQUIRED', 'TOTP_ACTIVATION_REQUIRED', 'PLATFORM_ACTIVATION_REQUIRED',
       'SECURITY_KEY_ACTIVATION_REQUIRED', 'MOBILE_ACTIVATION_REQUIRED', 'MFA_DEVICE_PAIRING_METHOD_FAILED',
       'VIP_ENROLLMENT', 'VIP_CREDENTIAL_REQUIRED', 'VIP_AUTHENTICATION_REQUIRED', 'VIP_CREDENTIAL_RESET_REQUIRED',
-      'USER_ID_REQUIRED', 'AUTHENTICATOR_SELECTION_REQUIRED', 'INPUT_REQUIRED', 'ENTRUST_FAILED', 'FRAUD_EVALUATION_CHECK_REQUIRED', 'AUTHENTICATION_CODE_RESPONSE_REQUIRED'
+      'USER_ID_REQUIRED', 'AUTHENTICATOR_SELECTION_REQUIRED', 'INPUT_REQUIRED', 'ENTRUST_FAILED', 'FRAUD_EVALUATION_CHECK_REQUIRED',
+      'AUTHENTICATION_CODE_RESPONSE_REQUIRED', 'BIOMETRIC_DEVICE_AUTHENTICATION_INFO_REQUIRED'
     ]
     .concat(oauthUserAuthorizationStates)
     .concat(oneTimeDeviceOtpStates)
@@ -138,6 +139,7 @@ export default class AuthnWidget {
     this.verifyRegistrationPassword = this.verifyRegistrationPassword.bind(this);
     this.postDeviceProfileAction = this.postDeviceProfileAction.bind(this);
     this.postFraudSessionInfoAction = this.postFraudSessionInfoAction.bind(this);
+    this.postContinueBiometricDeviceAuthentication = this.postContinueBiometricDeviceAuthentication.bind(this);
     this.registerAgentlessHandler = this.registerAgentlessHandler.bind(this);
     this.handleAgentlessSignOn = this.handleAgentlessSignOn.bind(this);
     this.postEmptyAuthentication = this.postEmptyAuthentication.bind(this);
@@ -209,6 +211,7 @@ export default class AuthnWidget {
     this.addPostRenderCallback('EXTERNAL_AUTHENTICATION_FAILED', this.externalAuthnFailure);
     this.addEventHandler('DEVICE_PROFILE_REQUIRED', this.postDeviceProfileAction);
     this.addEventHandler('FRAUD_EVALUATION_CHECK_REQUIRED', this.postFraudSessionInfoAction);
+    this.addEventHandler('BIOMETRIC_DEVICE_AUTHENTICATION_INFO_REQUIRED', this.postContinueBiometricDeviceAuthentication);
     this.addEventHandler('REFERENCE_ID_REQUIRED', this.registerAgentlessHandler);
     this.addPostRenderCallback('AUTHENTICATION_REQUIRED', this.postEmptyAuthentication);
     this.addPostRenderCallback('MFA_COMPLETED', this.postContinueAuthentication);
@@ -282,6 +285,7 @@ export default class AuthnWidget {
     this.actionModels.set('selectAuthenticator', {required: ['authenticator']});
     this.actionModels.set('checkInput', {required: ['input']});
     this.actionModels.set('submitFraudSessionInfo', { required: ['sessionId', 'clientPlatform', 'clientAction'] });
+    this.actionModels.set('continueBiometricDeviceAuthentication', { required: ['origin'] });
     this.actionModels.set('submitUserCode', { required: ['userCode'] })
     this.actionModels.set('confirmUserCode', { required: ['userCode'] })
   }
@@ -631,7 +635,12 @@ export default class AuthnWidget {
       // compare value with received, if there is no match, trigger cancel flow
       // PLATFORM - FULL
       // SECURITY_KEY - SECURITY_KEY_ONLY
-      if ( (selectedDevice[0].type === 'SECURITY_KEY' && value === 'NONE') || (selectedDevice[0].type === 'PLATFORM' && value !== 'FULL') )
+      // Usernameless flow
+      if( selectedDevice === null || selectedDevice.length === 0)
+      {
+        doWebAuthn(this);
+      }
+      else if ( (selectedDevice[0].type === 'SECURITY_KEY' && value === 'NONE') || (selectedDevice[0].type === 'PLATFORM' && value !== 'FULL') )
       {
         // Cancel authentication if this is the only device so we don't loop
         console.log("No acceptable authenticator");
@@ -703,6 +712,14 @@ export default class AuthnWidget {
         "clientVersion": this.fraudClientVersion,
       };
     this.store.dispatch('POST_FLOW', 'submitFraudSessionInfo', JSON.stringify(fraudClientInfo));
+  }
+
+  postContinueBiometricDeviceAuthentication() {
+    let hostName = window.location.hostname;
+    let hostInfo = {
+        "origin": hostName
+      };
+    this.store.dispatch('POST_FLOW', 'continueBiometricDeviceAuthentication', JSON.stringify(hostInfo));
   }
 
   postDeviceProfileAction() {
