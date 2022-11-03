@@ -211,7 +211,7 @@ export default class AuthnWidget {
     this.addPostRenderCallback('EXTERNAL_AUTHENTICATION_FAILED', this.externalAuthnFailure);
     this.addEventHandler('DEVICE_PROFILE_REQUIRED', this.postDeviceProfileAction);
     this.addEventHandler('FRAUD_EVALUATION_CHECK_REQUIRED', this.postFraudSessionInfoAction);
-    this.addEventHandler('BIOMETRIC_DEVICE_AUTHENTICATION_INFO_REQUIRED', this.postContinueBiometricDeviceAuthentication);
+    this.addPostRenderCallback('BIOMETRIC_DEVICE_AUTHENTICATION_INFO_REQUIRED', this.postContinueBiometricDeviceAuthentication);
     this.addEventHandler('REFERENCE_ID_REQUIRED', this.registerAgentlessHandler);
     this.addPostRenderCallback('AUTHENTICATION_REQUIRED', this.postEmptyAuthentication);
     this.addPostRenderCallback('MFA_COMPLETED', this.postContinueAuthentication);
