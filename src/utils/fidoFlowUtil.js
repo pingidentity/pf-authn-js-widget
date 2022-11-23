@@ -240,7 +240,7 @@ function activateFIDODevice(publicKeyCredential, authnWidget, isPlatformDevice) 
 	document.querySelector('#attestation').value = publicKeyCredential;
 	document.querySelector('#origin').value = window.location.origin; // Origin
 	let formData = authnWidget.getFormData();
-	if(isPlatformDevice == true)
+	if (isPlatformDevice == true)
 	{
 		authnWidget.store.dispatch('POST_FLOW', "activatePlatformDevice", JSON.stringify(formData));
 	}

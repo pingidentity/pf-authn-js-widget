@@ -636,7 +636,7 @@ export default class AuthnWidget {
       // PLATFORM - FULL
       // SECURITY_KEY - SECURITY_KEY_ONLY
       // Usernameless flow
-      if( selectedDevice === null || selectedDevice.length === 0)
+      if (selectedDevice === null || selectedDevice.length === 0)
       {
         doWebAuthn(this);
       }
