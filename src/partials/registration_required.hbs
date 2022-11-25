@@ -22,6 +22,7 @@
       {{/each}}
     </div>
 
+    {{#unless authenticationSource}}
     <div class="stack stack--small">
       <div class="float-label"><input type="password"
                                       class="text-input float-label__input required"
@@ -39,6 +40,7 @@
         <label class="float-label__label" for="newpassword">Verify New Password</label>
       </div>
     </div>
+    {{/unless}}
     {{#if showThisIsMyDevice}}
       <div>
         <label class="checkbox">
