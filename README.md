@@ -287,7 +287,17 @@ Please refer to the [Typescript Support](/docs/typescript.md) guide for more inf
 
 # Browser Compatibility
 
-The widget works with all major browsers, including Chrome, Firefox, IE11, and MS Edge.
+The widget relies upon a cookie that is transferred between the widget and PingFederate. If the widget and PingFederate are hosted on different domains, this cookie will be a cross-origin or third-party cookie. Some browsers such as Firefox and Safari block third-party cookies by default, which will break the widget's functionality.
+
+To be compatible with all major browsers, the widget must be deployed on the same domain as PingFederate, or on a subdomain of the same domain. For example, the following configuration will work for all browsers
+- PingFederate instance hosted at sso.example.com
+- Widget instance hosted at auth.example.com
+
+While the configuration
+- PingFederate hosted at sso.example.com
+- Widget hosted at auth.differentdomain.com
+
+will require users to enable third-party cookies in their browser configuration.
 
 # Bug Reports
 
