@@ -39,7 +39,7 @@ var options: IOptions = {
     checkRecaptcha: 'checkRecaptcha',
     grecaptcha: {},
     useActionParam: true,
-    deviceProfileScript: './pingone-risk-management-profiling.js'
+    deviceProfileScript: './pingone-protect-device-profiling.js'
 }
 
 var authnWidget: IAuthnWidget = new AuthnWidget("localhost", options);

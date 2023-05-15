@@ -767,6 +767,30 @@ export default class AuthnWidget {
         }, parseInt(data.deviceProfilingTimeoutMillis));
         break;
       }
+      case 'PINGONE-PROTECT': {
+        script = document.createElement('script');
+        script.src = this.deviceProfileScript;
+        let dispatched = false;
+        const onCompletion = data => {
+          if (!dispatched) {
+            const deviceProfile = { signalsSdkDeviceProfile: data };
+            this.store.dispatch('POST_FLOW', 'submitDeviceProfile', JSON.stringify(deviceProfile));
+            dispatched = true;
+          }
+        }
+        script.onload = () => {
+          profileDevice(onCompletion);
+        }
+        document.head.appendChild(script);
+
+        setTimeout(() => {
+          if (!dispatched) {
+            this.store.dispatch('POST_FLOW', 'submitDeviceProfile');
+            dispatched = true;
+          }
+        }, parseInt(data.deviceProfilingTimeoutMillis));
+        break;
+      }
     }
   }
 
