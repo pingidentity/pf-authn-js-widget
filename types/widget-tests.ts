@@ -4,9 +4,6 @@ let options: IOptions = {
     divId: 'authnwidget',
     flowId: 'flowId',
     logo: 'logo',
-    invokeReCaptcha: () => {},
-    checkRecaptcha: 'checkRecaptcha',
-    grecaptcha: {},
     useActionParam: true,
     deviceProfileScript: 'deviceProfileScript'
 }

@@ -9,11 +9,7 @@
   {{> errors}}
   {{> spinner}}
   <form class="form form--margin-small" id="AuthnWidgetForm">
-    {{#if showCaptcha}}
-    <div class="g-recaptcha" data-sitekey="{{captchaSiteKey}}" data-callback="{{checkRecaptcha}}" data-size="invisible"
-      id="invisibleRecaptchaId">
-    </div>
-    {{/if}}
+    {{renderRiskUI}}
     <div class="float-label">
       <input type="text" class="text-input float-label__input required" name="username" placeholder="Username"
         value="{{username}}" />

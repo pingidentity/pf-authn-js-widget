@@ -10,12 +10,7 @@
   {{> errors}}
   {{> spinner}}
   <form class="form" id="AuthnWidgetForm">
-    {{#if showCaptcha}}
-      <div class="g-recaptcha" data-sitekey="{{captchaSiteKey}}" data-callback="{{checkRecaptcha}}"
-           data-size="invisible"
-           id="invisibleRecaptchaId">
-      </div>
-    {{/if}}
+    {{renderRiskUI}}
     <div class="stack stack--small">
       {{#each fields as |field|}}
         {{renderfield field}}

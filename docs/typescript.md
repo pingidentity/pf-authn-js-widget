@@ -21,9 +21,6 @@ This interface describes the various constructor parameters for the authnWidget.
 | divId               | string   | false    |
 | flowId              | string   | true     |
 | logo                | string   | true     |
-| invokeRecaptcha     | function | true     |
-| checkRecaptcha      | string   | true     |
-| grecaptcha          | any      | true     |
 | useActionParam      | boolean  | true     |
 | deviceProfileScript | string   | true     |
 
@@ -35,9 +32,6 @@ var options: IOptions = {
     divId: 'authnwidget',
     flowId: 'flowId',
     logo: 'logo.svg',
-    invokeReCaptcha: () => {},
-    checkRecaptcha: 'checkRecaptcha',
-    grecaptcha: {},
     useActionParam: true,
     deviceProfileScript: './pingone-protect-device-profiling.js'
 }
