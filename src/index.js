@@ -10,6 +10,8 @@ import paOnAuthorizationRequest from './utils/paOnAuthorizationRequest';
 import paOnAuthorizationSuccess from './utils/paOnAuthorizationSuccess';
 import './scss/main.scss';
 import {isValidEmail, isValidPhone} from "./validators/inputs";
+import captchaPostRenderCallback from './utils/callbacks/riskPostRenderCallback';
+import CaptchaUtils from './utils/riskUtils';
 //uncomment to add your personal branding
 // import './scss/branding.scss';
 
@@ -113,8 +115,6 @@ export default class AuthnWidget {
     }
     this.captchaDivId = 'invisibleRecaptchaId';
     this.assets = new Assets(options);
-    this.invokeReCaptcha = options && options.invokeReCaptcha;
-    let checkRecaptcha = options && options.checkRecaptcha;
     this.grecaptcha = options && options.grecaptcha;
     this.deviceProfileScript = options && options.deviceProfileScript;
     this.fraudClientSessionID =  options && options.fraudClientSessionID;
@@ -195,12 +195,13 @@ export default class AuthnWidget {
     this.eventHandler = new Map();  //state -> eventHandlers
     this.postRenderCallbacks = new Map();
     this.actionModels = new Map();
-    this.store = new Store(flowId, baseUrl, checkRecaptcha, options);
+    this.store = new Store(flowId, baseUrl, options);
     this.store.registerListener(this.render);
     AuthnWidget.CORE_STATES.forEach(state => this.registerState(state), this);
 
     this.addEventHandler('IDENTIFIER_REQUIRED', this.registerIdFirstLinks);
     this.addEventHandler('USERNAME_PASSWORD_REQUIRED', this.registerAltAuthSourceLinks);
+    this.addPostRenderCallback('USERNAME_PASSWORD_REQUIRED', captchaPostRenderCallback);
     this.addEventHandler('REGISTRATION_REQUIRED', this.registerRegistrationLinks);
     this.addEventHandler('REGISTRATION_REQUIRED', this.registerAltAuthSourceLinks);
     this.addPostRenderCallback('REGISTRATION_REQUIRED', this.postRegistrationRequired);
@@ -298,7 +299,10 @@ export default class AuthnWidget {
       this.renderSpinnerTemplate();
       this.store
         .dispatch('GET_FLOW')
-        .catch(() => this.generalErrorRenderer(AuthnWidget.COMMUNICATION_ERROR_MSG));
+        .catch((err) => {
+          console.log(err);
+          this.generalErrorRenderer(AuthnWidget.COMMUNICATION_ERROR_MSG)
+        });
     } catch (err) {
       console.error(err);
       this.generalErrorRenderer(err.message);
@@ -1290,14 +1294,18 @@ export default class AuthnWidget {
    * @returns {string|*} the model to be sent to PingFederate after all required fields are available
    */
   validateActionModel(action, data) {
+    console.log(`Validating action model ${action}`);
     const model = this.actionModels.get(action);
     if (model === undefined) {
+      console.log(`Action Model not found`);
       return undefined;
     }
+    console.log(model);
     if (model.properties) {
       //remove unneeded params
       Object.keys(data).forEach(key => !model.properties.includes(key) ? delete data[key] : '');
     }
+    console.log(data);
     return data;
   }
 
@@ -1325,11 +1333,12 @@ export default class AuthnWidget {
   }
 
   dispatchWithCaptcha(actionId, formData) {
-    if (this.store.state.showCaptcha && this.needsCaptchaResponse(actionId) &&
-      this.store.state.captchaSiteKey && this.invokeReCaptcha) {
-      this.store.savePendingState('POST_FLOW', actionId, formData);
-      this.invokeReCaptcha();
-      return;
+    const state = this.store.state;
+    if (state.showCaptcha) {
+      const type = state.captchaProviderType;
+      const attributes = state.captchaAttributes;
+      const captchaUtils = new CaptchaUtils(type, attributes, this.store);
+      captchaUtils.execute(actionId, formData)
     } else {
       this.store.dispatch('POST_FLOW', actionId, JSON.stringify(formData));
     }
@@ -1339,10 +1348,6 @@ export default class AuthnWidget {
     return this.actionModels.get(actionId)
       && this.actionModels.get(actionId).properties
       && this.actionModels.get(actionId).properties.some(prop => prop === 'captchaResponse');
-  }
-
-  dispatchPendingState(token) {
-    this.store.dispatchPendingState(token);
   }
 
   clearPendingState() {
@@ -1404,14 +1409,13 @@ export default class AuthnWidget {
       }
     }
     let widgetDiv = document.getElementById(this.divId);
-    var params = Object.assign(state, this.assets.toTemplateParams())
+    const store = {store: this.store};
+    var params = Object.assign(state, this.assets.toTemplateParams(), store);
     widgetDiv.innerHTML = template(params);
     this.registerEventListeners(currentState);
+    // execute all post render callbacks
     if (this.postRenderCallbacks[currentState]) {
-      this.postRenderCallbacks[currentState](state);
-    }
-    if (this.store.state.showCaptcha && this.grecaptcha) {
-      this.grecaptcha.render(this.captchaDivId);
+      this.postRenderCallbacks[currentState]?.forEach((callback) => { callback(state, this.store) });
     }
 
     let autofocusInput = document.querySelector("input:not(:disabled)[autofocus]")
@@ -1464,7 +1468,11 @@ export default class AuthnWidget {
   }
 
   addPostRenderCallback(stateName, callback) {
-    this.postRenderCallbacks[stateName] = callback;
+    let callbacks = this.postRenderCallbacks[stateName]
+      ? this.postRenderCallbacks[stateName]
+      : new Set();
+    callbacks.add(callback);
+    this.postRenderCallbacks[stateName] = callbacks;
   }
 
   registerActionModel(action, model) {
@@ -1673,8 +1681,7 @@ export default class AuthnWidget {
           data.input = input;
         }
         this.store.dispatch('POST_FLOW', 'checkInput', JSON.stringify(data));
-      }
-      else {
+      } else {
         console.log("ERROR - Unable to dispatch authenticator selection as the target was null");
       }
     }
