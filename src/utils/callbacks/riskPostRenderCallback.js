@@ -1,4 +1,4 @@
-import CaptchaUtils from "../riskUtils";
+import RiskUtils from "../riskUtils";
 
 export default (state, store) => {
   // fast fail
@@ -6,6 +6,6 @@ export default (state, store) => {
     return;
   const type = state.captchaProviderType;
   const attributes = state.captchaAttributes;
-  const captchaUtils = new CaptchaUtils(type, attributes, store);
-  captchaUtils.render();
+  const riskUtils = new RiskUtils(type, attributes, store);
+  riskUtils.render();
 }

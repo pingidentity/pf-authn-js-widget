@@ -1414,9 +1414,7 @@ export default class AuthnWidget {
     widgetDiv.innerHTML = template(params);
     this.registerEventListeners(currentState);
     // execute all post render callbacks
-    if (this.postRenderCallbacks[currentState]) {
-      this.postRenderCallbacks[currentState]?.forEach((callback) => { callback(state, this.store) });
-    }
+    this.postRenderCallbacks[currentState]?.forEach((callback) => { callback(state, this.store) });
 
     let autofocusInput = document.querySelector("input:not(:disabled)[autofocus]")
     if (!autofocusInput) {
