@@ -768,6 +768,12 @@ export default class AuthnWidget {
         break;
       }
       case 'PINGONE-PROTECT': {
+        if (!this.deviceProfileScript) {
+          console.error('deviceProfileScript is not configured')
+          this.store.dispatch('POST_FLOW', 'submitDeviceProfile');
+          break;
+        }
+
         script = document.createElement('script');
         script.src = this.deviceProfileScript;
         let dispatched = false;
