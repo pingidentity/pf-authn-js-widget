@@ -1,10 +1,12 @@
+import { isScriptLoaded } from "../uiUtils";
+
 const LOG_PREFIX = '[PingOne Protect Provider] ';
 
 export default class Signals {
   constructor(attributes, store) {
     this.attributes = attributes;
     this.store = store;
-    window.signalsSDK_loaded = this.isScriptInjected();
+    window.signalsSDK_loaded = isScriptLoaded('signals-sdk');
   }
 
   isLoaded() {
@@ -51,19 +53,6 @@ export default class Signals {
         formData['captchaResponse'] = data;
         this.store.dispatch('POST_FLOW', actionId, JSON.stringify(formData));
       });
-  }
-
-  isScriptInjected() {
-    // check if the signal script is already loaded. if not, load it
-    const scripts = document.getElementsByTagName('script');
-    for (let i = 0; i < scripts.length; i++) {
-      const script = scripts[i];
-      if (script.src && script.src.includes('signals-sdk')) {
-        return true;
-      }
-    }
-
-    return false;
   }
 
   onSignalsSdkReady() {
