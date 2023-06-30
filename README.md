@@ -15,8 +15,8 @@
   - [Creating the index.html File](#creating-the-indexhtml-file)
   - [Customizing the Widget](#customizing-the-widget)
   - [Enabling Captcha](#enabling-captcha)
+  - [Using Protect-Based Authentication Adapters with the Widget](/docs/protectAuthentication.md)
   - [Using Risk-Based Authentication With the Widget](/docs/riskAuthentication.md)
-  - [Using PingOne Fraud Adapter Flow With the Widget](/docs/pingonefraudIntegration.md)
   - [Redirectless Support](/docs/redirectless.md)
 - [Browser Compatibility](#browser-compatibility)
 - [Bug Reports](#bug-reports)
@@ -271,13 +271,13 @@ function onloadCallback() {
 It is crucial that `api.js` is loaded before the widget is instantiated. Therefore we are using a callback function to load the widget. The `grecaptcha` object
 will be available after the `api.js` is loaded. For more information, see [Captcha documentations](https://developers.google.com/recaptcha/docs/invisible).
 
+## Using Protect-Based Authentication Adapters with the Widget
+
+Please refer to the [guide for using Protect-based authentication adapters with the widget](/docs/protectAuthentication.md) for more information on how to set up the widget with Protect-based authentication adapters.
+
 ## Using Risk-Based Authentication With the Widget
 
 Please refer to the [guide for using risk-based authentication with the widget](/docs/riskAuthentication.md) for more infomation on how to set up the widget with risk-based authentication adapters.
-
-## Using PingOne Fraud Adapter Flow With the Widget
-
-Please refer to the [guide for using PingOne Fraud adapter based authentication flow with the widget](/docs/pingonefraudIntegration.md) for more infomation on how to set up the widget to work with PingOne Fraud authentication adapter flow.
 
 ## Redirectless Support 
 Please refer to the [Redirectless Support](/docs/redirectless.md) guide for more infomation on how to configure PingFederate and how to use widget's redirectless feature.
