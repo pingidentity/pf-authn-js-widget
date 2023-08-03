@@ -112,10 +112,10 @@ export function doRegisterWebAuthn(authnWidget, status) {
 	var authAbortSignal = window.PublicKeyCredential ? authAbortController.signal : null;
 	return new Promise((resolve, reject) => {
 		let data = authnWidget.store.getStore();
-		let options = JSON.parse(data.publicKeyCredentialCreationOptions);		
+		let options = JSON.parse(data.publicKeyCredentialCreationOptions);
 		let publicKeyCredential = {};
-		publicKeyCredential.rp = options.rp;		
-		publicKeyCredential.user = options.user;		
+		publicKeyCredential.rp = options.rp;
+		publicKeyCredential.user = options.user;
 		publicKeyCredential.user.id = new Uint8Array(options.user.id);
 		publicKeyCredential.challenge = new Uint8Array(options.challenge);
 		publicKeyCredential.pubKeyCredParams = options.pubKeyCredParams;
@@ -138,7 +138,7 @@ export function doRegisterWebAuthn(authnWidget, status) {
 
 		navigator.credentials.create({ "publicKey": publicKeyCredential, "signal": authAbortSignal })
 			.then(function (newCredentialInfo) {
-				// Send new credential info to server for verification and registration.				
+				// Send new credential info to server for verification and registration.
 				var publicKeyCredential = {};
 				if ('id' in newCredentialInfo) {
 					publicKeyCredential.id = newCredentialInfo.id;
@@ -158,17 +158,19 @@ export function doRegisterWebAuthn(authnWidget, status) {
 				publicKeyCredential.response = response;
 				resolve(JSON.stringify(publicKeyCredential));
 				if (status === 'PLATFORM_ACTIVATION_REQUIRED')
-					activateFIDODevice(JSON.stringify(publicKeyCredential), authnWidget, true);
-				else
-					activateFIDODevice(JSON.stringify(publicKeyCredential), authnWidget, false);
+					activateFIDODevice(JSON.stringify(publicKeyCredential), authnWidget, 'PLATFORM');
+				else if (status === 'SECURITY_KEY_ACTIVATION_REQUIRED')
+          activateFIDODevice(JSON.stringify(publicKeyCredential), authnWidget, 'SECURITY_KEY');
+        else
+					activateFIDODevice(JSON.stringify(publicKeyCredential), authnWidget, 'FIDO2');
 
 			}).catch(function (err) {
 				// No acceptable authenticator or user refused consent. Handle appropriately.
 				console.log(err);
 				document.querySelector('#platform_icon_container_id').style.display = 'none';
 				document.querySelector('#attestationRequiredId').style.display = 'none';
-				document.querySelector('#unsupportedDeviceId').style.display = 'none'; 
-				document.querySelector('#consentRefusedId').style.display = 'block';				
+				document.querySelector('#unsupportedDeviceId').style.display = 'none';
+				document.querySelector('#consentRefusedId').style.display = 'block';
 			});
 	});
 }
@@ -236,17 +238,20 @@ function checkAssertion(publicKeyCredential, authnWidget) {
 	});
 }
 
-function activateFIDODevice(publicKeyCredential, authnWidget, isPlatformDevice) {
+function activateFIDODevice(publicKeyCredential, authnWidget, deviceType) {
 	document.querySelector('#attestation').value = publicKeyCredential;
 	document.querySelector('#origin').value = window.location.origin; // Origin
 	let formData = authnWidget.getFormData();
-	if (isPlatformDevice == true)
+	if (deviceType === 'PLATFORM')
 	{
 		authnWidget.store.dispatch('POST_FLOW', "activatePlatformDevice", JSON.stringify(formData));
 	}
-	else
-	{
+	else if (deviceType === 'SECURITY_KEY')
+  {
 		authnWidget.store.dispatch('POST_FLOW', "activateSecurityKeyDevice", JSON.stringify(formData));
 	}
-	
+  else{
+    authnWidget.store.dispatch('POST_FLOW', "activateFido2Device", JSON.stringify(formData));
+  }
+
 }

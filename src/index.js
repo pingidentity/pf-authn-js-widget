@@ -69,7 +69,7 @@ export default class AuthnWidget {
       'SECURITY_KEY_ACTIVATION_REQUIRED', 'MOBILE_ACTIVATION_REQUIRED', 'MFA_DEVICE_PAIRING_METHOD_FAILED',
       'VIP_ENROLLMENT', 'VIP_CREDENTIAL_REQUIRED', 'VIP_AUTHENTICATION_REQUIRED', 'VIP_CREDENTIAL_RESET_REQUIRED',
       'USER_ID_REQUIRED', 'AUTHENTICATOR_SELECTION_REQUIRED', 'INPUT_REQUIRED', 'ENTRUST_FAILED', 'FRAUD_EVALUATION_CHECK_REQUIRED',
-      'AUTHENTICATION_CODE_RESPONSE_REQUIRED', 'BIOMETRIC_DEVICE_AUTHENTICATION_INFO_REQUIRED'
+      'AUTHENTICATION_CODE_RESPONSE_REQUIRED', 'BIOMETRIC_DEVICE_AUTHENTICATION_INFO_REQUIRED', 'FIDO2_ACTIVATION_REQUIRED',
     ]
     .concat(oauthUserAuthorizationStates)
     .concat(oneTimeDeviceOtpStates)
@@ -174,6 +174,7 @@ export default class AuthnWidget {
     this.postAuthenticationCodeResponseRequired = this.postAuthenticationCodeResponseRequired.bind(this);
     this.postPlatformDeviceActivationRequired = this.postPlatformDeviceActivationRequired.bind(this);
     this.postSecurityKeyDeviceActivationRequired = this.postSecurityKeyDeviceActivationRequired.bind(this);
+    this.postFido2ActivationRequired = this.postFido2ActivationRequired.bind(this);
     this.postDeviceSelectionRequired = this.postDeviceSelectionRequired.bind(this);
     this.postRegistrationRequired = this.postRegistrationRequired.bind(this);
     this.showDeviceManagementPopup = this.showDeviceManagementPopup.bind(this);
@@ -244,6 +245,7 @@ export default class AuthnWidget {
     this.addPostRenderCallback('TOTP_ACTIVATION_REQUIRED', this.postTOTPActivationRequired);
     this.addPostRenderCallback('PLATFORM_ACTIVATION_REQUIRED', this.postPlatformDeviceActivationRequired);
     this.addPostRenderCallback('SECURITY_KEY_ACTIVATION_REQUIRED', this.postSecurityKeyDeviceActivationRequired);
+    this.addPostRenderCallback('FIDO2_ACTIVATION_REQUIRED', this.postFido2ActivationRequired);
     this.addEventHandler('DEVICE_PAIRING_METHOD_REQUIRED', this.registerMfaDevicePairingEventHandler);
     this.addPostRenderCallback('MOBILE_ACTIVATION_REQUIRED', this.postMobileActivationRequired);
     this.addEventHandler('VIP_AUTHENTICATION_REQUIRED', this.registerVIPAuthHandler);
@@ -279,6 +281,7 @@ export default class AuthnWidget {
     this.actionModels.set('activateTotpDevice', {required: ['otp']});
     this.actionModels.set('activatePlatformDevice', {required: ['origin', 'attestation']});
     this.actionModels.set('activateSecurityKeyDevice', {required: ['origin', 'attestation']});
+    this.actionModels.set('activateFido2Device', {required: ['origin', 'attestation']});
     this.actionModels.set('submitVIPCredential', {required: ['vipCredentialId', 'securityCode']});
     this.actionModels.set('resetVIPCredential', {required: ['vipCredentialId', 'securityCode', 'nextSecurityCode']});
     this.actionModels.set('checkUserId', {required: ['userid']});
@@ -489,7 +492,7 @@ export default class AuthnWidget {
       if (devicePairingMethod.length > 1 && devicePairingMethod[1] !== '') {
         data['devicePairingMethod']['applicationName'] = devicePairingMethod[1];
       }
-      if (devicePairingMethod[0] === 'SECURITY_KEY' || devicePairingMethod[0] === 'PLATFORM' ) {
+      if (devicePairingMethod[0] === 'SECURITY_KEY' || devicePairingMethod[0] === 'PLATFORM' || devicePairingMethod[0] === 'FIDO2' ) {
         data['devicePairingMethod']['relyingPartyId'] = rpId;
       }
       this.store.dispatch('POST_FLOW', "selectDevicePairingMethod", JSON.stringify(data));
@@ -562,7 +565,7 @@ export default class AuthnWidget {
     let data = this.store.getStore();
     if (data.changeDevicePermitted === false) {
       document.querySelector('#changeDevice').style.display = 'none';
-    }   
+    }
   }
 
   async postAuthenticationCodeResponseRequired()
@@ -625,6 +628,22 @@ export default class AuthnWidget {
     });
   }
 
+  postFido2ActivationRequired() {
+    let data = this.store.getStore();
+    getCompatibility().then(value => {
+      if (value === 'NONE') {
+        console.log("No acceptable authenticator");
+        document.querySelector('#fido2_icon_container_id').style.display = 'none';
+        document.querySelector('#attestationRequiredId').style.display = 'none';
+        document.querySelector('#unsupportedDeviceId').style.display = 'block';
+        document.querySelector('#consentRefusedId').style.display = 'none';
+      }
+      else {
+        doRegisterWebAuthn(this, data.status);
+      }
+    });
+  }
+
   postAssertionRequired() {
     let data = this.store.getStore();
     var selectedDevice = data.devices.filter(device => {return device.id === data.selectedDeviceRef.id;});
@@ -640,7 +659,8 @@ export default class AuthnWidget {
       {
         doWebAuthn(this);
       }
-      else if ( (selectedDevice[0].type === 'SECURITY_KEY' && value === 'NONE') || (selectedDevice[0].type === 'PLATFORM' && value !== 'FULL') )
+      else if ( ((selectedDevice[0].type === 'SECURITY_KEY' || selectedDevice[0].type ==='FIDO2') && value === 'NONE')
+        || (selectedDevice[0].type === 'PLATFORM' && value !== 'FULL') )
       {
         // Cancel authentication if this is the only device so we don't loop
         console.log("No acceptable authenticator");
@@ -987,7 +1007,7 @@ export default class AuthnWidget {
 
   async postPushNotificationWait() {
     let storeState = this.store.getStore();
-    let data = this.store.getStore();    
+    let data = this.store.getStore();
     if (data.changeDevicePermitted === false) {
       document.querySelector('#changeDevice').style.display = 'none';
     }
@@ -1231,7 +1251,7 @@ export default class AuthnWidget {
     if (data.forcePolicy) {
       document.getElementById("description").innerHTML = "Select a method to receive a web link on your mobile device to start the verification process.";
       document.getElementById("qrbtn").style.display = "none";
-      
+
       const radios = document.getElementsByName("radioGroup");
       for (let i = 0; i < radios.length; i++) {
         radios[i].checked = true;
