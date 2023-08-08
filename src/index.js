@@ -146,9 +146,11 @@ export default class AuthnWidget {
     this.handleMfaDeviceSelection = this.handleMfaDeviceSelection.bind(this);
     this.handleMfaOneTimeDeviceSelection = this.handleMfaOneTimeDeviceSelection.bind(this);
     this.handleMfaSetDefaultDeviceSelection = this.handleMfaSetDefaultDeviceSelection.bind(this);
+    this.handleMfaRemoveDeviceSelection = this.handleMfaRemoveDeviceSelection.bind(this);
     this.handleAddMfaMethod = this.handleAddMfaMethod.bind(this);
     this.handleCancelAddMfaMethod = this.handleCancelAddMfaMethod.bind(this);
     this.handleContinueAddMfaMethod = this.handleContinueAddMfaMethod.bind(this);
+    this.handleContinueRemoveDevice = this.handleContinueRemoveDevice.bind(this);
     this.registerMfaEventHandler = this.registerMfaEventHandler.bind(this);
     this.registerMfaOneTimeDeviceChangeEventHandler = this.registerMfaOneTimeDeviceChangeEventHandler.bind(this);
     this.registerMfaChangeDeviceEventHandler = this.registerMfaChangeDeviceEventHandler.bind(this);
@@ -839,17 +841,17 @@ export default class AuthnWidget {
 
     document.addEventListener('click', this.hideDeviceManagementPopup);
 
-    Array.from(document.querySelectorAll("[id^='device-management-popup-frame']"))
+    Array.from(document.querySelectorAll("[id^='set-default-device']"))
       .forEach(element => element.addEventListener('click', this.handleMfaSetDefaultDeviceSelection));
+
+    Array.from(document.querySelectorAll("[id^='remove-device']"))
+      .forEach(element => element.addEventListener('click', this.handleMfaRemoveDeviceSelection));
 
     if (document.getElementById('addMfaMethod') !== null) {
       document.getElementById('addMfaMethod')
         .addEventListener('click', this.handleAddMfaMethod);
     }
-    if (document.getElementById('continueAddMfaMethod') !== null) {
-      document.getElementById('continueAddMfaMethod')
-        .addEventListener('click', this.handleContinueAddMfaMethod);
-    }
+
     if (document.getElementById('addMfaMethodModalBackground') !== null) {
       document.getElementById('addMfaMethodModalBackground')
         .addEventListener('click', this.handleCancelAddMfaMethod);
@@ -929,6 +931,12 @@ export default class AuthnWidget {
   handleAddMfaMethod() {
     if (document.querySelector('#authentication_required_block_id') != null) {
       document.querySelector('#authentication_required_block_id').style.display = 'block';
+      document.getElementById("auth_for_unpair_message").style.display = 'none'
+      document.getElementById("auth_for_pair_message").style.display = 'block'
+      if (document.getElementById('confirmation_button') !== null) {
+        document.getElementById('confirmation_button')
+          .addEventListener('click', this.handleContinueAddMfaMethod);
+      }
     }
     document.body.style.overflow = "hidden";
     document.body.style.height = "100%";
@@ -938,6 +946,22 @@ export default class AuthnWidget {
     this.handleCancelAddMfaMethod();
     this.store.dispatch('POST_FLOW', "setupMfa", null);
   }
+
+  handleContinueRemoveDevice(evt) {
+    let source = evt.currentTarget;
+    if (source) {
+      let deviceId = source.dataset['deviceId'];
+      let data = {
+        "deviceRef": {
+          "id": deviceId
+        }
+      };
+      this.store.dispatch('POST_FLOW', "removeDevice", JSON.stringify(data));
+    } else {
+      console.log("ERROR - Unable to dispatch device selection as the target was null");
+    };
+  }
+
 
   handleCancelAddMfaMethod() {
     if (document.querySelector('#authentication_required_block_id') != null) {
@@ -962,6 +986,42 @@ export default class AuthnWidget {
       console.log("ERROR - Unable to dispatch device selection as the target was null");
     }
   }
+
+  handleMfaRemoveDeviceSelection(evt) {
+    evt.stopPropagation();
+    let source = evt.currentTarget;
+    if (document.getElementById('confirmation_button') != null && document.getElementById('confirmation_button').dataset.deviceId == null) {
+      if (source) {
+      let deviceId = source.dataset['mfaSelectionKebabMenuContainer'];
+        document.getElementById('confirmation_button').dataset.deviceId = deviceId;
+        document.getElementById('confirmation_button').addEventListener('click', this.handleContinueRemoveDevice)
+      }else {
+        console.log("ERROR - Unable to remove device, as the target was null");
+        return;
+      }
+    }
+
+    let shouldWarn = Array.from(document.querySelectorAll("[id^='remove-device']")).length === 1 && document.getElementById('confirmation_warn_button').dataset.skip_warn !== "true"
+    if(shouldWarn && document.querySelector('#last_device_warning_block_id') != null){
+      document.querySelector('#last_device_warning_block_id').style.display = 'block';
+      document.getElementById('confirmation_warn_button').dataset.skip_warn = "true";
+      document.getElementById("confirmation_warn_button").addEventListener('click', this.handleMfaRemoveDeviceSelection)
+      return;
+    }
+
+    if (document.querySelector('#last_device_warning_block_id') != null) {
+      document.querySelector('#last_device_warning_block_id').style.display = 'none';
+    }
+    if (document.querySelector('#authentication_required_block_id') != null) {
+      document.querySelector('#authentication_required_block_id').style.display = 'block';
+      document.getElementById("auth_for_unpair_message").style.display = 'block'
+      document.getElementById("auth_for_pair_message").style.display = 'none'
+
+    }
+    document.body.style.overflow = "hidden";
+    document.body.style.height = "100%";
+  }
+
 
   registerMfaChangeDeviceEventHandler() {
     document.getElementById('changeDevice')
