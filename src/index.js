@@ -149,6 +149,7 @@ export default class AuthnWidget {
     this.handleMfaRemoveDeviceSelection = this.handleMfaRemoveDeviceSelection.bind(this);
     this.handleAddMfaMethod = this.handleAddMfaMethod.bind(this);
     this.handleCancelAddMfaMethod = this.handleCancelAddMfaMethod.bind(this);
+    this.handleCancelRemoveDevice = this.handleCancelRemoveDevice.bind(this);
     this.handleContinueAddMfaMethod = this.handleContinueAddMfaMethod.bind(this);
     this.handleContinueRemoveDevice = this.handleContinueRemoveDevice.bind(this);
     this.registerMfaEventHandler = this.registerMfaEventHandler.bind(this);
@@ -860,6 +861,10 @@ export default class AuthnWidget {
       document.getElementById('cancelAddMfaMethod')
         .addEventListener('click', this.handleCancelAddMfaMethod);
     }
+    if (document.getElementById('cancelRemoveDevice') !== null) {
+      document.getElementById('cancelRemoveDevice')
+        .addEventListener('click', this.handleCancelRemoveDevice);
+    }
   }
 
   handleMfaDeviceSelection(evt) {
@@ -971,6 +976,16 @@ export default class AuthnWidget {
     document.body.style.height = "auto";
   }
 
+  handleCancelRemoveDevice() {
+    if (document.querySelector('#last_device_warning_block_id') != null) {
+      document.querySelector('#last_device_warning_block_id').style.display = 'none';
+      document.getElementById('confirmation_button').dataset.deviceId = null;
+      document.getElementById('confirmation_warn_button').dataset.skip_warn = 'false'
+    }
+    document.body.style.overflow = "auto";
+    document.body.style.height = "auto";
+  }
+
   handleMfaSetDefaultDeviceSelection(evt) {
     evt.stopPropagation();
     let source = evt.currentTarget;
@@ -995,6 +1010,7 @@ export default class AuthnWidget {
       let deviceId = source.dataset['mfaSelectionKebabMenuContainer'];
         document.getElementById('confirmation_button').dataset.deviceId = deviceId;
         document.getElementById('confirmation_button').addEventListener('click', this.handleContinueRemoveDevice)
+        document.getElementById('cancelAddMfaMethod').addEventListener('click', this.handleCancelRemoveDevice)
       }else {
         console.log("ERROR - Unable to remove device, as the target was null");
         return;
