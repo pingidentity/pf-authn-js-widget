@@ -1,4 +1,3 @@
-[![Build Status](https://travis-ci.org/pingidentity/pf-authn-js-widget.svg?branch=master)](https://travis-ci.org/pingidentity/pf-authn-js-widget)
 # JavaScript Widget for the PingFederate Authentication API
 
 **Table of Contents**
@@ -8,7 +7,8 @@
   - [Option 1: Using CDN Links](#option-1-using-cdn-links)
   - [Option 2: Building the Widget](#option-2-building-the-widget)
   - [Option 3: Adding the Widget as a Node Module](#option-3-adding-the-widget-as-a-node-module)
-  - [Widget Configuration](#widget-configuration)
+- [Widget Configuration](#widget-configuration)
+- [Upgrade from version 1 to version 2](#upgrade-from-version-1-to-version-2)
 - [Technical Notes](#technical-notes)
   - [Building the Latest Version of the Widget](#building-the-latest-version-of-the-widget)
   - [Adding the Widget to an Application](#adding-the-widget-to-an-application)
@@ -149,6 +149,14 @@ var authnWidget = new PfAuthnWidget(baseUrl, {divId: 'mywidget', logo: 'https://
 authnWidget.init();
 ```
 
+# Upgrade from version 1 to version 2
+
+The JavaScript Widget for the PingFederate Authentication API version 2 is compatible with version 1 except when **Google reCAPTCHA v2 invisible** is used.
+
+Upgrading from v1 to v2 can be done without any code changes if Google reCAPTCHA v2 is not used.
+
+Simple code change is required to upgrade from v1 to v2 if the Google reCAPTCHA v2 invisible is used. The custom javascript code used to enable Google reCAPTCHA v2 must be replaced with the standard widget initialization code to successfully upgrade from v1 to v2. More information is avaibale in [Widget Configuration](#widget-configuration) section of this document.
+
 <a name="tech-notes"></a>
 # Technical Notes
 
@@ -234,9 +242,11 @@ Please refer to the [guide for using Protect-based authentication adapters with 
 Please refer to the [guide for using risk-based authentication with the widget](/docs/riskAuthentication.md) for more infomation on how to set up the widget with risk-based authentication adapters.
 
 ## Redirectless Support
+
 Please refer to the [Redirectless Support](/docs/redirectless.md) guide for more infomation on how to configure PingFederate and how to use widget's redirectless feature.
 
 ## Typescript Support
+
 Please refer to the [Typescript Support](/docs/typescript.md) guide for more information on how to use the typescript definitions.
 
 # Browser Compatibility
