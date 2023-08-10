@@ -234,9 +234,13 @@ export default class AuthnWidget {
     this.addEventHandler('IDENTIFIER_REQUIRED', this.registerIdFirstLinks);
     this.addEventHandler('USERNAME_PASSWORD_REQUIRED', this.registerAltAuthSourceLinks);
     this.addPostRenderCallback('USERNAME_PASSWORD_REQUIRED', captchaPostRenderCallback);
+    this.addPostRenderCallback('NEW_PASSWORD_REQUIRED', captchaPostRenderCallback);
+    this.addPostRenderCallback('ACCOUNT_RECOVERY_USERNAME_REQUIRED', captchaPostRenderCallback);
+    this.addPostRenderCallback('USERNAME_RECOVERY_EMAIL_REQUIRED', captchaPostRenderCallback);
     this.addEventHandler('REGISTRATION_REQUIRED', this.registerRegistrationLinks);
     this.addEventHandler('REGISTRATION_REQUIRED', this.registerAltAuthSourceLinks);
     this.addPostRenderCallback('REGISTRATION_REQUIRED', this.postRegistrationRequired);
+    this.addPostRenderCallback('REGISTRATION_REQUIRED', captchaPostRenderCallback);
     this.addEventHandler('EXTERNAL_AUTHENTICATION_COMPLETED', this.postContinueAuthentication);
     this.addEventHandler('EXTERNAL_AUTHENTICATION_REQUIRED', this.registerReopenPopUpHandler);
     this.addPostRenderCallback('RESUME', this.resumeToPf);
@@ -661,8 +665,7 @@ export default class AuthnWidget {
         document.querySelector('#attestationRequiredId').style.display = 'none';
         document.querySelector('#unsupportedDeviceId').style.display = 'block';
         document.querySelector('#consentRefusedId').style.display = 'none';
-      }
-      else {
+      } else {
         doRegisterWebAuthn(this, data.status);
       }
     });
@@ -677,8 +680,7 @@ export default class AuthnWidget {
         document.querySelector('#attestationRequiredId').style.display = 'none';
         document.querySelector('#unsupportedDeviceId').style.display = 'block';
         document.querySelector('#consentRefusedId').style.display = 'none';
-      }
-      else {
+      } else {
         doRegisterWebAuthn(this, data.status);
       }
     });
@@ -714,10 +716,8 @@ export default class AuthnWidget {
       if (selectedDevice === null || selectedDevice.length === 0)
       {
         doWebAuthn(this);
-      }
-      else if ( ((selectedDevice[0].type === 'SECURITY_KEY' || selectedDevice[0].type ==='FIDO2') && value === 'NONE')
-        || (selectedDevice[0].type === 'PLATFORM' && value !== 'FULL') )
-      {
+      } else if (((selectedDevice[0].type === 'SECURITY_KEY' || selectedDevice[0].type ==='FIDO2') && value === 'NONE')
+        || (selectedDevice[0].type === 'PLATFORM' && value !== 'FULL')) {
         // Cancel authentication if this is the only device so we don't loop
         console.log("No acceptable authenticator");
         if(data.devices.length == 1)
@@ -1609,7 +1609,7 @@ export default class AuthnWidget {
 
   dispatchWithCaptcha(actionId, formData) {
     const state = this.store.state;
-    if (state.showCaptcha) {
+    if (state.showCaptcha && this.needsCaptchaResponse(actionId)) {
       const type = state.captchaProviderType;
       const attributes = state.captchaAttributes;
       const captchaUtils = new CaptchaUtils(type, attributes, this.store);
