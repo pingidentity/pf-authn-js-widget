@@ -150,12 +150,9 @@ authnWidget.init();
 ```
 
 # Upgrade from version 1 to version 2
+The JavaScript Widget for PingFederate Authentication API no longer requires custom javascript code to enable CAPTCHA as of version 2.
 
-The JavaScript Widget for the PingFederate Authentication API version 2 is compatible with version 1 except when **Google reCAPTCHA v2 invisible** is used.
-
-Upgrading from v1 to v2 can be done without any code changes if Google reCAPTCHA v2 is not used.
-
-Simple code change is required to upgrade from v1 to v2 if the Google reCAPTCHA v2 invisible is used. The custom javascript code used to enable Google reCAPTCHA v2 must be replaced with the standard widget initialization code to successfully upgrade from v1 to v2. More information is available in the [Widget Configuration](#widget-configuration) section of this document.
+When upgrading from version 1 to version 2, remove the custom javascript code and replace it with standard widget initialization code to leverage the new capability. More information is available in the [Widget Configuration](#widget-configuration) section of this document.
 
 <a name="tech-notes"></a>
 # Technical Notes
