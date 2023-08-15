@@ -4,12 +4,12 @@ export default class RecaptchaV2Invisible {
   constructor(attributes, store) {
     this.attributes = attributes;
     this.store = store;
+    window.recaptchaV2Invisible_loaded = window.recaptchaV2Invisible_loaded || false;
     if (window.recaptchaV2Invisible_loaded) {
       // aleady loaded no need to register agian
       console.log(LOG_PREFIX + 'already initialized, skipping initialization')
       return;
     }
-    window.recaptchaV2Invisible_loaded = false;
     window.recaptchaV2Invisible_onload = () => {
       console.log(LOG_PREFIX + 'script onload event triggered');
       window.recaptchaV2Invisible_loaded = true;
