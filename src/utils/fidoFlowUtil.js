@@ -38,7 +38,7 @@ function WebAuthnPlatformAuthentication(publicKeyCredentialRequestOptions) {
 		isWebAuthnPlatformAuthenticatorAvailable().then((result) => {
 			if (result) {
 				resolve(doWebAuthn());
-			} f
+			}
 			reject(Error("UnSupportedBrowserError"));
 		});
 	});
@@ -101,7 +101,6 @@ export function doWebAuthn(authnWidget) {
 					document.querySelector('#assertionRequiredSpinnerId').style.display = 'none';
 					document.querySelector('#assertionRequiredAuthenticatingId').style.display = 'none';
 					document.querySelector('#consentRefusedId').style.display = 'block';
-					document.querySelector('#deviceInfoBlockId').style.display = 'none';
 				}
 			});
 	});

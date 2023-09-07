@@ -417,6 +417,7 @@ export default class AuthnWidget {
   }
 
   handleAltAuthSource(evt) {
+    var errorMessage = document.getElementById('errorMessage');
     evt.preventDefault();
     let source = evt.currentTarget;
     if (source) {
@@ -1520,10 +1521,14 @@ export default class AuthnWidget {
 
   render(prevState, state) {
     let currentState = state.status;
+    let templateName = currentState;
     let template = this.getTemplate('general_error');
     if (currentState) {
+      if (currentState === 'BIOMETRIC_DEVICE_AUTHENTICATION_INFO_REQUIRED'){
+        templateName = 'ASSERTION_REQUIRED';
+      }
       try {
-        template = this.getTemplate(currentState);
+        template = this.getTemplate(templateName);
       } catch (e) {
         console.log(`Failed to load template: ${currentState}.`);
         template = this.getTemplate('general_error');
