@@ -6,17 +6,35 @@
   {{> spinner}}
   <form class="form" id="AuthnWidgetForm">
     {{#ifEq authenticator "TOKENPUSH"}}
-      <div class="heading-text">
-        <div class="text-block__text">Confirm the authentication request displayed on your Entrust Mobile Soft Token
-          Application.
+      {{#ifEq tokenPushMutualChallenge null}}
+        <div class="heading-text">
+          <div class="text-block__text">Confirm the authentication request displayed on your Entrust Mobile Soft Token
+            Application.
+          </div>
         </div>
-      </div>
-      <div class="spinner spinner--margin-bottom-small">
-        <div class="spinner__icon" data-id="spinner"></div>
-      </div>
-      <div class="text-block--overflow-wrap" id="pushnotificationmessage">
-        Approve Push Notification, then click Submit
-      </div>
+        <div class="spinner spinner--margin-bottom-small">
+          <div class="spinner__icon" data-id="spinner"></div>
+        </div>
+        <div class="text-block--overflow-wrap" id="pushnotificationmessage">
+          Approve Push Notification, then click Submit
+        </div>
+      {{else}}
+        <div class="heading-text">
+          <div class="text-block__text">Confirm the authentication request and select the following code in your Entrust Mobile Soft Token Application.
+          </div>
+        </div>
+        <br>
+        <br>
+         <h1 class="heading-text centered-text icon-heading"  style="font-weight:bold;">
+          {{tokenPushMutualChallenge}}
+        </h1>
+        <br>
+        <br>
+        <div class="text-block--overflow-wrap" id="pushnotificationmessage">
+          Approve Push Notification, then click Submit
+        </div>
+      {{/ifEq}}
+
     {{else ifEq authenticator "SMARTCREDENTIALPUSH"}}
       <div class="heading-text">
         <div class="text-block__text">
