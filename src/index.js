@@ -200,6 +200,7 @@ export default class AuthnWidget {
     AuthnWidget.CORE_STATES.forEach(state => this.registerState(state), this);
 
     this.addEventHandler('IDENTIFIER_REQUIRED', this.registerIdFirstLinks);
+    this.addPostRenderCallback('IDENTIFIER_REQUIRED', captchaPostRenderCallback);
     this.addEventHandler('USERNAME_PASSWORD_REQUIRED', this.registerAltAuthSourceLinks);
     this.addPostRenderCallback('USERNAME_PASSWORD_REQUIRED', captchaPostRenderCallback);
     this.addPostRenderCallback('NEW_PASSWORD_REQUIRED', captchaPostRenderCallback);
@@ -266,8 +267,8 @@ export default class AuthnWidget {
     this.actionModels.set('checkPasswordReset', { required: ['newPassword'], properties: ['newPassword'] });
     this.actionModels.set('checkRecoveryCode', { required: ['recoveryCode'], properties: ['recoveryCode'] });
     this.actionModels.set('checkChallengeResponse', { required: ['challengeResponse'], properties: ['challengeResponse'] });
-    this.actionModels.set('submitIdentifier', { required: ['identifier'], properties: ['identifier'] });
-    this.actionModels.set('clearIdentifier', { required: ['identifier'], properties: ['identifier'] });
+    this.actionModels.set('submitIdentifier', { required: ['identifier'], properties: ['identifier', 'captchaResponse'] });
+    this.actionModels.set('clearIdentifier', { required: ['identifier'], properties: ['identifier', 'captchaResponse'] });
     this.actionModels.set('registerUser', {required: ['password', 'fieldValues'], properties: ['password', 'captchaResponse', 'fieldValues', 'thisIsMyDevice']});
     this.actionModels.set('checkOtp', {required: ['otp']});
     this.actionModels.set('checkAssertion', {required: ['assertion', 'origin', 'compatibility'],  properties: ['assertion', 'origin', 'compatibility'] });
@@ -405,7 +406,7 @@ export default class AuthnWidget {
     switch (actionId) {
       case 'submitIdentifier':
       case 'clearIdentifier':
-        this.store.dispatch('POST_FLOW', actionId, JSON.stringify(data));
+        this.dispatchWithCaptcha(actionId, data);
         break;
       case 'selectidentifier':
         document.getElementById('existingAccountsSelectionList').style.display = 'none';
