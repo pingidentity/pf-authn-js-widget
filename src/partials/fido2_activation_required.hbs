@@ -1,0 +1,45 @@
+<div class="card">
+  <div class="org-logo">
+    <img class="org-logo__image" src="{{logo}}" alt="Company Logo"/>
+  </div>
+
+  <div style="display: none" id="unsupportedDeviceId" class="icon-feedback icon-feedback--timeout icon-feedback--error">
+    <span class="icon-feedback__icon pingicon-ghost-error"></span>
+    <p class="icon-feedback__label">
+      <p class="icon-feedback--error">Unsupported authenticator</p>
+    </p>
+  </div>
+
+  <div style="display: none" id="consentRefusedId" class="icon-feedback icon-feedback--timeout icon-feedback--error">
+    <span class="icon-feedback__icon pingicon-ghost-error"></span>
+    <p class="icon-feedback__label">
+      <p class="icon-feedback--error">Unsupported authenticator or user refused consent</p>
+    </p>
+  </div>
+
+  <form class="form" id="AuthnWidgetForm" data-actionId="activateFido2Device">
+    {{> errors}}
+  <div id="fido2_icon_container_id" class="tile-button__icon-container">
+    <h1 class="heading-text centered-text icon-heading" data-id="heading">
+      <svg viewBox="0 0 27 26" role="presentation" style="width: 32px; height: 32px;">
+        <path d="M10.2632 12.3158C13.6641 12.3158 16.4211 9.55881 16.4211 6.15789C16.4211 2.75698 13.6641 0 10.2632 0C6.86225 0 4.10527 2.75698 4.10527 6.15789C4.10527 9.55881 6.86225 12.3158 10.2632 12.3158Z" fill="#3D454D" />
+        <path d="M26.6842 12.3158C26.6842 9.67474 24.5631 7.51263 21.9084 7.51263C19.2674 7.51263 17.1053 9.63369 17.1053 12.2884C17.1053 14.1495 18.1589 15.8326 19.8421 16.6263V23.9474L21.8947 26L25.3158 22.5789L23.2631 20.5263L25.3158 18.4737L23.6189 16.7768C25.4663 16.0653 26.6842 14.2863 26.6842 12.3158ZM21.8947 12.3158C21.1421 12.3158 20.5263 11.7 20.5263 10.9474C20.5263 10.1947 21.1421 9.57895 21.8947 9.57895C22.6474 9.57895 23.2631 10.1947 23.2631 10.9474C23.2631 11.7 22.6474 12.3158 21.8947 12.3158Z" fill="#3D454D" />
+        <path d="M15.6547 15.08C14.6011 14.6147 13.4653 14.3684 12.3158 14.3684H8.21053C3.68105 14.3684 0 18.0495 0 22.5789V25.3158H17.7895V17.7758C16.8726 17.0642 16.1337 16.1474 15.6547 15.08Z" fill="#3D454D" />
+      </svg><span style="margin-left: .5em">PassKey</span>
+    </h1>
+  </div>
+   <div >
+    <div id="attestationRequiredId" class="text-block--overflow-wrap" style="margin-bottom: 30px;">
+      <p class="icon-feedback__label">Follow the directions your browser provides to finish pairing your PassKey.</p>
+    </div>
+    <input style="display:none" type="hidden" id="attestation" name="attestation" type="text" class="text-input text-input--primary" value=""/>
+    <input  style="display:none"  type="hidden" type="origin" id="origin" name="origin" type="text" class="text-input text-input--primary" value=""/>
+    <br>
+    <div class="text-block" data-id="textblock">
+      <div class="text-block--overflow-wrap">
+        <a tabindex="0" data-actionId="cancelDevicePairing" target="_self" class="anchor">
+          Cancel</a>
+      </div>
+    </div>
+  </form>
+</div>

@@ -13,6 +13,8 @@
           <span class="text-block__text">Biometrics</span>
       {{else ifEq device.type "SECURITY_KEY"}}
           <span class="text-block__text">Security Key</span>
+      {{else ifEq device.type "FIDO2"}}
+        <span class="text-block__text">PassKey</span>
       {{else ifEq device.type "TOTP"}}
         {{#if device.nickname}}
           <span class="text-block__text">{{device.nickname}}</span>

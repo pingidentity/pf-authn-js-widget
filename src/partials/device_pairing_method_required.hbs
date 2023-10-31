@@ -34,6 +34,12 @@
               <path d="M8 15C8.55 15 9 15.45 9 16C9 16.55 8.55 17 8 17C7.45 17 7 16.55 7 16C7 15.45 7.45 15 8 15M15.07 4.69L16.5 6.1L15.07 7.5L13.66 6.1L15.07 4.69M17.9 7.5L19.31 8.93L17.9 10.34L16.5 8.93L17.9 7.5M8 13C6.34 13 5 14.34 5 16C5 17.66 6.34 19 8 19C9.66 19 11 17.66 11 16C11 14.34 9.66 13 8 13M9.77 4.33L10.5 5.08L14.29 1.29C14.47 1.11 14.72 1 15 1C15.28 1 15.53 1.11 15.71 1.29L22.78 8.36L22.78 8.37C22.92 8.54 23 8.76 23 9C23 9.3 22.87 9.57 22.66 9.76L22.66 9.76L18.93 13.5L19.67 14.23L12.95 20.95C11.68 22.22 9.93 23 8 23C4.13 23 1 19.87 1 16C1 14.07 1.78 12.32 3.05 11.05L9.77 4.33M20.59 9L15 3.41L11.93 6.5L17.5 12.08L20.59 9Z"
                     style="fill: rgb(61, 69, 77);"></path>
             </svg>
+          {{else ifEq devicePairingMethod.deviceType "FIDO2"}}
+            <svg viewBox="0 0 27 26" role="presentation" style="width: 32px; height: 32px;">
+              <path d="M10.2632 12.3158C13.6641 12.3158 16.4211 9.55881 16.4211 6.15789C16.4211 2.75698 13.6641 0 10.2632 0C6.86225 0 4.10527 2.75698 4.10527 6.15789C4.10527 9.55881 6.86225 12.3158 10.2632 12.3158Z" fill="#3D454D" />
+              <path d="M26.6842 12.3158C26.6842 9.67474 24.5631 7.51263 21.9084 7.51263C19.2674 7.51263 17.1053 9.63369 17.1053 12.2884C17.1053 14.1495 18.1589 15.8326 19.8421 16.6263V23.9474L21.8947 26L25.3158 22.5789L23.2631 20.5263L25.3158 18.4737L23.6189 16.7768C25.4663 16.0653 26.6842 14.2863 26.6842 12.3158ZM21.8947 12.3158C21.1421 12.3158 20.5263 11.7 20.5263 10.9474C20.5263 10.1947 21.1421 9.57895 21.8947 9.57895C22.6474 9.57895 23.2631 10.1947 23.2631 10.9474C23.2631 11.7 22.6474 12.3158 21.8947 12.3158Z" fill="#3D454D" />
+              <path d="M15.6547 15.08C14.6011 14.6147 13.4653 14.3684 12.3158 14.3684H8.21053C3.68105 14.3684 0 18.0495 0 22.5789V25.3158H17.7895V17.7758C16.8726 17.0642 16.1337 16.1474 15.6547 15.08Z" fill="#3D454D" />
+            </svg>
           {{else ifEq devicePairingMethod.deviceType "Voice"}}
             <svg viewBox="0 0 24 24" role="presentation" style="width: 32px; height: 32px;">
               <path d="M20,15.5C18.8,15.5 17.5,15.3 16.4,14.9C16.3,14.9 16.2,14.9 16.1,14.9C15.8,14.9 15.6,15 15.4,15.2L13.2,17.4C10.4,15.9 8,13.6 6.6,10.8L8.8,8.6C9.1,8.3 9.2,7.9 9,7.6C8.7,6.5 8.5,5.2 8.5,4C8.5,3.5 8,3 7.5,3H4C3.5,3 3,3.5 3,4C3,13.4 10.6,21 20,21C20.5,21 21,20.5 21,20V16.5C21,16 20.5,15.5 20,15.5M5,5H6.5C6.6,5.9 6.8,6.8 7,7.6L5.8,8.8C5.4,7.6 5.1,6.3 5,5M19,19C17.7,18.9 16.4,18.6 15.2,18.2L16.4,17C17.2,17.2 18.1,17.4 19,17.4V19Z"
@@ -62,6 +68,8 @@
             <div class="tile-button__title">Security Key</div>
           {{else ifEq devicePairingMethod.deviceType "PLATFORM"}}
             <div class="tile-button__title">Biometrics</div>
+          {{else ifEq devicePairingMethod.deviceType "FIDO2"}}
+            <div class="tile-button__title">PassKey</div>
           {{else ifEq devicePairingMethod.deviceType "Voice"}}
             <div class="tile-button__title">Voice Authentication</div>
           {{else}}
@@ -79,6 +87,8 @@
             <div class="tile-button__content">Use a security key to authenticate.</div>
           {{else ifEq devicePairingMethod.deviceType "PLATFORM"}}
             <div class="tile-button__content">Use a fingerprint or facial scan to authenticate.</div>
+          {{else ifEq devicePairingMethod.deviceType "FIDO2"}}
+            <div class="tile-button__content">Use a passKey device to authenticate.</div>
           {{else ifEq devicePairingMethod.deviceType "Voice"}}
             <div class="tile-button__content">Receive a phone call with a passcode to authenticate.</div>
           {{/ifEq}}
