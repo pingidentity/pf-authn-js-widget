@@ -1298,7 +1298,8 @@ export default class AuthnWidget {
         }
         if (input.type === 'email') {
           let emailIsValid = input.checkValidity() && isValidEmail(input.value);
-          if (!emailIsValid) {
+          let allowedValue = document.getElementById("allowedValue").getAttribute("data-velocity-variable");
+          if (!emailIsValid && allowedValue === "" ) {
             disabled = true;
           }
         }
