@@ -212,8 +212,7 @@ export default class AuthnWidget {
     this.postFido2ActivationRequired = this.postFido2ActivationRequired.bind(this);
     this.postDeviceSelectionRequired = this.postDeviceSelectionRequired.bind(this);
     this.postRegistrationRequired = this.postRegistrationRequired.bind(this);
-    this.showDeviceManagementPopup = this.showDeviceManagementPopup.bind(this);
-    this.hideDeviceManagementPopup = this.hideDeviceManagementPopup.bind(this);
+    this.manageDeviceManagementPopup = this.manageDeviceManagementPopup.bind(this);
     this.pollCheckGet = this.pollCheckGet.bind(this);
     this.pollLinkStatus = this.pollLinkStatus.bind(this);
     this.postEmailVerificationRequired = this.postEmailVerificationRequired.bind(this);
@@ -909,15 +908,13 @@ export default class AuthnWidget {
 
   registerMfaEventHandler() {
     Array.from(document.querySelectorAll('[data-mfa-selection-kebab-menu-container]'))
-      .forEach(element => element.addEventListener('click', this.showDeviceManagementPopup));
+      .forEach(element => element.addEventListener('click', this.manageDeviceManagementPopup));
 
     Array.from(document.querySelectorAll('[data-mfa-selection]'))
       .forEach(element => element.addEventListener('click', this.handleMfaDeviceSelection));
 
     Array.from(document.querySelectorAll('[data-one-time-device-mfa-selection]'))
       .forEach(element => element.addEventListener('click', this.handleMfaOneTimeDeviceSelection));
-
-    document.addEventListener('click', this.hideDeviceManagementPopup);
 
     Array.from(document.querySelectorAll("[id^='set-default-device']"))
       .forEach(element => element.addEventListener('click', this.handleMfaSetDefaultDeviceSelection));
@@ -991,37 +988,24 @@ export default class AuthnWidget {
     }
   }
 
-  showDeviceManagementPopup(evt) {
+  manageDeviceManagementPopup(evt) {
     evt.stopPropagation();
+    let source = evt.currentTarget;
+    var deviceId = source.dataset['mfaSelectionKebabMenuContainer'];
+    var currentElement = 'device-management-popup-frame-' + deviceId;
     // close other popups if any
     var popupDivs = document.querySelectorAll("[id^='device-management-popup-frame']");
     for (var i = 0; i < popupDivs.length; ++i) {
       var popupDisplayStatus = popupDivs[i].style.display;
-      if (popupDisplayStatus === 'block') {
+      if (popupDivs[i] !== document.getElementById(currentElement) && popupDisplayStatus === 'block') {
         popupDivs[i].style.display = 'none';
       }
     }
-    let source = evt.currentTarget;
-    var deviceId = source.dataset['mfaSelectionKebabMenuContainer'];
-    var docId = 'device-management-popup-frame-' + deviceId;
-    document.getElementById(docId).style.display = 'block';
-  }
-
-  hideDeviceManagementPopup(evt) {
-    var target = evt.target;
-    var kebabMenuDivs = document.querySelectorAll("[id='kebab-menu-svg-id']");
-    for (var i = 0; i < kebabMenuDivs.length; ++i) {
-      if (kebabMenuDivs[i] == target) {
-        return;
-      }
-    }
-
-    var popupDivs = document.querySelectorAll("[id^='device-management-popup-frame']");
-    for (var i = 0; i < popupDivs.length; ++i) {
-      var popupDisplayStatus = popupDivs[i].style.display;
-      if (popupDisplayStatus === 'block') {
-        popupDivs[i].style.display = 'none';
-      }
+    popupDisplayStatus = document.getElementById(currentElement).style.display;
+    if (popupDisplayStatus === 'block'){
+      document.getElementById(currentElement).style.display = 'none';
+    }else {
+      document.getElementById(currentElement).style.display = 'block';
     }
   }
 
