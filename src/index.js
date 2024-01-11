@@ -169,9 +169,13 @@ export default class AuthnWidget {
     this.handleAgentlessSignOn = this.handleAgentlessSignOn.bind(this);
     this.postEmptyAuthentication = this.postEmptyAuthentication.bind(this);
     this.handleMfaDeviceSelection = this.handleMfaDeviceSelection.bind(this);
+    this.handleUpdateDeviceNickName = this.handleUpdateDeviceNickName.bind(this);
     this.handleCASChallengeMethodSelection = this.handleCASChallengeMethodSelection.bind(this);
     this.handleMfaOneTimeDeviceSelection = this.handleMfaOneTimeDeviceSelection.bind(this);
     this.handleMfaSetDefaultDeviceSelection = this.handleMfaSetDefaultDeviceSelection.bind(this);
+    this.displayEditNicknameInput = this.displayEditNicknameInput.bind(this);
+    this.closeEditNicknameInput = this.closeEditNicknameInput.bind(this);
+    this.updateDeviceNickName = this.updateDeviceNickName.bind(this);
     this.handleMfaRemoveDeviceSelection = this.handleMfaRemoveDeviceSelection.bind(this);
     this.handleAddMfaMethod = this.handleAddMfaMethod.bind(this);
     this.handleCancelAddMfaMethod = this.handleCancelAddMfaMethod.bind(this);
@@ -761,7 +765,7 @@ export default class AuthnWidget {
 
   postDeviceSelectionRequired() {
     let data = this.store.getStore();
-    if (data.userSelectedDefault === false) {
+    if (data.manageDevicesAllowed === false) {
       var deviceKebabMenus = document.querySelectorAll('#kebab-menu-icon-id');
       [].forEach.call(deviceKebabMenus, function(deviceKebabMenu) {
         deviceKebabMenu.style.display = "none";
@@ -775,7 +779,7 @@ export default class AuthnWidget {
           platformDevice.style.display = "none";
         });
       } else if (value === 'NONE') {
-        var platformDevices = document.querySelectorAll("[id^='PLATFORM-']");
+        platformDevices = document.querySelectorAll("[id^='PLATFORM-']");
         [].forEach.call(platformDevices, function(platformDevice) {
           platformDevice.style.display = "none";
         });
@@ -919,6 +923,15 @@ export default class AuthnWidget {
     Array.from(document.querySelectorAll("[id^='set-default-device']"))
       .forEach(element => element.addEventListener('click', this.handleMfaSetDefaultDeviceSelection));
 
+    Array.from(document.querySelectorAll("[id^='edit-device']"))
+      .forEach(element => element.addEventListener('click', this.displayEditNicknameInput));
+
+    Array.from(document.querySelectorAll("[id^='save_nickname_button']"))
+      .forEach(element => element.addEventListener('click', this.handleUpdateDeviceNickName));
+
+    Array.from(document.querySelectorAll("[id^='cancel_edit_name_icon_id']"))
+      .forEach(element => element.addEventListener('click', this.closeEditNicknameInput));
+
     Array.from(document.querySelectorAll("[id^='remove-device']"))
       .forEach(element => element.addEventListener('click', this.handleMfaRemoveDeviceSelection));
 
@@ -1012,8 +1025,8 @@ export default class AuthnWidget {
   handleAddMfaMethod() {
     if (document.querySelector('#authentication_required_block_id') != null) {
       document.querySelector('#authentication_required_block_id').style.display = 'block';
-      document.getElementById("auth_for_unpair_message").style.display = 'none'
-      document.getElementById("auth_for_pair_message").style.display = 'block'
+      document.getElementById("auth_required_message").innerText = 'Adding a new authentication method requires to authenticate with an existing method.'
+      document.getElementById("auth_required_message").style.display = 'block'
       if (document.getElementById('confirmation_button') !== null) {
         document.getElementById('confirmation_button')
           .addEventListener('click', this.handleContinueAddMfaMethod);
@@ -1076,6 +1089,59 @@ export default class AuthnWidget {
     } else {
       console.log("ERROR - Unable to dispatch device selection as the target was null");
     }
+  }
+
+  displayEditNicknameInput(evt){
+    let source = evt.currentTarget;
+    let deviceId = source.dataset['mfaSelectionKebabMenuContainer'];
+    Array.from(document.querySelectorAll('[data-mfa-selection]')).filter(element => element.dataset['mfaSelection'] === deviceId)
+      .forEach(element => element.removeEventListener('click', this.handleMfaDeviceSelection));
+    Array.from(document.querySelectorAll('#kebab-menu-icon-id')).filter(element => element.dataset['mfaSelectionKebabMenuContainer'] === deviceId)
+      .forEach(element => element.style.display = 'none');
+    document.getElementById(deviceId+'_edit_nickname_id').style.display = 'block'
+    Array.from(document.querySelectorAll('#cancel_edit_name_icon_id')).filter(element => element.dataset['mfaSelection'] === deviceId)
+      .forEach(element => element.style.display = 'block')
+    document.getElementById(deviceId+'_device_container').style.display = 'none'
+  }
+
+  closeEditNicknameInput(evt){
+    evt.stopPropagation();
+    let source = evt.currentTarget;
+    let deviceId = source.dataset['mfaSelection'];
+    Array.from(document.querySelectorAll('#kebab-menu-icon-id')).filter(element => element.dataset['mfaSelectionKebabMenuContainer'] === deviceId)
+      .forEach(element => element.style.display = 'block');
+    document.getElementById(deviceId+'_edit_nickname_id').style.display = 'none'
+    Array.from(document.querySelectorAll('#cancel_edit_name_icon_id')).filter(element => element.dataset['mfaSelection'] === deviceId)
+      .forEach(element => element.style.display = 'none')
+    document.getElementById(deviceId+'_device_container').style.display = 'block'
+    Array.from(document.querySelectorAll('[data-mfa-selection]')).filter(element => element.dataset['mfaSelection'] === deviceId)
+      .forEach(element => element.addEventListener('click', this.handleMfaDeviceSelection));
+  }
+
+  handleUpdateDeviceNickName(evt) {
+    let source = evt.currentTarget;
+    let deviceId = source.dataset['mfaSelection'];
+    let inputElement = document.getElementById('nickname_input_for_'+deviceId);
+    const newNickName = inputElement.value;
+    const oldNickName = inputElement.dataset['originName'];
+    if (oldNickName === newNickName) {
+      this.closeEditNicknameInput(evt);
+      return;
+    }
+    document.getElementById("auth_required_message").innerText = 'Updating device\'s nickname, requires to authenticate with an existing method.'
+    document.getElementById("auth_required_message").style.display = 'block'
+    document.getElementById("confirmation_button").dataset.deviceId = deviceId;
+    document.getElementById("confirmation_button").addEventListener('click', this.updateDeviceNickName)
+    document.querySelector('#authentication_required_block_id').style.display = 'block';
+  }
+
+  updateDeviceNickName(evt){
+    let source = evt.currentTarget;
+    let deviceId = source.dataset['deviceId'];
+    let newNickname = document.getElementById('nickname_input_for_'+deviceId).value;
+    const request = JSON.stringify({id: deviceId, nickname: newNickname});
+    this.store.dispatch('POST_FLOW', "updateDeviceNickname", request);
+    console.log("INFO - device nickname updated to "+ newNickname);
   }
 
   registerCASChangeMethodEventHandler() {
@@ -1155,8 +1221,8 @@ export default class AuthnWidget {
     }
     if (document.querySelector('#authentication_required_block_id') != null) {
       document.querySelector('#authentication_required_block_id').style.display = 'block';
-      document.getElementById("auth_for_unpair_message").style.display = 'block'
-      document.getElementById("auth_for_pair_message").style.display = 'none'
+      document.getElementById("auth_required_message").innerText = 'Removing authentication method requires to authenticate with an existing method.'
+      document.getElementById("auth_required_message").style.display = 'block'
 
     }
     document.body.style.overflow = "hidden";
@@ -1324,7 +1390,9 @@ export default class AuthnWidget {
         }
       })
     }
-    document.querySelector('#submit').disabled = disabled;
+    if (document.querySelector('#submit')) {
+      document.querySelector('#submit').disabled = disabled;
+    }
   }
 
   async registerIdVerificationRequiredEventHandler() {
