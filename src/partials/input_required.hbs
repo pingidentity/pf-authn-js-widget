@@ -128,6 +128,24 @@
           Alternative Authentication</a>
       </div>
       <div class="text-block--overflow-wrap">
+        {{#ifEq authenticator "EMAIL OTP"}}
+          <a tabindex="0" data-actionId="resendAuthenticationRequest" target="_self" class="anchor">
+            Resend Authentication Request</a>
+        {{else ifEq authenticator "SMS OTP"}}
+          <a tabindex="0" data-actionId="resendAuthenticationRequest" target="_self" class="anchor">
+            Resend Authentication Request</a>
+        {{else ifEq authenticator "VOICE OTP"}}
+          <a tabindex="0" data-actionId="resendAuthenticationRequest" target="_self" class="anchor">
+            Resend Authentication Request</a>
+        {{else ifEq authenticator "SMARTCREDENTIALPUSH"}}
+          <a tabindex="0" data-actionId="resendAuthenticationRequest" target="_self" class="anchor">
+            Resend Authentication Request</a>
+        {{else ifEq authenticator "TOKENPUSH"}}
+          <a tabindex="0" data-actionId="resendAuthenticationRequest" target="_self" class="anchor">
+            Resend Authentication Request</a>
+        {{/ifEq}}
+      </div>
+      <div class="text-block--overflow-wrap">
         <a tabindex="0" data-actionId="cancel" target="_self" class="anchor">Cancel</a>
       </div>
     </div>
