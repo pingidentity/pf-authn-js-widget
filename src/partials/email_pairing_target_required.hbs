@@ -9,15 +9,21 @@
     </svg>
     <span class="inline-icon">Email</span></h1>
   <div class="text-block">
-    <div class="text-block--overflow-wrap">Enter the email you would like to receive authentication codes with.</div>
+    {{#if allowedValue}}
+      <div class="text-block--overflow-wrap">Passcodes will be sent to the following email address:</div>
+    {{else}}
+      <div class="text-block--overflow-wrap">Enter the email you would like to receive authentication codes with.</div>
+    {{/if}}
   </div>
   <div class="tile-selector tile-selector--stacked">
     <form class="form" id="AuthnWidgetForm">
       <div class="stack stack--small" data-id="stack">
         <div class="text-input__icon">
-          <input id="email" type="email" name="email" class="text-input text-input required" value=""/>
+          <input id="email" type="email" name="email" class="text-input text-input required"
+                 value="{{allowedValue}}" {{#if allowedValue}} readonly="readonly" {{/if}} />
         </div>
       </div>
+      <div id="allowedValue" data-velocity-variable="{{allowedValue}}"></div>
       <div class="text-block" data-id="textblock">
         <div class="text-block--overflow-wrap">
           <div class="stack" data-id="stack">
