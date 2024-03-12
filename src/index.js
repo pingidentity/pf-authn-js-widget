@@ -52,6 +52,12 @@ export default class AuthnWidget {
       'ID_VERIFICATION_OPTIONS',
     ]
 
+    const magicLinkStates = [
+      'LINK_INITIATED',
+      'LINK_COMPLETED',
+      'LINK_EXPIRED',
+    ]
+
     return ['USERNAME_PASSWORD_REQUIRED', 'MUST_CHANGE_PASSWORD', 'CHANGE_PASSWORD_EXTERNAL', 'NEW_PASSWORD_RECOMMENDED',
       'NEW_PASSWORD_REQUIRED', 'SUCCESSFUL_PASSWORD_CHANGE', 'ACCOUNT_RECOVERY_USERNAME_REQUIRED',
       'ACCOUNT_RECOVERY_OTL_VERIFICATION_REQUIRED', 'RECOVERY_CODE_REQUIRED', 'PASSWORD_RESET_REQUIRED',
@@ -73,7 +79,8 @@ export default class AuthnWidget {
     ]
     .concat(oauthUserAuthorizationStates)
     .concat(oneTimeDeviceOtpStates)
-    .concat(idVerificationStates);
+    .concat(idVerificationStates)
+    .concat(magicLinkStates);
   }
 
   static get COMMUNICATION_ERROR_MSG() {
@@ -132,6 +139,7 @@ export default class AuthnWidget {
     this.openExternalAuthnPopup = this.openExternalAuthnPopup.bind(this);
     this.externalAuthnFailure = this.externalAuthnFailure.bind(this);
     this.postContinueAuthentication = this.postContinueAuthentication.bind(this);
+    this.postContinue = this.postContinue.bind(this);
     this.registerReopenPopUpHandler = this.registerReopenPopUpHandler.bind(this);
     this.handleReopenPopUp = this.handleReopenPopUp.bind(this);
     this.registerRegistrationLinks = this.registerRegistrationLinks.bind(this);
@@ -183,6 +191,7 @@ export default class AuthnWidget {
     this.showDeviceManagementPopup = this.showDeviceManagementPopup.bind(this);
     this.hideDeviceManagementPopup = this.hideDeviceManagementPopup.bind(this);
     this.pollCheckGet = this.pollCheckGet.bind(this);
+    this.pollLinkStatus = this.pollLinkStatus.bind(this);
     this.postEmailVerificationRequired = this.postEmailVerificationRequired.bind(this);
     this.registerMfaDevicePairingEventHandler = this.registerMfaDevicePairingEventHandler.bind(this);
     this.handleMfaDevicePairingSelection = this.handleMfaDevicePairingSelection.bind(this);
@@ -255,6 +264,8 @@ export default class AuthnWidget {
     this.addEventHandler('AUTHENTICATOR_SELECTION_REQUIRED', this.registerAuthenticationRequiredHandler);
     this.addPostRenderCallback('INPUT_REQUIRED', this.postInputRequired);
     this.addEventHandler('INPUT_REQUIRED', this.registerInputRequiredHandler);
+    this.addPostRenderCallback('LINK_INITIATED', this.pollLinkStatus);
+    this.addPostRenderCallback('LINK_COMPLETED', this.postContinue);
 
     this.actionModels.set('checkUsernamePassword', { required: ['username', 'password'], properties: ['username', 'password', 'rememberMyUsername', 'thisIsMyDevice', 'captchaResponse'] });
     this.actionModels.set('initiateAccountRecovery', { properties: ['usernameHint'] });
@@ -1223,6 +1234,35 @@ export default class AuthnWidget {
     this.pollCheckGet(this.store.getStore().verificationCode, 5000);
   }
 
+  postContinue() {
+    this.store.dispatch('POST_FLOW', 'continue', '{}')
+      .catch(() => this.generalErrorRenderer(AuthnWidget.COMMUNICATION_ERROR_MSG));
+  }
+
+  pollLinkStatus() {
+    this.pollLink(5000);
+  }
+
+  async pollLink(timeout) {
+    let fetchUtil = this.store.fetchUtil;
+    let result = await fetchUtil.postFlow(this.store.flowId, 'poll', '{}');
+    let newState = await result.json();
+
+    if (newState.status === 'LINK_INITIATED') {
+      setTimeout(() => {
+        this.pollLink(timeout);
+      }, timeout);
+    } else if (newState.status === 'LINK_EXPIRED' || newState.status === 'LINK_COMPLETED') { // Render the new template
+      this.store.dispatch('GET_FLOW')
+        .catch(() => this.generalErrorRenderer(AuthnWidget.COMMUNICATION_ERROR_MSG));
+    } else {
+      // The flow continued and the original tab won't be able to get a magic link status.
+      let template = this.getTemplate('link_done');
+      let params = this.assets.toTemplateParams();
+      let widgetDiv = document.getElementById(this.divId);
+      widgetDiv.innerHTML = template(params);
+    }
+  }
   handleIdVerificationInProgress() {
     setTimeout(() => {
       this.store.dispatch('POST_FLOW', 'poll', '{}');

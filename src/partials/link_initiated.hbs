@@ -1,0 +1,22 @@
+<div class="card">
+  <div class="org-logo">
+    <img class="org-logo__image" src="{{logo}}" alt="Company Logo" />
+  </div>
+  {{#if email}}
+  <div class="text-block text-block--large" data-id="textblock">
+    <div class="text-block--overflow-wrap">A magic link has been sent to </div>
+  </div>
+  <div class="text-block text-block--large" data-id="textblock">
+    <div class="text-block--overflow-wrap">{{email}}</div>
+  </div>
+  {{else}}
+  <div class="text-block text-block--large" data-id="textblock">
+    <div class="text-block--overflow-wrap">A magic link has been generated and sent to you.</div>
+  </div>
+  {{/if}}
+  <div class="text-block text-block--small" data-id="textblock">
+    <div class="text-block--overflow-wrap">
+      Please check your email to complete authentication.
+    </div>
+  </div>
+</div>
