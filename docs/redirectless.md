@@ -40,6 +40,29 @@ Create a configuration object that contains the `onAuthorizationRequest` and `on
 ### OAuth 2.0 Device Authorization Grant
 Create a configuration object containing the `onAuthorizationSuccess` function and a `flowType` attribute set to `PfAuthnWidget.FLOW_TYPE_USER_AUTHZ`. This configuration initializes the Authentication API Widget to interact with PingFederate's user authorization endpoint. Optionally, the `user_code` attribute can be provided. If provided, it is passed to the user authorization endpoint as a query parameter, which will trigger a state where the user must confirm the code (rather than having to enter it). An example is present [here](#oauth-20-device-authorization).
 
+### Cookieless 
+The cookieless configuration allows the widget to operate without using HTTP cookies. The PingFederate OAuth 2.0 client must be configured appropriatly inorder for this mode to work correctly.
+
+By enabling this mode, the widget will handle the state management required by the cookieless functionality. the `cookieless` and `stateHeaderName` are attributes controlling this mode.
+- `cookieless` attribute is boolean, defaulting to `false`
+- `stateHeaderName` attribute specifices the header name to send the state back to PingFederate. If not specified the default `X-Pf-Authn-Api-State` value will be used.
+
+An example of the cookieless configuration can be found below:
+```javascript
+var config = {
+  client_id: 'test',
+  response_type: 'token',
+  cookieless: true,
+  stateHeaderName: 'X-Pf-Authn-Api-State',
+  onAuthorizationSuccess: function (response) {
+    console.log(response);
+  },
+  onAuthorizationFailed: function (response) {
+      console.log(response);
+  }
+};
+```
+
 ### Callback function descriptions
 #### `onAuthorizationRequest` function
 This callback function is called during the authorization request. It has no arguments and it's expected to return a JavaScript `Promise`, which completes the authorization request call to PingFederate.

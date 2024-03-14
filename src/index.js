@@ -326,6 +326,11 @@ export default class AuthnWidget {
       redirectlessConfigValidator(configuration);
       this.addPostRenderCallback('COMPLETED', (state) => completeStateCallback(state, configuration));
       this.addPostRenderCallback('FAILED', (state) => failedStateCallback(state, configuration));
+      const isCookieless = configuration.cookieless || false;
+      this.store.setCookieless(isCookieless);
+      if (isCookieless) {
+        this.store.setStateHeader(configuration.stateHeaderName || 'X-PF-Authn-API-State');
+      }
       this.store
         .dispatch('INIT_REDIRECTLESS', null, configuration)
         .catch((err) => this.generalErrorRenderer(err.message));

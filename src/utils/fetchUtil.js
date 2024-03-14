@@ -1,10 +1,15 @@
 export default class fetchUtil {
-  constructor(baseUrl, useActionParam=false) {
+  constructor(baseUrl, useActionParam = false) {
     this.baseUrl = baseUrl;
     this.useActionParam = useActionParam;
+    this.cookieless = false;
   }
 
-  doRequest(method, flowId, actionId, body) {
+  configCookieless(flag) {
+    this.cookieless = flag;
+  }
+
+  doRequest(method, flowId, actionId, body, httpHeaders) {
     var FLOWS_ENDPOINT = '/pf-ws/authn/flows/';
     var url = this.baseUrl + FLOWS_ENDPOINT + flowId;
     var headers = {
@@ -15,26 +20,33 @@ export default class fetchUtil {
       var contentType = 'application/json';
       if (this.useActionParam) {
         url = url + '?action=' + actionId;
-      }
-      else {
+      } else {
         contentType = 'application/vnd.pingidentity.' + actionId + '+json';
       }
       headers['Content-Type'] = contentType;
     }
+    // add more headers
+    httpHeaders.forEach((value, key) => {
+      headers[key] = value;
+    });
+    //options
     var options = {
       headers: headers,
       method: method,
       body: body,
-      credentials: 'include'
+    }
+    // include credentials
+    if (!this.cookieless) {
+      options.credentials = 'include'
     }
     return fetch(url, options);
   }
 
-  getFlow(flowId) {
-    return this.doRequest('GET', flowId);
+  getFlow(flowId, headers = new Map()) {
+    return this.doRequest('GET', flowId, headers);
   }
 
-  postFlow(flowId, actionId, body) {
-    return this.doRequest('POST', flowId, actionId, body);
+  postFlow(flowId, actionId, body, headers = new Map()) {
+    return this.doRequest('POST', flowId, actionId, body, headers);
   }
 }
