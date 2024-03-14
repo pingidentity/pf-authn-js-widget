@@ -369,6 +369,11 @@ export default class AuthnWidget {
       redirectlessConfigValidator(configuration);
       this.addPostRenderCallback('COMPLETED', (state) => completeStateCallback(state, configuration));
       this.addPostRenderCallback('FAILED', (state) => failedStateCallback(state, configuration));
+      const isCookieless = Boolean(configuration.cookieless);
+      this.store.setCookieless(isCookieless);
+      if (isCookieless) {
+        this.store.setStateHeader(configuration.stateHeaderName || 'X-PF-Authn-API-State');
+      }
       this.store
         .dispatch('INIT_REDIRECTLESS', null, configuration)
         .catch((err) => this.generalErrorRenderer(err.message));
@@ -1072,11 +1077,6 @@ export default class AuthnWidget {
     }
   }
 
-   registerMfaChangeDeviceEventHandler() {
-    document.getElementById('changeDevice')
-            .addEventListener('click', this.handleMfaDeviceChange);
-  }
-
   registerCASChangeMethodEventHandler() {
     document.getElementById('useAlternateMethod')
             .addEventListener('click', this.handleCASUseAlternateMethod);
@@ -1373,6 +1373,7 @@ export default class AuthnWidget {
       widgetDiv.innerHTML = template(params);
     }
   }
+
   handleIdVerificationInProgress() {
     setTimeout(() => {
       this.store.dispatch('POST_FLOW', 'poll', '{}');
@@ -1402,8 +1403,7 @@ export default class AuthnWidget {
       this.store
         .dispatch('GET_FLOW')
         .catch(() => this.generalErrorRenderer(AuthnWidget.COMMUNICATION_ERROR_MSG));
-    }
-    else {
+    } else {
       this.pollCheckGetHandler = setTimeout(() => {
         this.pollCheckGet(currentVerificationCode, timeout);
       }, timeout);
