@@ -1240,13 +1240,11 @@ export default class AuthnWidget {
   }
 
   pollLinkStatus() {
-    this.pollLink(5000);
+    this.pollLink(2000);
   }
 
   async pollLink(timeout) {
-    let fetchUtil = this.store.fetchUtil;
-    let result = await fetchUtil.postFlow(this.store.flowId, 'poll', '{}');
-    let newState = await result.json();
+    let newState = await this.store.poll();
 
     if (newState.status === 'LINK_INITIATED') {
       setTimeout(() => {
@@ -1270,9 +1268,7 @@ export default class AuthnWidget {
   }
 
   async pollCheckGet(currentVerificationCode, timeout) {
-    let fetchUtil = this.store.fetchUtil;
-    let result = await fetchUtil.postFlow(this.store.flowId, 'poll', '{}');
-    let newState = await result.json();
+    let newState = await this.store.poll();
 
     if (newState.txStatus === 'INITIATED')
     {
