@@ -500,8 +500,7 @@ export default class AuthnWidget {
       let devicePairingMethod = source.dataset['mfaDevicePairingSelection'].split('.');
       let data = {
         'devicePairingMethod': {
-          'deviceType': devicePairingMethod[0],
-          'userAgent': userAgent
+          'deviceType': devicePairingMethod[0]
         }
       };
       if (devicePairingMethod.length > 1 && devicePairingMethod[1] !== '') {
@@ -509,6 +508,7 @@ export default class AuthnWidget {
       }
       if (devicePairingMethod[0] === 'SECURITY_KEY' || devicePairingMethod[0] === 'PLATFORM' || devicePairingMethod[0] === 'FIDO2' ) {
         data['devicePairingMethod']['relyingPartyId'] = rpId;
+        data['devicePairingMethod']['userAgent'] = userAgent;
       }
       this.store.dispatch('POST_FLOW', "selectDevicePairingMethod", JSON.stringify(data));
     } else {
