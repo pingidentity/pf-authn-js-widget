@@ -1,5 +1,6 @@
 import { initRedirectless } from './utils/redirectless';
 import FetchUtil from './utils/fetchUtil';
+import fetchUtil from "./utils/fetchUtil";
 
 export default class Store {
   constructor(flowId, baseUrl, checkRecaptcha, options) {
@@ -244,5 +245,10 @@ export default class Store {
   registerListener(listener) {
     this.listeners.push(listener);
     console.log('registering # of listeners: ' + this.listeners.length);
+  }
+
+  async poll(actionId = 'poll', body = '{}') {
+    let result = await this.fetchUtil.postFlow(this.flowId, actionId, body);
+    return await result.json();
   }
 }

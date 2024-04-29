@@ -23,6 +23,7 @@ The widget is regularly updated to support more integrations.
 | [Identifier First](https://docs.pingidentity.com/csh?Product=pf-latest&topicname=iek1564003022460.html)                                                    | :heavy_check_mark:    | :heavy_check_mark:  |
 | [Jamf Integration Kit](https://docs.pingidentity.com/bundle/integrations/page/wyg1612987868528.html)                                                       | :heavy_check_mark:    | :heavy_check_mark:  |
 | [LinkedIn Cloud Identity Connector](https://docs.pingidentity.com/bundle/integrations/page/pwm1563995028175.html)                                          | :heavy_check_mark:    | :heavy_check_mark:  |
+| [Magic Link Integration Kit](https://docs.pingidentity.com/r/en-us/pingfederate-magic-link-ik/pingfederate_magic_link_ik)                      | :heavy_check_mark:    | :heavy_check_mark:  |
 | [Microsoft Cloud Identity Connector](https://docs.pingidentity.com/bundle/integrations/page/set1623964507521.html)                                         | :heavy_check_mark:    | :heavy_check_mark:  |
 | [One-Time Passcode Integration Kit](https://docs.pingidentity.com/bundle/integrations/page/hdv1589402808052.html)                                          | :heavy_check_mark:    |                     |
 | [PingOne MFA Integration Kit](https://docs.pingidentity.com/bundle/integrations/page/cal1599060087050.html)                                                | :heavy_check_mark:    | :heavy_check_mark:  |
