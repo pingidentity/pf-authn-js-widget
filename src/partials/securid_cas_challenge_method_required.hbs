@@ -1,0 +1,54 @@
+<div class="card">
+  <div class="org-logo">
+    <img class="org-logo__image" src="{{logo}}" alt="Company Logo"/>
+  </div>
+  <h1 class="heading">CAS Authentication</h1>
+  <div class="text-block">    
+      <div class="text-block__text">Select one of the authentication methods available below.</div>
+  </div>
+  <div class="tile-selector tile-selector--stacked">
+    {{#if authFailed}}
+    <div class="feedback feedback--error" data-id="feedback">
+      <span class="feedback__icon pingicon-error-triangle"></span>
+      <div class="feedback__message">Request failed.
+      </div>
+    </div>
+    {{/if}}
+    {{#if resetFailed}}
+    <div class="feedback feedback--error" data-id="feedback">
+      <span class="feedback__icon pingicon-error-triangle"></span>
+      <div class="feedback__message">Pin reset request failed.
+      </div>
+    </div>
+    {{/if}}    
+    {{#each challengeMethodIds as |challengeMethodId|}}
+      {{#ifEq challengeMethodId "SECURID"}}
+        <div class="tile-button--side-icon tile-button tile-button--stacked-small"
+          data-id="cas-method-selection-button" id="cas-method-SECURID" role="button" tabindex="0" data-cas-challenge-method-selection="SECURID">
+           <span class="text-block__text" data-cas-challenge-method-selection="SECURID">SECURID</span>
+        </div>
+      {{/ifEq}}
+      {{#ifEq challengeMethodId "APPROVE"}}
+        <div class="tile-button--side-icon tile-button tile-button--stacked-small"
+          data-id="cas-method-selection-button" id="cas-method-APPROVE" role="button" tabindex="0" data-cas-challenge-method-selection="APPROVE">
+           <span class="text-block__text"  data-cas-challenge-method-selection="APPROVE">APPROVE</span>
+        </div>
+      {{/ifEq}}
+      {{#ifEq challengeMethodId "TOKEN"}}
+        <div class="tile-button--side-icon tile-button tile-button--stacked-small"
+          data-id="cas-method-selection-button" id="cas-method-TOKEN" role="button" tabindex="0" data-cas-challenge-method-selection="TOKEN">
+           <span class="text-block__text" data-cas-challenge-method-selection="TOKEN">TOKEN</span>
+        </div>
+      {{/ifEq}}
+    {{/each}}
+
+    <form class="form form--margin-small" id="AuthnWidgetForm">      
+      <div class="stack" data-id="stack">    
+        <div class="text-block">
+          <a tabindex="0" data-actionId="cancel" target="_self" class="anchor">
+            Cancel</a>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
