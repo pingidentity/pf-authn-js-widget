@@ -256,7 +256,6 @@ export default class AuthnWidget {
     this.addPostRenderCallback('SECURID_REAUTHENTICATION_REQUIRED', this.postCASFlow);
     this.addPostRenderCallback('SECURID_NEXT_TOKENCODE_REQUIRED', this.postCASFlow);
     this.addPostRenderCallback('SECURID_SYSTEM_PIN_RESET_REQUIRED', this.postCASFlow);
-    this.addPostRenderCallback('SECURID_SYSTEM_PIN_RESET_REQUIRED', this.postCASFlow);
     this.addPostRenderCallback('SECURID_USER_PIN_RESET_REQUIRED', this.postCASFlow);
     this.addPostRenderCallback('SECURID_CREDENTIAL_REQUIRED', this.postCASFlow);
     this.addPostRenderCallback('SECURID_TOKEN_REQUIRED', this.postCASFlow);
@@ -1080,11 +1079,14 @@ export default class AuthnWidget {
   }
 
   async postCASFlow() {
-    document.getElementById('useAlternateMethod')
-    .addEventListener('click', this.handleCASUseAlternateMethod);
-    if (this.store.securIdChallengeMethods.length  >= 1)
+    if (document.getElementById('useAlternateMethod') != null)
     {
-      document.getElementById('useAlternateMethod').style.display = 'block';
+      document.getElementById('useAlternateMethod')
+      .addEventListener('click', this.handleCASUseAlternateMethod);
+      if (this.store.securIdChallengeMethods !== undefined && this.store.securIdChallengeMethods.length  >= 1)
+      {
+        document.getElementById('useAlternateMethod').style.display = 'block';
+      }
     }
   }
 
