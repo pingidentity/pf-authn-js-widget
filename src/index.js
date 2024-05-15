@@ -58,6 +58,18 @@ export default class AuthnWidget {
       'LINK_EXPIRED',
     ]
 
+    const securIdStates = [
+      'SECURID_NEXT_CODE_REQUIRED',
+      'SECURID_TOKEN_REQUIRED',
+      'SECURID_CAS_CHALLENGE_METHOD_REQUIRED',
+      'SECURID_CAS_APPROVE_METHOD_PENDING_VERIFICATION',
+      'SECURID_CREDENTIAL_REQUIRED',
+      'SECURID_NEXT_TOKENCODE_REQUIRED',
+      'SECURID_REAUTHENTICATION_REQUIRED',
+      'SECURID_SYSTEM_PIN_RESET_REQUIRED',
+      'SECURID_USER_PIN_RESET_REQUIRED',
+    ]
+
     return ['USERNAME_PASSWORD_REQUIRED', 'MUST_CHANGE_PASSWORD', 'CHANGE_PASSWORD_EXTERNAL', 'NEW_PASSWORD_RECOMMENDED',
       'NEW_PASSWORD_REQUIRED', 'SUCCESSFUL_PASSWORD_CHANGE', 'ACCOUNT_RECOVERY_USERNAME_REQUIRED',
       'ACCOUNT_RECOVERY_OTL_VERIFICATION_REQUIRED', 'RECOVERY_CODE_REQUIRED', 'PASSWORD_RESET_REQUIRED',
@@ -67,9 +79,7 @@ export default class AuthnWidget {
       'DEVICE_PROFILE_REQUIRED', 'REGISTRATION_REQUIRED', 'REFERENCE_ID_REQUIRED','CURRENT_CREDENTIALS_REQUIRED',
       'DEVICE_SELECTION_REQUIRED', 'MFA_COMPLETED', 'MFA_FAILED', 'OTP_REQUIRED', 'ASSERTION_REQUIRED',
       'PUSH_CONFIRMATION_REJECTED', 'PUSH_CONFIRMATION_TIMED_OUT', 'PUSH_CONFIRMATION_WAITING', 'ACCOUNT_LINKING_FAILED',
-      'SECURID_NEXT_CODE_REQUIRED', 'SECURID_TOKEN_REQUIRED', 'SECURID_CAS_CHALLENGE_METHOD_REQUIRED', 'SECURID_CAS_APPROVE_METHOD_PENDING_VERIFICATION',
-      'SECURID_CREDENTIAL_REQUIRED', 'SECURID_NEXT_TOKENCODE_REQUIRED', 'SECURID_REAUTHENTICATION_REQUIRED',
-      'SECURID_SYSTEM_PIN_RESET_REQUIRED', 'SECURID_USER_PIN_RESET_REQUIRED', 'EMAIL_VERIFICATION_REQUIRED', 'EMAIL_VERIFICATION_OTP_REQUIRED',
+      'EMAIL_VERIFICATION_REQUIRED', 'EMAIL_VERIFICATION_OTP_REQUIRED',
       'MFA_SETUP_REQUIRED', 'DEVICE_PAIRING_METHOD_REQUIRED', 'EMAIL_PAIRING_TARGET_REQUIRED',
       'EMAIL_ACTIVATION_REQUIRED', 'SMS_PAIRING_TARGET_REQUIRED', 'SMS_ACTIVATION_REQUIRED',
       'VOICE_PAIRING_TARGET_REQUIRED', 'VOICE_ACTIVATION_REQUIRED', 'TOTP_ACTIVATION_REQUIRED', 'PLATFORM_ACTIVATION_REQUIRED',
@@ -81,7 +91,8 @@ export default class AuthnWidget {
     .concat(oauthUserAuthorizationStates)
     .concat(oneTimeDeviceOtpStates)
     .concat(idVerificationStates)
-    .concat(magicLinkStates);
+    .concat(magicLinkStates)
+    .concat(securIdStates);
   }
 
   static get COMMUNICATION_ERROR_MSG() {
@@ -867,12 +878,10 @@ export default class AuthnWidget {
     Array.from(document.querySelectorAll('[data-cas-challenge-method-selection]'))
     .forEach(element => element.addEventListener('click', this.handleCASChallengeMethodSelection));
     let state = await this.store.getState();
-    if (state.challengeMethodIds !== undefined && state.challengeMethodIds.length >= 1)
-    {
+    if (state.challengeMethodIds !== undefined && state.challengeMethodIds.length >= 1) {
       this.store.securIdChallengeMethods = state.challengeMethodIds;
     }
-    else
-    {
+    else {
       state.challengeMethodIds = this.store.securIdChallengeMethods;
     }
   }
@@ -1079,12 +1088,10 @@ export default class AuthnWidget {
   }
 
   async postCASFlow() {
-    if (document.getElementById('useAlternateMethod') != null)
-    {
+    if (document.getElementById('useAlternateMethod') != null) {
       document.getElementById('useAlternateMethod')
       .addEventListener('click', this.handleCASUseAlternateMethod);
-      if (this.store.securIdChallengeMethods !== undefined && this.store.securIdChallengeMethods.length  >= 1)
-      {
+      if (this.store.securIdChallengeMethods !== undefined && this.store.securIdChallengeMethods.length  >= 1) {
         document.getElementById('useAlternateMethod').style.display = 'block';
       }
     }
@@ -1106,12 +1113,13 @@ export default class AuthnWidget {
 
     document.getElementById('useAlternateMethod')
     .addEventListener('click', this.handleCASUseAlternateMethod);
+    let newState = await this.store.poll();
     let pollState = await this.store.getState();
     if (pollState.status === 'SECURID_CAS_APPROVE_METHOD_PENDING_VERIFICATION') {
       // continue waiting
       clearTimeout(this.pollPushNoticationState);
       this.pollPushNoticationState = setTimeout(() => {
-        this.store.dispatch('POST_FLOW', 'poll', '{}');
+        this.postCASApproveNotificationWait();
       }, 5000);
     } else {
       clearTimeout(this.pollPushNoticationState);
