@@ -880,8 +880,7 @@ export default class AuthnWidget {
     let state = await this.store.getState();
     if (state.challengeMethodIds !== undefined && state.challengeMethodIds.length >= 1) {
       this.store.securIdChallengeMethods = state.challengeMethodIds;
-    }
-    else {
+    } else {
       state.challengeMethodIds = this.store.securIdChallengeMethods;
     }
   }
