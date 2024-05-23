@@ -1105,11 +1105,9 @@ export default class AuthnWidget {
   }
 
   async postCASApproveNotificationWait() {
-
     if (document.querySelector("#spinnerId")) {
       document.querySelector('#spinnerId').style.display = 'block';
     }
-
     document.getElementById('useAlternateMethod')
     .addEventListener('click', this.handleCASUseAlternateMethod);
     let newState = await this.store.poll();
@@ -1127,7 +1125,6 @@ export default class AuthnWidget {
         .catch(() => this.generalErrorRenderer(AuthnWidget.COMMUNICATION_ERROR_MSG));
     }
   }
-
 
   handleMfaRemoveDeviceSelection(evt) {
     evt.stopPropagation();
