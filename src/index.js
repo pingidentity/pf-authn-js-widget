@@ -58,6 +58,18 @@ export default class AuthnWidget {
       'LINK_EXPIRED',
     ]
 
+    const securIdStates = [
+      'SECURID_NEXT_CODE_REQUIRED',
+      'SECURID_TOKEN_REQUIRED',
+      'SECURID_CAS_CHALLENGE_METHOD_REQUIRED',
+      'SECURID_CAS_APPROVE_METHOD_PENDING_VERIFICATION',
+      'SECURID_CREDENTIAL_REQUIRED',
+      'SECURID_NEXT_TOKENCODE_REQUIRED',
+      'SECURID_REAUTHENTICATION_REQUIRED',
+      'SECURID_SYSTEM_PIN_RESET_REQUIRED',
+      'SECURID_USER_PIN_RESET_REQUIRED',
+    ]
+
     return ['USERNAME_PASSWORD_REQUIRED', 'MUST_CHANGE_PASSWORD', 'CHANGE_PASSWORD_EXTERNAL', 'NEW_PASSWORD_RECOMMENDED',
       'NEW_PASSWORD_REQUIRED', 'SUCCESSFUL_PASSWORD_CHANGE', 'ACCOUNT_RECOVERY_USERNAME_REQUIRED',
       'ACCOUNT_RECOVERY_OTL_VERIFICATION_REQUIRED', 'RECOVERY_CODE_REQUIRED', 'PASSWORD_RESET_REQUIRED',
@@ -67,8 +79,7 @@ export default class AuthnWidget {
       'DEVICE_PROFILE_REQUIRED', 'REGISTRATION_REQUIRED', 'REFERENCE_ID_REQUIRED','CURRENT_CREDENTIALS_REQUIRED',
       'DEVICE_SELECTION_REQUIRED', 'MFA_COMPLETED', 'MFA_FAILED', 'OTP_REQUIRED', 'ASSERTION_REQUIRED',
       'PUSH_CONFIRMATION_REJECTED', 'PUSH_CONFIRMATION_TIMED_OUT', 'PUSH_CONFIRMATION_WAITING', 'ACCOUNT_LINKING_FAILED',
-      'SECURID_CREDENTIAL_REQUIRED', 'SECURID_NEXT_TOKENCODE_REQUIRED', 'SECURID_REAUTHENTICATION_REQUIRED',
-      'SECURID_SYSTEM_PIN_RESET_REQUIRED', 'SECURID_USER_PIN_RESET_REQUIRED', 'EMAIL_VERIFICATION_REQUIRED', 'EMAIL_VERIFICATION_OTP_REQUIRED',
+      'EMAIL_VERIFICATION_REQUIRED', 'EMAIL_VERIFICATION_OTP_REQUIRED',
       'MFA_SETUP_REQUIRED', 'DEVICE_PAIRING_METHOD_REQUIRED', 'EMAIL_PAIRING_TARGET_REQUIRED',
       'EMAIL_ACTIVATION_REQUIRED', 'SMS_PAIRING_TARGET_REQUIRED', 'SMS_ACTIVATION_REQUIRED',
       'VOICE_PAIRING_TARGET_REQUIRED', 'VOICE_ACTIVATION_REQUIRED', 'TOTP_ACTIVATION_REQUIRED', 'PLATFORM_ACTIVATION_REQUIRED',
@@ -80,7 +91,8 @@ export default class AuthnWidget {
     .concat(oauthUserAuthorizationStates)
     .concat(oneTimeDeviceOtpStates)
     .concat(idVerificationStates)
-    .concat(magicLinkStates);
+    .concat(magicLinkStates)
+    .concat(securIdStates);
   }
 
   static get COMMUNICATION_ERROR_MSG() {
@@ -152,6 +164,7 @@ export default class AuthnWidget {
     this.handleAgentlessSignOn = this.handleAgentlessSignOn.bind(this);
     this.postEmptyAuthentication = this.postEmptyAuthentication.bind(this);
     this.handleMfaDeviceSelection = this.handleMfaDeviceSelection.bind(this);
+    this.handleCASChallengeMethodSelection = this.handleCASChallengeMethodSelection.bind(this);
     this.handleMfaOneTimeDeviceSelection = this.handleMfaOneTimeDeviceSelection.bind(this);
     this.handleMfaSetDefaultDeviceSelection = this.handleMfaSetDefaultDeviceSelection.bind(this);
     this.handleMfaRemoveDeviceSelection = this.handleMfaRemoveDeviceSelection.bind(this);
@@ -161,13 +174,19 @@ export default class AuthnWidget {
     this.handleContinueAddMfaMethod = this.handleContinueAddMfaMethod.bind(this);
     this.handleContinueRemoveDevice = this.handleContinueRemoveDevice.bind(this);
     this.registerMfaEventHandler = this.registerMfaEventHandler.bind(this);
+    this.registerSecurIDCASEventHandler = this.registerSecurIDCASEventHandler.bind(this);
     this.registerMfaOneTimeDeviceChangeEventHandler = this.registerMfaOneTimeDeviceChangeEventHandler.bind(this);
     this.registerMfaChangeDeviceEventHandler = this.registerMfaChangeDeviceEventHandler.bind(this);
+    this.registerCASChangeMethodEventHandler = this.registerCASChangeMethodEventHandler.bind(this);
     this.handleMfaDeviceChange = this.handleMfaDeviceChange.bind(this);
+    this.handleCASUseAlternateMethod = this.handleCASUseAlternateMethod.bind(this);
     this.handleMfaOneTimeDeviceChange = this.handleMfaOneTimeDeviceChange.bind(this);
     this.registerMfaUsePasscodeEventHandler = this.registerMfaUsePasscodeEventHandler.bind(this);
     this.handleMfaUsePasscode = this.handleMfaUsePasscode.bind(this);
     this.postPushNotificationWait = this.postPushNotificationWait.bind(this);
+    this.postCASApproveNotificationWait = this.postCASApproveNotificationWait.bind(this);
+    this.postCASChallengeMethodRequired = this.postCASChallengeMethodRequired.bind(this);
+    this.postCASFlow = this.postCASFlow.bind(this);
     this.registerIdVerificationRequiredEventHandler = this.registerIdVerificationRequiredEventHandler.bind(this);
     this.postIdVerificationRequired = this.postIdVerificationRequired.bind(this);
     this.handleIdVerificationInProgress = this.handleIdVerificationInProgress.bind(this);
@@ -229,6 +248,7 @@ export default class AuthnWidget {
     this.addPostRenderCallback('AUTHENTICATION_REQUIRED', this.postEmptyAuthentication);
     this.addPostRenderCallback('MFA_COMPLETED', this.postContinueAuthentication);
     this.addEventHandler('DEVICE_SELECTION_REQUIRED', this.registerMfaEventHandler);
+    this.addEventHandler('SECURID_CAS_CHALLENGE_METHOD_REQUIRED', this.registerSecurIDCASEventHandler);
     this.addPostRenderCallback('DEVICE_SELECTION_REQUIRED', this.postDeviceSelectionRequired);
     this.addEventHandler('ONE_TIME_DEVICE_OTP_METHOD_TYPE_INPUT_REQUIRED', this.registerMfaEventHandler);
     this.addEventHandler('ONE_TIME_DEVICE_OTP_INPUT_REQUIRED', this.registerMfaOneTimeDeviceChangeEventHandler);
@@ -242,6 +262,15 @@ export default class AuthnWidget {
     this.addEventHandler('PUSH_CONFIRMATION_WAITING', this.registerMfaUsePasscodeEventHandler);
     this.addPostRenderCallback('PUSH_CONFIRMATION_WAITING', this.postPushNotificationWait);
     this.addEventHandler('PUSH_CONFIRMATION_WAITING', this.registerMfaChangeDeviceEventHandler);
+    this.addPostRenderCallback('SECURID_CAS_APPROVE_METHOD_PENDING_VERIFICATION', this.postCASApproveNotificationWait);
+    this.addPostRenderCallback('SECURID_NEXT_CODE_REQUIRED', this.postCASFlow);
+    this.addPostRenderCallback('SECURID_REAUTHENTICATION_REQUIRED', this.postCASFlow);
+    this.addPostRenderCallback('SECURID_NEXT_TOKENCODE_REQUIRED', this.postCASFlow);
+    this.addPostRenderCallback('SECURID_SYSTEM_PIN_RESET_REQUIRED', this.postCASFlow);
+    this.addPostRenderCallback('SECURID_USER_PIN_RESET_REQUIRED', this.postCASFlow);
+    this.addPostRenderCallback('SECURID_CREDENTIAL_REQUIRED', this.postCASFlow);
+    this.addPostRenderCallback('SECURID_TOKEN_REQUIRED', this.postCASFlow);
+    this.addPostRenderCallback('SECURID_CAS_CHALLENGE_METHOD_REQUIRED', this.postCASChallengeMethodRequired);
     this.addEventHandler('PUSH_CONFIRMATION_TIMED_OUT', this.registerMfaEventHandler);
     this.addEventHandler('PUSH_CONFIRMATION_TIMED_OUT', this.registerMfaChangeDeviceEventHandler);
     this.addPostRenderCallback('MOBILE_PAIRING_REQUIRED', this.postContinueAuthentication);
@@ -284,8 +313,10 @@ export default class AuthnWidget {
     this.actionModels.set('checkAssertion', {required: ['assertion', 'origin', 'compatibility'],  properties: ['assertion', 'origin', 'compatibility'] });
     this.actionModels.set('checkCredential', { required: ['passcode'], properties: ['username', 'passcode'] });
     this.actionModels.set('checkNextTokencode', { required: ['tokencode'], properties: ['tokencode'] });
+    this.actionModels.set('checkTokencode', { required: ['tokencode'], properties: ['tokencode'] });
     this.actionModels.set('checkPasscode', { required: ['passcode'], properties: ['passcode'] });
     this.actionModels.set('resetPin', { required: ['newPin', 'confirmPin'], properties: ['newPin', 'confirmPin'] });
+    this.actionModels.set('validatePasscode', { required: ['passcode'], properties: ['passcode'] });
     this.actionModels.set('submitEmailTarget', {required: ['email']});
     this.actionModels.set('activateEmailDevice', {required: ['otp']});
     this.actionModels.set('submitSmsTarget', {required: ['phone']});
@@ -303,8 +334,9 @@ export default class AuthnWidget {
     this.actionModels.set('checkInput', {required: ['input']});
     this.actionModels.set('submitFraudSessionInfo', { required: ['sessionId', 'clientPlatform', 'clientAction'] });
     this.actionModels.set('continueBiometricDeviceAuthentication', { required: ['origin'] });
-    this.actionModels.set('submitUserCode', { required: ['userCode'] })
-    this.actionModels.set('confirmUserCode', { required: ['userCode'] })
+    this.actionModels.set('submitUserCode', { required: ['userCode'] });
+    this.actionModels.set('confirmUserCode', { required: ['userCode'] });
+    this.actionModels.set('useAlternateMethod', {});
   }
 
   init() {
@@ -842,6 +874,17 @@ export default class AuthnWidget {
     this.store.dispatch('POST_FLOW', 'authenticate', '{}');
   }
 
+  async registerSecurIDCASEventHandler() {
+    Array.from(document.querySelectorAll('[data-cas-challenge-method-selection]'))
+    .forEach(element => element.addEventListener('click', this.handleCASChallengeMethodSelection));
+    let state = await this.store.getState();
+    if (state.challengeMethodIds !== undefined && state.challengeMethodIds.length >= 1) {
+      this.store.securIdChallengeMethods = state.challengeMethodIds;
+    } else {
+      state.challengeMethodIds = this.store.securIdChallengeMethods;
+    }
+  }
+
   registerMfaEventHandler() {
     Array.from(document.querySelectorAll('[data-mfa-selection-kebab-menu-container]'))
       .forEach(element => element.addEventListener('click', this.showDeviceManagementPopup));
@@ -890,6 +933,21 @@ export default class AuthnWidget {
         }
       };
       this.store.dispatch('POST_FLOW', "selectDevice", JSON.stringify(data));
+    } else {
+      console.log("ERROR - Unable to dispatch device selection as the target was null");
+    }
+  }
+
+  handleCASChallengeMethodSelection(evt) {
+    evt.preventDefault();
+    let source = evt.currentTarget;
+    let storeState = this.store.getStore();
+    if (source) {
+      let casMethod = source.dataset['casChallengeMethodSelection'];
+      let data = {
+        "input": casMethod
+      };
+      this.store.dispatch('POST_FLOW', "selectChallengeMethod", JSON.stringify(data));
     } else {
       console.log("ERROR - Unable to dispatch device selection as the target was null");
     }
@@ -1011,6 +1069,60 @@ export default class AuthnWidget {
       this.store.dispatch('POST_FLOW', "setDefaultDevice", JSON.stringify(data));
     } else {
       console.log("ERROR - Unable to dispatch device selection as the target was null");
+    }
+  }
+
+   registerMfaChangeDeviceEventHandler() {
+    document.getElementById('changeDevice')
+            .addEventListener('click', this.handleMfaDeviceChange);
+  }
+
+  registerCASChangeMethodEventHandler() {
+    document.getElementById('useAlternateMethod')
+            .addEventListener('click', this.handleCASUseAlternateMethod);
+  }
+
+  async postCASChallengeMethodRequired() {
+    let state = await this.store.getState();
+  }
+
+  async postCASFlow() {
+    if (document.getElementById('useAlternateMethod') != null) {
+      document.getElementById('useAlternateMethod')
+      .addEventListener('click', this.handleCASUseAlternateMethod);
+      if (this.store.securIdChallengeMethods !== undefined && this.store.securIdChallengeMethods.length  >= 1) {
+        document.getElementById('useAlternateMethod').style.display = 'block';
+      }
+    }
+  }
+
+  async handleCASUseAlternateMethod(evt) {
+    evt.preventDefault();
+    if (this.pollPushNoticationState) {
+      clearTimeout(this.pollPushNoticationState);
+    }
+    this.store.dispatch('POST_FLOW', "useAlternateMethod", '{}');
+  }
+
+  async postCASApproveNotificationWait() {
+    if (document.querySelector("#spinnerId")) {
+      document.querySelector('#spinnerId').style.display = 'block';
+    }
+    document.getElementById('useAlternateMethod')
+    .addEventListener('click', this.handleCASUseAlternateMethod);
+    let newState = await this.store.poll();
+    let pollState = await this.store.getState();
+    if (pollState.status === 'SECURID_CAS_APPROVE_METHOD_PENDING_VERIFICATION') {
+      // continue waiting
+      clearTimeout(this.pollPushNoticationState);
+      this.pollPushNoticationState = setTimeout(() => {
+        this.postCASApproveNotificationWait();
+      }, 5000);
+    } else {
+      clearTimeout(this.pollPushNoticationState);
+      this.store
+        .dispatch('GET_FLOW')
+        .catch(() => this.generalErrorRenderer(AuthnWidget.COMMUNICATION_ERROR_MSG));
     }
   }
 

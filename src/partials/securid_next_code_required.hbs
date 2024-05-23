@@ -1,28 +1,28 @@
 <div class="card">
   <div class="step-link step-link--back" style="margin: 0; text-align: left;">
     <div style="margin: 0; text-align: left;">
-      <button id="useAlternateMethod" class="button back-button" style="display: none;">
+      <button id="useAlternateMethod" class="button back-button">
       <span class="pingicon-left"></span>
       </button>
     </div>
-  </div>
+  </div>  
   <div class="org-logo">
     <img class="org-logo__image" src="{{logo}}" alt="Company Logo" />
   </div>
-  {{> errors}}
-  {{> spinner}}
   <form class="form" id="AuthnWidgetForm">
+    {{> errors}}
+    {{> spinner}}
     <div class="text-block" data-id="textblock">
       <div class="text-block--overflow-wrap">
-        Please re-authenticate to complete your PIN reset.<br/><br/>Wait until the tokencode (the number on your RSA SecurID token) changes, then enter the new tokencode.<br/><strong>Note:</strong> It might take a minute or more for the tokencode to change.
+        Wait until the tokencode (the number on your RSA SecurID token) changes, then enter the new tokencode.<br/><strong>Note</strong>: It might take a minute or more for the tokencode to change.
       </div>
     </div>
     <div class="float-label">
-      <input type="password" class="text-input float-label__input required" id="passcode" name="passcode"
-        placeholder="Passcode" />
-      <label class="float-label__label" for="passcode">Passcode</label>
+      <input type="password" class="text-input float-label__input required" id="tokencode" name="tokencode"
+        placeholder="Next Tokencode" />
+      <label class="float-label__label" for="tokencode">Next Tokencode</label>
     </div>
-    <button id="submit" data-actionid="checkPasscode" type="submit" class="button button--primary brand-primary-bg">
+    <button id="submit" data-actionid="checkNextTokencode" type="submit" class="button button--primary brand-primary-bg">
       Submit
     </button>
     <div class="text-block">

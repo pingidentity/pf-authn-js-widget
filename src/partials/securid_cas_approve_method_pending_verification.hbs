@@ -1,0 +1,24 @@
+<div class="card">
+  <div class="step-link step-link--back" style="margin: 0; text-align: left;">
+    <div style="margin: 0; text-align: left;">
+      <button id="useAlternateMethod" class="button back-button" style="display: block;">
+      <span class="pingicon-left"></span>
+      </button>
+    </div>
+  </div>  
+  
+  <div class="org-logo">
+    <img class="org-logo__image" src="{{logo}}" alt="Company Logo"/>
+  </div>
+  <div class="stack stack--small" data-id="stack"> <h1 class="heading-text centered-text icon-heading">
+    <svg viewBox="0 0 24 24" role="presentation">
+      <path d="M16,18H7V4H16M11.5,22A1.5,1.5 0 0,1 10,20.5A1.5,1.5 0 0,1 11.5,19A1.5,1.5 0 0,1 13,20.5A1.5,1.5 0 0,1 11.5,22M15.5,1H7.5A2.5,2.5 0 0,0 5,3.5V20.5A2.5,2.5 0 0,0 7.5,23H15.5A2.5,2.5 0 0,0 18,20.5V3.5A2.5,2.5 0 0,0 15.5,1Z"/>
+    </svg><span>Approve</span></h1>
+  </div>
+  {{> errors}}
+  <div class="spinner" id="spinnerId" style="display:block">
+    <div class="spinner__icon" data-id="spinner">
+    </div>
+  </div>
+  <div class="feedback__message">Open the RSA SecurID app and approve push notification.</div>
+</div>
