@@ -12,10 +12,10 @@ Single-page web applications can also use redirectless mode if administrators co
 ## Usage
 To use the redirectless flow:
 - Create an instance of the widget by providing PingFederate's base URL and the necessary options.
-- Create a `configuration` object to provide the necessary redirectless settings. 
+- Create a `configuration` object to provide the necessary redirectless settings.
 - Call `initRedirectless` and pass the `configuration` object as an argument.
 
-Here's an example: 
+Here's an example:
 ```javascript
 var authnWidget = new PfAuthnWidget("https://localhost", { divId: 'authnwidget' });
 var config = {
@@ -39,6 +39,29 @@ This option should support majority of deployments.
 Create a configuration object that contains the `onAuthorizationRequest` and `onAuthorizationSuccess` functions. This option is for advanced use-cases.
 ### OAuth 2.0 Device Authorization Grant
 Create a configuration object containing the `onAuthorizationSuccess` function and a `flowType` attribute set to `PfAuthnWidget.FLOW_TYPE_USER_AUTHZ`. This configuration initializes the Authentication API Widget to interact with PingFederate's user authorization endpoint. Optionally, the `user_code` attribute can be provided. If provided, it is passed to the user authorization endpoint as a query parameter, which will trigger a state where the user must confirm the code (rather than having to enter it). An example is present [here](#oauth-20-device-authorization).
+
+### Cookieless
+The cookieless configuration allows the widget to operate without using HTTP cookies. The PingFederate OAuth 2.0 client must be configured appropriatly in order for this mode to work correctly.
+
+By enabling this mode, the widget will handle the state management required by the cookieless functionality. The `cookieless` and `stateHeaderName` are attributes controlling this mode.
+- `cookieless` attribute is boolean, defaulting to `false`
+- `stateHeaderName` attribute specifices the header name to send the state back to PingFederate. If not specified the default `X-Pf-Authn-Api-State` value will be used.
+
+An example of the cookieless configuration can be found below:
+```javascript
+var config = {
+  client_id: 'test',
+  response_type: 'token',
+  cookieless: true,
+  stateHeaderName: 'X-Pf-Authn-Api-State',
+  onAuthorizationSuccess: function (response) {
+    console.log(response);
+  },
+  onAuthorizationFailed: function (response) {
+      console.log(response);
+  }
+};
+```
 
 ### Callback function descriptions
 #### `onAuthorizationRequest` function
@@ -64,7 +87,7 @@ The `options` attribute `credentials: 'include'` is required to ensure the brows
 This callback function returns the result of the transaction to the webpage containing the Authentication API widget. The protocol response is passed to this function as the first argument when the Authentication API widget calls it.
 [PingAccess redirectless support](/docs/pingaccessRedirectless.md).
 
-Here is an example: 
+Here is an example:
 ```js
 var config = {
   onAuthorizationSuccess: function (response) {

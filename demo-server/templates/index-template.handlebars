@@ -88,6 +88,8 @@
             // flowType: PfAuthnWidget.FLOW_TYPE_AUTHZ, // Optional parameter
             // client_id: '', // redirectless requires this configuration
             // response_type: 'token', // redirectless requires this configuration
+            // cookieless: true, // Optional parameter to enable cookieless mode
+            // stateHeaderName: 'X-Pf-Authn-Api-State', // Optional parameter to set the state header name
             onAuthorizationSuccess: function (response) {
               showResponse(JSON.stringify(response));
             },
