@@ -69,12 +69,12 @@ You also need a running PingFederate instance that is version 9.3 or above.
 A pre-built widget is available for incorporating directly into your application. All versions of the widget, starting with 1.7.0, will be available via CDN.
 
 To include the latest released version the following links can be used:
-- https://downloads.pingidentity.com/pf-authn-widget/latest/pf.authn-widget.js
-- https://downloads.pingidentity.com/pf-authn-widget/latest/main-styles.css
+- https://downloads.pingidentity.com/pf-authn-widget/latest/v2/pf.authn-widget.js
+- https://downloads.pingidentity.com/pf-authn-widget/latest/v2/main-styles.css
 
 To include a specific version of the widget, replace `latest` with the version required.
-- https://downloads.pingidentity.com/pf-authn-widget/1.7.0/pf.authn-widget.js
-- https://downloads.pingidentity.com/pf-authn-widget/1.7.0/main-styles.css
+- https://downloads.pingidentity.com/pf-authn-widget/2.0.0/pf.authn-widget.js
+- https://downloads.pingidentity.com/pf-authn-widget/2.0.0/main-styles.css
 
 A working example that utilizes the pre-built widget would look like:
 ```html
@@ -83,9 +83,9 @@ A working example that utilizes the pre-built widget would look like:
     <title>Authentication API Sample App</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <script src="https://downloads.pingidentity.com/pf-authn-widget/latest/pf.authn-widget.js"></script>
+    <script src="https://downloads.pingidentity.com/pf-authn-widget/latest/v2/pf.authn-widget.js"></script>
     <link rel="stylesheet" type="text/css" href="https://assets.pingone.com/ux/end-user/0.36.1/end-user.css">
-    <link rel="stylesheet" type="text/css" href="https://downloads.pingidentity.com/pf-authn-widget/latest/main-styles.css">
+    <link rel="stylesheet" type="text/css" href="https://downloads.pingidentity.com/pf-authn-widget/latest/v2/main-styles.css">
     <script>
       function load() {
         var authnWidget = new PfAuthnWidget("{{baseUrl}}", { divId: 'authnwidget' });
