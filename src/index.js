@@ -11,7 +11,7 @@ import paOnAuthorizationSuccess from './utils/paOnAuthorizationSuccess';
 import './scss/main.scss';
 import {isValidEmail, isValidPhone} from "./validators/inputs";
 import captchaPostRenderCallback from './utils/callbacks/riskPostRenderCallback';
-import CaptchaUtils from './utils/riskUtils';
+import RiskUtils from './utils/riskUtils';
 //uncomment to add your personal branding
 // import './scss/branding.scss';
 
@@ -132,9 +132,7 @@ export default class AuthnWidget {
     if (!baseUrl) {
       throw new Error(AuthnWidget.BASE_URL_REQUIRED_MSG);
     }
-    this.captchaDivId = 'invisibleRecaptchaId';
     this.assets = new Assets(options);
-    this.grecaptcha = options && options.grecaptcha;
     this.deviceProfileScript = options && options.deviceProfileScript;
     this.fraudClientSessionID =  options && options.fraudClientSessionID;
     this.fraudClientPlatform =  options && options.fraudClientPlatform;
@@ -1613,8 +1611,8 @@ export default class AuthnWidget {
     if (state.showCaptcha && this.needsCaptchaResponse(actionId)) {
       const type = state.captchaProviderType;
       const attributes = state.captchaAttributes;
-      const captchaUtils = new CaptchaUtils(type, attributes, this.store);
-      captchaUtils.execute(actionId, formData)
+      const riskUtils = new RiskUtils(type, attributes, this.store);
+      riskUtils.execute(actionId, formData)
     } else {
       this.store.dispatch('POST_FLOW', actionId, JSON.stringify(formData));
     }
