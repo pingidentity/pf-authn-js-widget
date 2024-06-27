@@ -355,6 +355,7 @@ export default class AuthnWidget {
     this.actionModels.set('submitUserCode', { required: ['userCode'] });
     this.actionModels.set('confirmUserCode', { required: ['userCode'] });
     this.actionModels.set('useAlternateMethod', {});
+    this.actionModels.set('updateDeviceNickname', { required : ['nickname', 'id'] })
   }
 
   init() {
@@ -1026,17 +1027,22 @@ export default class AuthnWidget {
   }
 
   handleAddMfaMethod() {
-    if (document.querySelector('#authentication_required_block_id') != null) {
-      document.querySelector('#authentication_required_block_id').style.display = 'block';
-      document.getElementById("auth_for_unpair_message").style.display = 'none'
-      document.getElementById("auth_for_pair_message").style.display = 'block'
-      if (document.getElementById('confirmation_button') !== null) {
-        document.getElementById('confirmation_button')
-          .addEventListener('click', this.handleContinueAddMfaMethod);
+    const state = this.store.state;
+    if(state.newPairingAuthRequired){
+      if (document.querySelector('#authentication_required_block_id') != null) {
+        document.querySelector('#authentication_required_block_id').style.display = 'block';
+        document.getElementById("auth_for_unpair_message").style.display = 'none'
+        document.getElementById("auth_for_pair_message").style.display = 'block'
+        if (document.getElementById('confirmation_button') !== null) {
+          document.getElementById('confirmation_button')
+            .addEventListener('click', this.handleContinueAddMfaMethod);
+        }
       }
+      document.body.style.overflow = "hidden";
+      document.body.style.height = "100%";
+    } else{
+      this.store.dispatch('POST_FLOW', "setupMfa", null);
     }
-    document.body.style.overflow = "hidden";
-    document.body.style.height = "100%";
   }
 
   handleContinueAddMfaMethod() {
