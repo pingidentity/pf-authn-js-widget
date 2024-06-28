@@ -42,7 +42,7 @@
           {{/ifEq}}
         </div>
       </div>
-      <div class="tile-button__content-container" data-mfa-selection="{{device.id}}">
+      <div id="{{device.id}}_content_container_id" class="tile-button__content-container" data-mfa-selection="{{device.id}}">
         <div
           class="flex-row flex-row--align-stretch flex-row--justify-start flex-row--flex-direction-column flex-row--column-spacing-sm"
           data-id="flex-row">
@@ -89,6 +89,17 @@
           {{#if device.defaultDevice}}
           <div class="device-selector__item-status"><span class="muted-text">Default</span></div>
           {{/if}}
+        </div>
+      </div>
+      <div id="{{device.id}}_update_nickname_id" class="saveable-textinput" style="display: none">
+        <div class="saveable-textinput__input">
+          <input id="nickname_input_for_{{device.id}}" class="text-input"
+                 data-id="text-input" placeholder="Nickname" type="text" autocomplete="on" maxlength="100" style="position: inherit; padding-right: 48px">
+          <div>
+            <button id="update_device_nickname_{{device.id}}" class="saveable-textinput__save saveable-textinput" data-id="button"
+                    data-device-id="{{device.id}}" type="button" role="button" style="border:none; position:inherit">
+            </button>
+          </div>
         </div>
       </div>
       {{#if device.defaultDevice}}
@@ -144,6 +155,9 @@
                   <button class="button file-input--button popover-menu__item" data-id="button" type="button">Set As Default</button>
                 </div>
                 {{#if ../manageDevicesAllowed}}
+                  <div id="update-device-{{device.id}}" data-mfa-update-device-selection-device-id="{{device.id}}" data-id="popup-frame" data-parent="popover-nav-menu">
+                    <button class="button file-input--button popover-menu__item" data-id="button" type="button">Edit Name</button>
+                  </div>
                   <div id="remove-device-{{device.id}}" data-mfa-selection-kebab-menu-container="{{device.id}}" data-id="popup-frame" data-parent="popover-nav-menu">
                     <button class="button file-input--button popover-menu__item" data-id="button" type="button">Remove</button>
                   </div>
@@ -154,6 +168,9 @@
         </div>
       </div>
       {{/ifEq}}
+      <div class="saveable-textinput__cancel" id="{{device.id}}_cancel_icon_id"
+           data-mfa-cancel-update-device-selection-device-id="{{device.id}}" style="display: none">
+      </div>
     </div>
     {{/isValidRpId}}
   {{/if}}
