@@ -2,7 +2,7 @@ import { initRedirectless } from './utils/redirectless';
 import FetchUtil from './utils/fetchUtil';
 
 export default class Store {
-  constructor(flowId, baseUrl, checkRecaptcha, options) {
+  constructor(flowId, baseUrl, options) {
     this.listeners = [];
     this.prevState = {};
     this.state = {};
@@ -10,7 +10,6 @@ export default class Store {
     this.baseUrl = baseUrl;
     var useActionParam = (options && options.useActionParam) || false;
     this.fetchUtil = new FetchUtil(baseUrl, useActionParam);
-    this.checkRecaptcha = checkRecaptcha;
     this.pendingState = {};
     this.registrationflow = false;
     this.cookieless = false;
@@ -64,9 +63,9 @@ export default class Store {
     }
   }
 
-  dispatchPendingState(token) {
+  dispatchPendingState(extraPayload) {
     if (this.pendingState) {
-      let payLoadString = JSON.stringify({ ...this.pendingState.payload, ...{ captchaResponse: token } });
+      const payLoadString = JSON.stringify({ ...this.pendingState.payload, ...extraPayload });
       this.dispatch(this.pendingState.method, this.pendingState.actionId, payLoadString);
       this.pendingState = {};
     }
@@ -186,7 +185,7 @@ export default class Store {
         daysToExpireMsg = "in " + daysToExpire + " days";
       }
     }
-    combinedData = { ...combinedData, checkRecaptcha: this.checkRecaptcha, daysToExpireMsg, actionid };
+    combinedData = { ...combinedData, daysToExpireMsg, actionid };
     return combinedData;
   }
 

@@ -10,6 +10,8 @@ import paOnAuthorizationRequest from './utils/paOnAuthorizationRequest';
 import paOnAuthorizationSuccess from './utils/paOnAuthorizationSuccess';
 import './scss/main.scss';
 import {isValidEmail, isValidPhone} from "./validators/inputs";
+import captchaPostRenderCallback from './utils/callbacks/riskPostRenderCallback';
+import RiskUtils from './utils/riskUtils';
 //uncomment to add your personal branding
 // import './scss/branding.scss';
 
@@ -130,11 +132,7 @@ export default class AuthnWidget {
     if (!baseUrl) {
       throw new Error(AuthnWidget.BASE_URL_REQUIRED_MSG);
     }
-    this.captchaDivId = 'invisibleRecaptchaId';
     this.assets = new Assets(options);
-    this.invokeReCaptcha = options && options.invokeReCaptcha;
-    let checkRecaptcha = options && options.checkRecaptcha;
-    this.grecaptcha = options && options.grecaptcha;
     this.deviceProfileScript = options && options.deviceProfileScript;
     this.fraudClientSessionID =  options && options.fraudClientSessionID;
     this.fraudClientPlatform =  options && options.fraudClientPlatform;
@@ -227,15 +225,21 @@ export default class AuthnWidget {
     this.eventHandler = new Map();  //state -> eventHandlers
     this.postRenderCallbacks = new Map();
     this.actionModels = new Map();
-    this.store = new Store(flowId, baseUrl, checkRecaptcha, options);
+    this.store = new Store(flowId, baseUrl, options);
     this.store.registerListener(this.render);
     AuthnWidget.CORE_STATES.forEach(state => this.registerState(state), this);
 
     this.addEventHandler('IDENTIFIER_REQUIRED', this.registerIdFirstLinks);
+    this.addPostRenderCallback('IDENTIFIER_REQUIRED', captchaPostRenderCallback);
     this.addEventHandler('USERNAME_PASSWORD_REQUIRED', this.registerAltAuthSourceLinks);
+    this.addPostRenderCallback('USERNAME_PASSWORD_REQUIRED', captchaPostRenderCallback);
+    this.addPostRenderCallback('NEW_PASSWORD_REQUIRED', captchaPostRenderCallback);
+    this.addPostRenderCallback('ACCOUNT_RECOVERY_USERNAME_REQUIRED', captchaPostRenderCallback);
+    this.addPostRenderCallback('USERNAME_RECOVERY_EMAIL_REQUIRED', captchaPostRenderCallback);
     this.addEventHandler('REGISTRATION_REQUIRED', this.registerRegistrationLinks);
     this.addEventHandler('REGISTRATION_REQUIRED', this.registerAltAuthSourceLinks);
     this.addPostRenderCallback('REGISTRATION_REQUIRED', this.postRegistrationRequired);
+    this.addPostRenderCallback('REGISTRATION_REQUIRED', captchaPostRenderCallback);
     this.addEventHandler('EXTERNAL_AUTHENTICATION_COMPLETED', this.postContinueAuthentication);
     this.addEventHandler('EXTERNAL_AUTHENTICATION_REQUIRED', this.registerReopenPopUpHandler);
     this.addPostRenderCallback('RESUME', this.resumeToPf);
@@ -306,8 +310,8 @@ export default class AuthnWidget {
     this.actionModels.set('checkPasswordReset', { required: ['newPassword'], properties: ['newPassword'] });
     this.actionModels.set('checkRecoveryCode', { required: ['recoveryCode'], properties: ['recoveryCode'] });
     this.actionModels.set('checkChallengeResponse', { required: ['challengeResponse'], properties: ['challengeResponse'] });
-    this.actionModels.set('submitIdentifier', { required: ['identifier'], properties: ['identifier'] });
-    this.actionModels.set('clearIdentifier', { required: ['identifier'], properties: ['identifier'] });
+    this.actionModels.set('submitIdentifier', { required: ['identifier'], properties: ['identifier', 'captchaResponse'] });
+    this.actionModels.set('clearIdentifier', { required: ['identifier'], properties: ['identifier', 'captchaResponse'] });
     this.actionModels.set('registerUser', {required: ['password', 'fieldValues'], properties: ['password', 'captchaResponse', 'fieldValues', 'thisIsMyDevice']});
     this.actionModels.set('checkOtp', {required: ['otp']});
     this.actionModels.set('checkAssertion', {required: ['assertion', 'origin', 'compatibility'],  properties: ['assertion', 'origin', 'compatibility'] });
@@ -347,7 +351,10 @@ export default class AuthnWidget {
       this.renderSpinnerTemplate();
       this.store
         .dispatch('GET_FLOW')
-        .catch(() => this.generalErrorRenderer(AuthnWidget.COMMUNICATION_ERROR_MSG));
+        .catch((err) => {
+          console.log(err);
+          this.generalErrorRenderer(AuthnWidget.COMMUNICATION_ERROR_MSG)
+        });
     } catch (err) {
       console.error(err);
       this.generalErrorRenderer(err.message);
@@ -451,7 +458,7 @@ export default class AuthnWidget {
     switch (actionId) {
       case 'submitIdentifier':
       case 'clearIdentifier':
-        this.store.dispatch('POST_FLOW', actionId, JSON.stringify(data));
+        this.dispatchWithCaptcha(actionId, data);
         break;
       case 'selectidentifier':
         document.getElementById('existingAccountsSelectionList').style.display = 'none';
@@ -657,8 +664,7 @@ export default class AuthnWidget {
         document.querySelector('#attestationRequiredId').style.display = 'none';
         document.querySelector('#unsupportedDeviceId').style.display = 'block';
         document.querySelector('#consentRefusedId').style.display = 'none';
-      }
-      else {
+      } else {
         doRegisterWebAuthn(this, data.status);
       }
     });
@@ -673,8 +679,7 @@ export default class AuthnWidget {
         document.querySelector('#attestationRequiredId').style.display = 'none';
         document.querySelector('#unsupportedDeviceId').style.display = 'block';
         document.querySelector('#consentRefusedId').style.display = 'none';
-      }
-      else {
+      } else {
         doRegisterWebAuthn(this, data.status);
       }
     });
@@ -710,10 +715,8 @@ export default class AuthnWidget {
       if (selectedDevice === null || selectedDevice.length === 0)
       {
         doWebAuthn(this);
-      }
-      else if ( ((selectedDevice[0].type === 'SECURITY_KEY' || selectedDevice[0].type ==='FIDO2') && value === 'NONE')
-        || (selectedDevice[0].type === 'PLATFORM' && value !== 'FULL') )
-      {
+      } else if (((selectedDevice[0].type === 'SECURITY_KEY' || selectedDevice[0].type ==='FIDO2') && value === 'NONE')
+        || (selectedDevice[0].type === 'PLATFORM' && value !== 'FULL')) {
         // Cancel authentication if this is the only device so we don't loop
         console.log("No acceptable authenticator");
         if(data.devices.length == 1)
@@ -1565,14 +1568,18 @@ export default class AuthnWidget {
    * @returns {string|*} the model to be sent to PingFederate after all required fields are available
    */
   validateActionModel(action, data) {
+    console.log(`Validating action model ${action}`);
     const model = this.actionModels.get(action);
     if (model === undefined) {
+      console.log(`Action Model not found`);
       return undefined;
     }
+    console.log(model);
     if (model.properties) {
       //remove unneeded params
       Object.keys(data).forEach(key => !model.properties.includes(key) ? delete data[key] : '');
     }
+    console.log(data);
     return data;
   }
 
@@ -1600,11 +1607,12 @@ export default class AuthnWidget {
   }
 
   dispatchWithCaptcha(actionId, formData) {
-    if (this.store.state.showCaptcha && this.needsCaptchaResponse(actionId) &&
-      this.store.state.captchaSiteKey && this.invokeReCaptcha) {
-      this.store.savePendingState('POST_FLOW', actionId, formData);
-      this.invokeReCaptcha();
-      return;
+    const state = this.store.state;
+    if (state.showCaptcha && this.needsCaptchaResponse(actionId)) {
+      const type = state.captchaProviderType;
+      const attributes = state.captchaAttributes;
+      const riskUtils = new RiskUtils(type, attributes, this.store);
+      riskUtils.execute(actionId, formData)
     } else {
       this.store.dispatch('POST_FLOW', actionId, JSON.stringify(formData));
     }
@@ -1614,10 +1622,6 @@ export default class AuthnWidget {
     return this.actionModels.get(actionId)
       && this.actionModels.get(actionId).properties
       && this.actionModels.get(actionId).properties.some(prop => prop === 'captchaResponse');
-  }
-
-  dispatchPendingState(token) {
-    this.store.dispatchPendingState(token);
   }
 
   clearPendingState() {
@@ -1683,15 +1687,12 @@ export default class AuthnWidget {
       }
     }
     let widgetDiv = document.getElementById(this.divId);
-    var params = Object.assign(state, this.assets.toTemplateParams())
+    const store = {store: this.store};
+    var params = Object.assign(state, this.assets.toTemplateParams(), store);
     widgetDiv.innerHTML = template(params);
     this.registerEventListeners(currentState);
-    if (this.postRenderCallbacks[currentState]) {
-      this.postRenderCallbacks[currentState](state);
-    }
-    if (this.store.state.showCaptcha && this.grecaptcha) {
-      this.grecaptcha.render(this.captchaDivId);
-    }
+    // execute all post render callbacks
+    this.postRenderCallbacks[currentState]?.forEach((callback) => { callback(state, this.store) });
 
     let autofocusInput = document.querySelector("input:not(:disabled)[autofocus]")
     if (!autofocusInput) {
@@ -1743,7 +1744,11 @@ export default class AuthnWidget {
   }
 
   addPostRenderCallback(stateName, callback) {
-    this.postRenderCallbacks[stateName] = callback;
+    let callbacks = this.postRenderCallbacks[stateName]
+      ? this.postRenderCallbacks[stateName]
+      : new Set();
+    callbacks.add(callback);
+    this.postRenderCallbacks[stateName] = callbacks;
   }
 
   registerActionModel(action, model) {
@@ -1952,8 +1957,7 @@ export default class AuthnWidget {
           data.input = input;
         }
         this.store.dispatch('POST_FLOW', 'checkInput', JSON.stringify(data));
-      }
-      else {
+      } else {
         console.log("ERROR - Unable to dispatch authenticator selection as the target was null");
       }
     }

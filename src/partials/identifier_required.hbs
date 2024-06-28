@@ -12,6 +12,7 @@
   </div>
   {{> errors}}
   {{> spinner}}
+  {{renderRiskUI}}
   {{#if previouslySubmittedIdentifiers.length}}
   <div id="existingAccountsSelectionList" class="identifier-first__account-list">
     {{#each previouslySubmittedIdentifiers}}

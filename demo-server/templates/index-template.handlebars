@@ -10,49 +10,7 @@
   <link rel="stylesheet" type="text/css" href="https://assets.pingone.com/ux/end-user/0.36.1/end-user.css">
   <link rel="stylesheet" type="text/css" href="main-styles.css">
 
-<!--  Enable the below script to use Captcha v2 -->
-<!--    <script src="https://www.google.com/recaptcha/api.js?onload=onloadCallback&render=explicit" async defer></script>-->
     <script type="text/javascript">
-        var authnWidget;
-        function checkRecaptcha(token) {
-            console.log('captcha response: ' + token);
-            if (token.length === 0) {
-                //reCaptcha not verified
-                authnWidget.clearPendingState();
-                console.log('did not pass captcha try again');
-            } else {
-                //reCaptch verified
-                authnWidget.dispatchPendingState(token);
-                // grecaptcha.reset();
-            }
-        }
-
-        function invokeReCaptcha() {
-            let token = grecaptcha.getResponse();
-            if(token) {
-                checkRecaptcha(token);
-            }
-            else {
-                grecaptcha.execute();
-            }
-        }
-
-        function onloadCallback() {
-            authnWidget = new PfAuthnWidget("{{baseUrl}}", {
-                divId: 'authnwidget',
-                invokeReCaptcha: invokeReCaptcha,
-                checkRecaptcha: 'checkRecaptcha',
-                grecaptcha: grecaptcha
-            });
-            // let customLogo = 'https://www.pingidentity.com/content/dam/ping-6-2-assets/images/home/9001-home-logos/Cisco@2x.png.png'
-            // authnWidget = new PfAuthnWidget("https://localhost:9031", {divId: 'authnwidget', logo: customLogo});
-            initWidget(authnWidget);
-        }
-
-        /**  --------------------------------------------------
-         *   In order to use Captcha, remove the code below and uncomment api.js loading
-         *   --------------------------------------------------
-        **/
         function load() {
             var authnWidget = new PfAuthnWidget("{{baseUrl}}", { divId: 'authnwidget' });
             // decide how to init the widget based on the mode option

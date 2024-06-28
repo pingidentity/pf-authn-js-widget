@@ -1,4 +1,3 @@
-[![Build Status](https://travis-ci.org/pingidentity/pf-authn-js-widget.svg?branch=master)](https://travis-ci.org/pingidentity/pf-authn-js-widget)
 # JavaScript Widget for the PingFederate Authentication API
 
 **Table of Contents**
@@ -8,13 +7,13 @@
   - [Option 1: Using CDN Links](#option-1-using-cdn-links)
   - [Option 2: Building the Widget](#option-2-building-the-widget)
   - [Option 3: Adding the Widget as a Node Module](#option-3-adding-the-widget-as-a-node-module)
-  - [Widget Configuration](#widget-configuration)
+- [Widget Configuration](#widget-configuration)
+- [Upgrade from version 1 to version 2](#upgrade-from-version-1-to-version-2)
 - [Technical Notes](#technical-notes)
   - [Building the Latest Version of the Widget](#building-the-latest-version-of-the-widget)
   - [Adding the Widget to an Application](#adding-the-widget-to-an-application)
   - [Creating the index.html File](#creating-the-indexhtml-file)
   - [Customizing the Widget](#customizing-the-widget)
-  - [Enabling Captcha](#enabling-captcha)
   - [Using Protect-Based Authentication Adapters with the Widget](/docs/protectAuthentication.md)
   - [Using Risk-Based Authentication With the Widget](/docs/riskAuthentication.md)
   - [Redirectless Support](/docs/redirectless.md)
@@ -22,7 +21,7 @@
 - [Bug Reports](#bug-reports)
 - [License](#license)
 
-The JavaScript Widget for the PingFederate Authentication API is a customizable JavaScript library that provides the capabilities of the [HTML form Adapter](https://docs.pingidentity.com/csh?Product=pf-latest&topicname=xvy1564003022890.html) 
+The JavaScript Widget for the PingFederate Authentication API is a customizable JavaScript library that provides the capabilities of the [HTML form Adapter](https://docs.pingidentity.com/csh?Product=pf-latest&topicname=xvy1564003022890.html)
 and other integrations via [Authentication APIs](https://docs.pingidentity.com/csh?Product=pf-latest&topicname=qsl1564002999029.html), including:
  - user login
  - trouble signing in
@@ -33,7 +32,7 @@ and other integrations via [Authentication APIs](https://docs.pingidentity.com/c
  - social login
  - multi-factor authentication
  - identity verification
- 
+
  A full list of the supported integrations can be found [here](/docs/supportedIntegrations.md).
 
 The widget is a ready-to-use drop-in bundle with a CSS and customizable templates. This alternative to PingFederate templates provides a sign-in experience as a single page application.
@@ -50,10 +49,10 @@ To configure PingFederate for the widget:
   1. First enable the authentication API: Authentication > Authentication API Applications > Enable Authentication API.
   2. Then, add an application by clicking the "Add Authentication Application" button and entering the appropriate values. For example: **Name:** TestApp, **URL:** `https://localhost:8443`.
   3. Click "Save".
-  
+
   **Caution:** setting your Authentication Application as the "Default Authentication Application" will make it the default authentication for all of your existing connections. This is the easiest way to configure your connections, but it
   is not very precise. For more precision, configure the desired authentication policies to use your Authentication API Application.
-  
+
   4. Select your newly created Authentication Application ("TestApp" if you used the example above) in the drop-down in the "Default Authentication Application" section.
   5. Start the SSO flow as you would normally. For example, by clicking on an existing IdP Connection, and you will be redirected to your "JavaScript Widget for the PingFederate Authentication API" application.
 
@@ -69,13 +68,13 @@ You also need a running PingFederate instance that is version 9.3 or above.
 
 A pre-built widget is available for incorporating directly into your application. All versions of the widget, starting with 1.7.0, will be available via CDN.
 
-To include the latest released version the following links can be used: 
-- https://downloads.pingidentity.com/pf-authn-widget/latest/pf.authn-widget.js
-- https://downloads.pingidentity.com/pf-authn-widget/latest/main-styles.css
+To include the latest released version the following links can be used:
+- https://downloads.pingidentity.com/pf-authn-widget/latest/v2/pf.authn-widget.js
+- https://downloads.pingidentity.com/pf-authn-widget/latest/v2/main-styles.css
 
 To include a specific version of the widget, replace `latest` with the version required.
-- https://downloads.pingidentity.com/pf-authn-widget/1.7.0/pf.authn-widget.js
-- https://downloads.pingidentity.com/pf-authn-widget/1.7.0/main-styles.css
+- https://downloads.pingidentity.com/pf-authn-widget/2.0.0/pf.authn-widget.js
+- https://downloads.pingidentity.com/pf-authn-widget/2.0.0/main-styles.css
 
 A working example that utilizes the pre-built widget would look like:
 ```html
@@ -84,9 +83,9 @@ A working example that utilizes the pre-built widget would look like:
     <title>Authentication API Sample App</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <script src="https://downloads.pingidentity.com/pf-authn-widget/latest/pf.authn-widget.js"></script>        
+    <script src="https://downloads.pingidentity.com/pf-authn-widget/latest/v2/pf.authn-widget.js"></script>
     <link rel="stylesheet" type="text/css" href="https://assets.pingone.com/ux/end-user/0.36.1/end-user.css">
-    <link rel="stylesheet" type="text/css" href="https://downloads.pingidentity.com/pf-authn-widget/latest/main-styles.css">
+    <link rel="stylesheet" type="text/css" href="https://downloads.pingidentity.com/pf-authn-widget/latest/v2/main-styles.css">
     <script>
       function load() {
         var authnWidget = new PfAuthnWidget("{{baseUrl}}", { divId: 'authnwidget' });
@@ -150,6 +149,11 @@ var authnWidget = new PfAuthnWidget(baseUrl, {divId: 'mywidget', logo: 'https://
 authnWidget.init();
 ```
 
+# Upgrade from version 1 to version 2
+The JavaScript Widget for PingFederate Authentication API no longer requires custom javascript code to enable CAPTCHA as of version 2.
+
+When upgrading from version 1 to version 2, remove the custom javascript code and replace it with standard widget initialization code to leverage the new capability. More information is available in the [Widget Configuration](#widget-configuration) section of this document.
+
 <a name="tech-notes"></a>
 # Technical Notes
 
@@ -191,7 +195,7 @@ Create a file called `index.html` with the following content and host it in your
     <title>Authentication API Sample App</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <script src="./pf.authn-widget.js"></script>        
+    <script src="./pf.authn-widget.js"></script>
     <link rel="stylesheet" type="text/css" href="https://assets.pingone.com/ux/end-user/0.36.1/end-user.css">
     <link rel="stylesheet" type="text/css" href="main-styles.css">
     <script>
@@ -226,51 +230,6 @@ Note: Some items cannot be customized:
 - the widget-specific CSS is provided via the compiled sass file as `main-styles.css`
 - to overwrite the CSS, add any customization to `src/scss/branding.scss` and include it in `src/index.js`
 
-## Enabling Captcha
-
-To use Captcha with the HTML Form Adapter, import `api.js` from Google's CDN at `<script src="https://www.google.com/recaptcha/api.js?onload=onloadCallback&render=explicit" async defer></script>`
-After the script is loaded, instantiate the widget.
-
-Three functions are needed:
-
-```javascript
-var authnWidget;
-
-function checkRecaptcha(token) {
-  console.log('captcha response: ' + token);
-  if (token.length === 0) {
-    //reCaptcha not verified
-    authnWidget.clearPendingState();
-    console.log('did not pass captcha try again');
-  } else {
-    //reCaptch verified
-    authnWidget.dispatchPendingState(token);
-  }
-}
-
-function invokeReCaptcha() {
-  let token = grecaptcha.getResponse();
-  if(token) {
-    checkRecaptcha(token);
-  }
-  else {
-    grecaptcha.execute();
-  }
-}
-
-function onloadCallback() {
-  authnWidget = new PfAuthnWidget("{{baseUrl}}", {
-    divId: 'authnwidget',
-    invokeReCaptcha: invokeReCaptcha,
-    checkRecaptcha: 'checkRecaptcha',
-    grecaptcha: grecaptcha
-  });
-  authnWidget.init();
-}
-```
-It is crucial that `api.js` is loaded before the widget is instantiated. Therefore we are using a callback function to load the widget. The `grecaptcha` object
-will be available after the `api.js` is loaded. For more information, see [Captcha documentations](https://developers.google.com/recaptcha/docs/invisible).
-
 ## Using Protect-Based Authentication Adapters with the Widget
 
 Please refer to the [guide for using Protect-based authentication adapters with the widget](/docs/protectAuthentication.md) for more information on how to set up the widget with Protect-based authentication adapters.
@@ -279,10 +238,12 @@ Please refer to the [guide for using Protect-based authentication adapters with 
 
 Please refer to the [guide for using risk-based authentication with the widget](/docs/riskAuthentication.md) for more infomation on how to set up the widget with risk-based authentication adapters.
 
-## Redirectless Support 
+## Redirectless Support
+
 Please refer to the [Redirectless Support](/docs/redirectless.md) guide for more infomation on how to configure PingFederate and how to use widget's redirectless feature.
 
 ## Typescript Support
+
 Please refer to the [Typescript Support](/docs/typescript.md) guide for more information on how to use the typescript definitions.
 
 # Browser Compatibility

@@ -14,9 +14,6 @@ export interface IOptions {
   divId: string,
   flowId?: string,
   logo?: string,
-  invokeReCaptcha?: () => void,
-  checkRecaptcha?: string,
-  grecaptcha?: any,
   useActionParam?: boolean,
   deviceProfileScript?: string
 }
@@ -24,7 +21,6 @@ export interface IOptions {
 export interface IAuthnWidget {
   init(): void;
   initRedirectless(redirectlessConfig: IRedirectlessConfig): void;
-  dispatchPendingState(token: string): void;
   clearPendingState(): void;
 }
 
@@ -32,6 +28,5 @@ export default class AuthnWidget implements IAuthnWidget {
   constructor(baseUrl: string, options: IOptions);
   init(): void;
   initRedirectless(redirectlessConfig: IRedirectlessConfig): void;
-  dispatchPendingState(token: string): void;
   clearPendingState(): void;
 }
