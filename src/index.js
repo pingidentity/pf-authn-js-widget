@@ -2082,13 +2082,13 @@ export default class AuthnWidget {
     let source = evt.currentTarget;
     if (source) {
       let deviceId = source.dataset['deviceId'];
-      let nicknameInput = document.getElementById(`nickname_input_for_${deviceId}`);
       const originalNickname = document.getElementById(deviceId + "_content_container_id")
         .getElementsByClassName('tile-button__title')[0]?.innerText;
-      if(nicknameInput && nicknameInput.value !=null && nicknameInput.value !== originalNickname){
+      let nicknameInput = document.getElementById(`nickname_input_for_${deviceId}`);
+      if(nicknameInput && nicknameInput.value.trim() !== "" && nicknameInput.value !== originalNickname){
         let data = {
           "id": deviceId,
-          "nickname": nicknameInput.value
+          "nickname": nicknameInput.value.trim()
         };
         this.store.dispatch('POST_FLOW', "updateDeviceNickname", JSON.stringify(data));
       }
