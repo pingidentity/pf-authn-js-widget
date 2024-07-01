@@ -86,7 +86,7 @@
               <div class="tile-button__content"></div>
             {{/ifEq}}
           {{/ifEq}}
-          {{#if device.defaultDevice}}
+          {{#if (and ../userSelectedDefault device.defaultDevice)}}
           <div class="device-selector__item-status"><span class="muted-text">Default</span></div>
           {{/if}}
         </div>
@@ -102,9 +102,8 @@
           </div>
         </div>
       </div>
-      {{#if device.defaultDevice}}
-        {{#if ../manageDevicesAllowed}}
-        <div class="device-selector__item-controls" id="kebab-menu-icon-id" data-mfa-selection-kebab-menu-container="{{device.id}}">
+      {{#if (or ../manageDevicesAllowed (and ../userSelectedDefault (not device.defaultDevice)))}}
+        <div class="device-selector__item-controls" id="{{device.id}}_kebab_menu_icon_id" data-mfa-selection-kebab-menu-container="{{device.id}}">
           <div class="popover popover--left" data-id="popover-nav-menu">
             <a class="popover__trigger" data-id="popover-nav-menu-trigger">
               <div>
@@ -122,38 +121,11 @@
                  style="display:none; position: absolute; right: 0px;">
               <div class="popup-frame popup-frame--left">
                 <div class="popover-menu__dialog" data-id="kebab-menu">
-                    <div id="remove-device-{{device.id}}" data-mfa-selection-kebab-menu-container="{{device.id}}" data-id="popup-frame" data-parent="popover-nav-menu">
-                      <button class="button file-input--button popover-menu__item" data-id="button" type="button">Remove</button>
-                    </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        {{/if}}
-      {{/if}}
-      {{#ifEq device.defaultDevice false}}
-      <div class="device-selector__item-controls" id="kebab-menu-icon-id" data-mfa-selection-kebab-menu-container="{{device.id}}">
-        <div class="popover popover--left" data-id="popover-nav-menu">
-          <a class="popover__trigger" data-id="popover-nav-menu-trigger">
-            <div>
-              <button class="button file-input~~button popover-menu__control" data-id="button" style="border:none" type="button">
-                <svg id="kebab-menu-svg-id" viewBox="0 0 24 24" role="presentation" style="width: 26px; height: 26px;">
-                  <path
-                    d="M12,16A2,2 0 0,1 14,18A2,2 0 0,1 12,20A2,2 0 0,1 10,18A2,2 0 0,1 12,16M12,10A2,2 0 0,1 14,12A2,2 0 0,1 12,14A2,2 0 0,1 10,12A2,2 0 0,1 12,10M12,4A2,2 0 0,1 14,6A2,2 0 0,1 12,8A2,2 0 0,1 10,6A2,2 0 0,1 12,4Z"
-                    style="fill: rgb(104, 111, 119);"></path>
-                </svg>
-              </button>
-            </div>
-          </a>
-          <div id="device-management-popup-frame-{{device.id}}"
-            class="popper-container popover-display" ;
-            style="display:none; position: absolute; right: 0px;">
-            <div class="popup-frame popup-frame--left">
-              <div class="popover-menu__dialog" data-id="kebab-menu">
-                <div id="set-default-device-{{device.id}}" data-mfa-selection-kebab-menu-container="{{device.id}}" data-id="popup-frame" data-parent="popover-nav-menu">
-                  <button class="button file-input--button popover-menu__item" data-id="button" type="button">Set As Default</button>
-                </div>
+                {{#if (and (not device.defaultDevice) ../userSelectedDefault)}}
+                  <div id="set-default-device-{{device.id}}" data-mfa-selection-kebab-menu-container="{{device.id}}" data-id="popup-frame" data-parent="popover-nav-menu">
+                    <button class="button file-input--button popover-menu__item" data-id="button" type="button">Set As Default</button>
+                  </div>
+                {{/if}}
                 {{#if ../manageDevicesAllowed}}
                   <div id="update-device-{{device.id}}" data-mfa-update-device-selection-device-id="{{device.id}}" data-id="popup-frame" data-parent="popover-nav-menu">
                     <button class="button file-input--button popover-menu__item" data-id="button" type="button">Edit Name</button>
@@ -162,12 +134,12 @@
                     <button class="button file-input--button popover-menu__item" data-id="button" type="button">Remove</button>
                   </div>
                 {{/if}}
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-      {{/ifEq}}
+      {{/if}}
       <div class="saveable-textinput__cancel" id="{{device.id}}_cancel_icon_id"
            data-mfa-cancel-update-device-selection-device-id="{{device.id}}" style="display: none">
       </div>
