@@ -72,6 +72,12 @@ export default class AuthnWidget {
       'SECURID_USER_PIN_RESET_REQUIRED',
     ]
 
+	const credentialVerificationStates = [
+      'CREDENTIAL_VERIFICATION_REQUIRED',
+      'CREDENTIAL_VERIFICATION_FAILED',
+      'CREDENTIAL_VERIFICATION_TIMED_OUT',
+    ]
+
     return ['USERNAME_PASSWORD_REQUIRED', 'MUST_CHANGE_PASSWORD', 'CHANGE_PASSWORD_EXTERNAL', 'NEW_PASSWORD_RECOMMENDED',
       'NEW_PASSWORD_REQUIRED', 'SUCCESSFUL_PASSWORD_CHANGE', 'ACCOUNT_RECOVERY_USERNAME_REQUIRED',
       'ACCOUNT_RECOVERY_OTL_VERIFICATION_REQUIRED', 'RECOVERY_CODE_REQUIRED', 'PASSWORD_RESET_REQUIRED',
@@ -94,7 +100,8 @@ export default class AuthnWidget {
     .concat(oneTimeDeviceOtpStates)
     .concat(idVerificationStates)
     .concat(magicLinkStates)
-    .concat(securIdStates);
+    .concat(securIdStates)
+    .concat(credentialVerificationStates);
   }
 
   static get COMMUNICATION_ERROR_MSG() {
@@ -221,6 +228,10 @@ export default class AuthnWidget {
     this.postInputRequired = this.postInputRequired.bind(this);
     this.registerInputRequiredHandler = this.registerInputRequiredHandler.bind(this);
     this.checkInputHandler = this.checkInputHandler.bind(this);
+    this.registerCredentialVerificationRequiredEventHandler = this.registerCredentialVerificationRequiredEventHandler.bind(this);
+    this.postCredentialVerificationRequired = this.postCredentialVerificationRequired.bind(this);
+    this.pollCheckGetCredential = this.pollCheckGetCredential.bind(this);
+    this.postContinueCredential = this.postContinueCredential.bind(this);
     this.stateTemplates = new Map();  //state -> handlebar templates
     this.eventHandler = new Map();  //state -> eventHandlers
     this.postRenderCallbacks = new Map();
@@ -299,6 +310,9 @@ export default class AuthnWidget {
     this.addEventHandler('INPUT_REQUIRED', this.registerInputRequiredHandler);
     this.addPostRenderCallback('LINK_INITIATED', this.pollLinkStatus);
     this.addPostRenderCallback('LINK_COMPLETED', this.postContinue);
+    this.addEventHandler('CREDENTIAL_VERIFICATION_REQUIRED', this.registerCredentialVerificationRequiredEventHandler);
+    this.addPostRenderCallback('CREDENTIAL_VERIFICATION_REQUIRED', this.postCredentialVerificationRequired);
+    this.addPostRenderCallback('CREDENTIAL_VERIFICATION_COMPLETED', this.postContinueCredential);
 
     this.actionModels.set('checkUsernamePassword', { required: ['username', 'password'], properties: ['username', 'password', 'rememberMyUsername', 'thisIsMyDevice', 'captchaResponse'] });
     this.actionModels.set('initiateAccountRecovery', { properties: ['usernameHint'] });
@@ -1558,6 +1572,66 @@ export default class AuthnWidget {
       errorMessage.style.display = "block";
       document.querySelector('#submit').disabled = true;
     }
+  }
+
+  async registerCredentialVerificationRequiredEventHandler() {
+    let data = this.store.getStore();
+
+    document.getElementById('qrCode').src = data.qrUrl || "";
+    document.getElementById('appOpenUrl').addEventListener('click', this.handleAppOpenUrl(data.appOpenUrl));
+
+    if (data.redirect && data.appOpenUrl !== undefined &&
+        this.store.getPreviousStore.appOpenUrl != data.appOpenUrl) {
+      console.log("redirect to " + data.appOpenUrl);
+      window.open(data.appOpenUrl, "_blank");
+    }
+  }
+
+  handleAppOpenUrl(appOpenUrl) {
+    return (evt) => ((arg) => {
+      evt.preventDefault();
+      this.store.dispatch('POST_FLOW', 'sameDevice', '{}');
+      console.log("open appOpenUrl in new tab: " + arg);
+      window.open(arg, '_blank');
+    })(appOpenUrl);
+  }
+
+  postCredentialVerificationRequired() {
+    this.pollCheckGetCredential(this.store.getStore().qrUrl, 5000);
+  }
+
+  async pollCheckGetCredential(currentQrUrl, timeout) {
+    let newState = await this.store.poll();
+
+    if (newState.code === 'RESOURCE_NOT_FOUND') {
+      console.log("resource not found, stop polling flow");
+      return;
+    }
+
+    let pollAgain = 
+      newState.status === 'CREDENTIAL_VERIFICATION_REQUIRED' &&
+      newState.qrUrl === currentQrUrl;
+
+    if (!pollAgain) {
+      this.store
+        .dispatch('GET_FLOW')
+        .catch(() => this.generalErrorRenderer(AuthnWidget.COMMUNICATION_ERROR_MSG));
+    } else {
+      this.pollCredentialCheckGetHandler = setTimeout(() => {
+        this.pollCheckGetCredential(currentQrUrl, timeout);
+      }, timeout);
+    }
+  }
+
+  postContinueCredential() {
+    if (document.querySelector("#spinnerId")) {
+      document.querySelector('#spinnerId').style.display = 'block';
+    }
+    setTimeout(() => {
+      this.store
+        .dispatch('POST_FLOW', 'continue', '{}')
+        .catch(() => this.generalErrorRenderer(AuthnWidget.COMMUNICATION_ERROR_MSG));
+    }, 1000)
   }
 
   /**
