@@ -1,7 +1,7 @@
 import handlebars from 'handlebars'
 import RecaptchaV2Invisible from "./risk-providers/recaptcha-v2-invisible";
 import RecaptchaV3 from "./risk-providers/recaptcha-v3";
-import RecaptchaEnterprise from "./risk-providers/recaptcha-v3";
+import RecaptchaEnterprise from "./risk-providers/recaptcha-enterprise";
 import Signals from "./risk-providers/signals";
 
 const CAPTCHA_TYPE_RECAPTCHA_V2_INVISIBLE = "reCAPTCHA v2 Invisible";
