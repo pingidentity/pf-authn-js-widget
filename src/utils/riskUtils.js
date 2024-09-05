@@ -5,7 +5,7 @@ import RecaptchaEnterprise from "./risk-providers/recaptcha-enterprise";
 import Signals from "./risk-providers/signals";
 
 const CAPTCHA_TYPE_RECAPTCHA_V2_INVISIBLE = "reCAPTCHA v2 Invisible";
-const CAPTCHA_TYPE_RECAPTHCA_V3 = "reCAPTCHA v3";
+const CAPTCHA_TYPE_RECAPTCHA_V3 = "reCAPTCHA v3";
 const CAPTCHA_TYPE_RECAPTCHA_ENTERPRISE = "reCAPTCHA Enterprise";
 const CAPTCHA_TYPE_PING_ONE_PROTECT_OLD_NAME = "PingOne Protect Provider";
 const CAPTCHA_TYPE_PING_ONE_PROTECT = "PingOne Protect";
@@ -37,7 +37,7 @@ export default class RiskUtils {
     switch (this.type) {
       case CAPTCHA_TYPE_RECAPTCHA_V2_INVISIBLE:
         return new RecaptchaV2Invisible(this.attributes, this.store);
-      case CAPTCHA_TYPE_RECAPTHCA_V3:
+      case CAPTCHA_TYPE_RECAPTCHA_V3:
         return new RecaptchaV3(this.attributes, this.store);
       case CAPTCHA_TYPE_RECAPTCHA_ENTERPRISE:
         return new RecaptchaEnterprise(this.attributes, this.store);
