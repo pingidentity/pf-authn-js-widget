@@ -95,6 +95,7 @@ export default class AuthnWidget {
       'VIP_ENROLLMENT', 'VIP_CREDENTIAL_REQUIRED', 'VIP_AUTHENTICATION_REQUIRED', 'VIP_CREDENTIAL_RESET_REQUIRED',
       'USER_ID_REQUIRED', 'AUTHENTICATOR_SELECTION_REQUIRED', 'INPUT_REQUIRED', 'ENTRUST_FAILED', 'FRAUD_EVALUATION_CHECK_REQUIRED',
       'AUTHENTICATION_CODE_RESPONSE_REQUIRED', 'BIOMETRIC_DEVICE_AUTHENTICATION_INFO_REQUIRED', 'FIDO2_ACTIVATION_REQUIRED',
+      'UPDATE_NICKNAME'
     ]
     .concat(oauthUserAuthorizationStates)
     .concat(oneTimeDeviceOtpStates)
@@ -232,6 +233,10 @@ export default class AuthnWidget {
     this.postCredentialVerificationRequired = this.postCredentialVerificationRequired.bind(this);
     this.pollCheckGetCredential = this.pollCheckGetCredential.bind(this);
     this.postContinueCredential = this.postContinueCredential.bind(this);
+    this.handleUpdateDeviceNicknameSelection = this.handleUpdateDeviceNicknameSelection.bind(this);
+    this.transitionToUpdateDeviceNicknameMode = this.transitionToUpdateDeviceNicknameMode.bind(this);
+    this.transitionFromUpdateDeviceNicknameMode = this.transitionFromUpdateDeviceNicknameMode.bind(this);
+    this.updateDeviceNickname = this.updateDeviceNickname.bind(this);
     this.stateTemplates = new Map();  //state -> handlebar templates
     this.eventHandler = new Map();  //state -> eventHandlers
     this.postRenderCallbacks = new Map();
@@ -355,6 +360,7 @@ export default class AuthnWidget {
     this.actionModels.set('submitUserCode', { required: ['userCode'] });
     this.actionModels.set('confirmUserCode', { required: ['userCode'] });
     this.actionModels.set('useAlternateMethod', {});
+    this.actionModels.set('updateDeviceNickname', { required : ['nickname', 'id'] })
   }
 
   init() {
@@ -761,14 +767,6 @@ export default class AuthnWidget {
   }
 
   postDeviceSelectionRequired() {
-    let data = this.store.getStore();
-    if (data.userSelectedDefault === false) {
-      var deviceKebabMenus = document.querySelectorAll('#kebab-menu-icon-id');
-      [].forEach.call(deviceKebabMenus, function(deviceKebabMenu) {
-        deviceKebabMenu.style.display = "none";
-      });
-    }
-
     getCompatibility().then(value => {
       if (value === 'SECURITY_KEY_ONLY') {
         var platformDevices = document.querySelectorAll("[id^='PLATFORM-']");
@@ -925,6 +923,9 @@ export default class AuthnWidget {
     Array.from(document.querySelectorAll("[id^='remove-device']"))
       .forEach(element => element.addEventListener('click', this.handleMfaRemoveDeviceSelection));
 
+    Array.from(document.querySelectorAll("[id^='update-device']"))
+      .forEach(element => element.addEventListener('click', this.transitionToUpdateDeviceNicknameMode));
+
     if (document.getElementById('addMfaMethod') !== null) {
       document.getElementById('addMfaMethod')
         .addEventListener('click', this.handleAddMfaMethod);
@@ -1026,17 +1027,23 @@ export default class AuthnWidget {
   }
 
   handleAddMfaMethod() {
-    if (document.querySelector('#authentication_required_block_id') != null) {
-      document.querySelector('#authentication_required_block_id').style.display = 'block';
-      document.getElementById("auth_for_unpair_message").style.display = 'none'
-      document.getElementById("auth_for_pair_message").style.display = 'block'
-      if (document.getElementById('confirmation_button') !== null) {
-        document.getElementById('confirmation_button')
-          .addEventListener('click', this.handleContinueAddMfaMethod);
+    const state = this.store.state;
+    if (state.newPairingAuthRequired) {
+      if (document.querySelector('#authentication_required_block_id') != null) {
+        document.querySelector('#authentication_required_block_id').style.display = 'block';
+        document.getElementById("auth_for_unpair_message").style.display = 'none';
+        document.getElementById("auth_for_update_nickname_name_message").style.display = 'none';
+        document.getElementById("auth_for_pair_message").style.display = 'block';
+        if (document.getElementById('confirmation_button') !== null) {
+          document.getElementById('confirmation_button')
+            .addEventListener('click', this.handleContinueAddMfaMethod);
+        }
       }
+      document.body.style.overflow = "hidden";
+      document.body.style.height = "100%";
+    } else {
+      this.store.dispatch('POST_FLOW', "setupMfa", null);
     }
-    document.body.style.overflow = "hidden";
-    document.body.style.height = "100%";
   }
 
   handleContinueAddMfaMethod() {
@@ -1058,7 +1065,6 @@ export default class AuthnWidget {
       console.log("ERROR - Unable to dispatch device selection as the target was null");
     };
   }
-
 
   handleCancelAddMfaMethod() {
     if (document.querySelector('#authentication_required_block_id') != null) {
@@ -1169,16 +1175,24 @@ export default class AuthnWidget {
     if (document.querySelector('#last_device_warning_block_id') != null) {
       document.querySelector('#last_device_warning_block_id').style.display = 'none';
     }
-    if (document.querySelector('#authentication_required_block_id') != null) {
-      document.querySelector('#authentication_required_block_id').style.display = 'block';
-      document.getElementById("auth_for_unpair_message").style.display = 'block'
-      document.getElementById("auth_for_pair_message").style.display = 'none'
-
+    const state = this.store.state;
+    if (state.newPairingAuthRequired) {
+      if (document.querySelector('#authentication_required_block_id') != null) {
+        document.querySelector('#authentication_required_block_id').style.display = 'block';
+        document.getElementById("auth_for_unpair_message").style.display = 'block';
+        document.getElementById("auth_for_pair_message").style.display = 'none';
+        document.getElementById("auth_for_update_nickname_name_message").style.display = 'none';
+      }
+      document.body.style.overflow = "hidden";
+      document.body.style.height = "100%";
+    } else {
+      const source = evt.currentTarget;
+      if (source) {
+        evt.currentTarget.dataset.deviceId = source.dataset['mfaSelectionKebabMenuContainer'];
+      }
+      this.handleContinueRemoveDevice(evt);
     }
-    document.body.style.overflow = "hidden";
-    document.body.style.height = "100%";
   }
-
 
   registerMfaChangeDeviceEventHandler() {
     document.getElementById('changeDevice')
@@ -1339,7 +1353,9 @@ export default class AuthnWidget {
         }
       })
     }
-    document.querySelector('#submit').disabled = disabled;
+    if (document.querySelector('#submit') != null) {
+      document.querySelector('#submit').disabled = disabled;
+    }
   }
 
   async registerIdVerificationRequiredEventHandler() {
@@ -2035,4 +2051,94 @@ export default class AuthnWidget {
         console.log("ERROR - Unable to dispatch authenticator selection as the target was null");
       }
     }
+
+  handleUpdateDeviceNicknameSelection(evt) {
+    const state = this.store.state;
+    if (state.newPairingAuthRequired) {
+      if (document.querySelector('#authentication_required_block_id') != null) {
+        document.querySelector('#authentication_required_block_id').style.display = 'block';
+        document.getElementById("auth_for_unpair_message").style.display = 'none';
+        document.getElementById("auth_for_pair_message").style.display = 'none';
+        document.getElementById("auth_for_update_nickname_name_message").style.display = 'block';
+        if (document.getElementById('confirmation_button') !== null) {
+          let source = evt.currentTarget;
+          if (source) {
+            document.getElementById('confirmation_button').dataset.deviceId = source.dataset['deviceId'];
+          }
+          document.getElementById('confirmation_button')
+            .addEventListener('click', this.updateDeviceNickname);
+        }
+      }
+      document.body.style.overflow = "hidden";
+      document.body.style.height = "100%";
+    } else {
+      this.updateDeviceNickname(evt);
+    }
+  }
+
+  updateDeviceNickname(evt) {
+    evt.preventDefault();
+    let source = evt.currentTarget;
+    if (source) {
+      let deviceId = source.dataset['deviceId'];
+      const originalNickname = document.getElementById(deviceId + "_content_container_id")
+        .getElementsByClassName('tile-button__title')[0]?.innerText;
+      let nicknameInput = document.getElementById(`nickname_input_for_${deviceId}`);
+      if (nicknameInput && nicknameInput.value.trim() !== "" && nicknameInput.value !== originalNickname) {
+        let data = {
+          "id": deviceId,
+          "nickname": nicknameInput.value.trim()
+        };
+        this.store.dispatch('POST_FLOW', "updateDeviceNickname", JSON.stringify(data));
+      }
+    }
+  }
+
+  transitionToUpdateDeviceNicknameMode(evt) {
+    evt.preventDefault();
+    let source = evt.currentTarget;
+    if (source) {
+      let deviceId = source.dataset['mfaUpdateDeviceSelectionDeviceId'];
+      Array.from(document.querySelectorAll('[data-mfa-selection]'))
+        .forEach(element => {
+          if (element.dataset.mfaSelection === deviceId) {
+            element.removeEventListener('click', this.handleMfaDeviceSelection)
+          }
+        });
+      const contentContainer = document.getElementById(deviceId + "_content_container_id");
+      const originalNickname = contentContainer.getElementsByClassName('tile-button__title')[0].innerText;
+      contentContainer.style.display = 'none';
+      document.getElementById(deviceId + "_update_nickname_id").style.display = 'block';
+      if (document.getElementById(`update_device_nickname_${deviceId}`) !== null) {
+        document.getElementById(`update_device_nickname_${deviceId}`)
+          .addEventListener('click', this.handleUpdateDeviceNicknameSelection);
+      }
+      document.getElementById("nickname_input_for_" + deviceId).value = originalNickname;
+      document.getElementById(deviceId + "_kebab_menu_icon_id").style.display = 'none';
+      document.getElementById(deviceId + "_cancel_icon_id").style.display = 'block';
+      document.getElementById(deviceId + "_cancel_icon_id").addEventListener(
+        'click', this.transitionFromUpdateDeviceNicknameMode
+      );
+    }
+  }
+
+  transitionFromUpdateDeviceNicknameMode(evt) {
+    evt.preventDefault();
+    let source = evt.currentTarget;
+    if (source) {
+      let deviceId = source.dataset['mfaCancelUpdateDeviceSelectionDeviceId'];
+      document.getElementById(deviceId + "_content_container_id").style.display = 'block';
+      document.getElementById(deviceId + "_update_nickname_id").style.display = 'none';
+      document.getElementById(deviceId + "_kebab_menu_icon_id").style.display = 'block';
+      document.getElementById(`device-management-popup-frame-${deviceId}`).style.display = 'none';
+      document.getElementById(deviceId + "_cancel_icon_id").style.display = 'none';
+      Array.from(document.querySelectorAll('[data-mfa-selection]'))
+        .forEach(element => {
+          if (element.dataset.mfaSelection === deviceId) {
+            element.addEventListener('click', this.handleMfaDeviceSelection)
+          }
+        });
+      evt.stopImmediatePropagation();
+    }
+  }
 }
