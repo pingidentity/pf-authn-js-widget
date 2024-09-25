@@ -8,17 +8,21 @@
       <path d="M20,2A2,2 0 0,1 22,4V16A2,2 0 0,1 20,18H6L2,22V4C2,2.89 2.9,2 4,2H20M4,4V17.17L5.17,16H20V4H4M6,7H18V9H6V7M6,11H15V13H6V11Z"></path>
     </svg><span class="inline-icon">Text Message</span></h1>
   <div class="text-block">
-    <div class="text-block--overflow-wrap">Enter the mobile number you would like to receive authentication codes
-      with.
-    </div>
+    {{#if allowedValue}}
+      <div class="text-block--overflow-wrap">Passcodes will be sent to the following phone number:</div>
+    {{else}}
+      <div class="text-block--overflow-wrap">Enter the phone number you would like to receive authentication codes with.</div>
+    {{/if}}
   </div>
   <div class="tile-selector tile-selector--stacked">
     <form class="form" id="AuthnWidgetForm">
       <div class="stack stack--small" data-id="stack">
         <div class="text-input__icon">
-          <input id="phone" type="tel" name="phone" class="text-input text-input required" value=""/>
+          <input id="phone" type="tel" name="phone" class="text-input text-input required"
+                 value="{{allowedValue}}" {{#if allowedValue}}readonly="readonly"{{/if}} />
         </div>
       </div>
+      <div id="allowedValue" data-velocity-variable="{{allowedValue}}"></div>
       <div class="text-block" data-id="textblock">
         <div class="text-block--overflow-wrap">
           <div class="stack" data-id="stack">
