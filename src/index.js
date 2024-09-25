@@ -1015,9 +1015,9 @@ export default class AuthnWidget {
       }
     }
     popupDisplayStatus = document.getElementById(currentElement).style.display;
-    if (popupDisplayStatus === 'block'){
+    if (popupDisplayStatus === 'block') {
       document.getElementById(currentElement).style.display = 'none';
-    }else {
+    } else {
       document.getElementById(currentElement).style.display = 'block';
     }
   }
@@ -1091,29 +1091,29 @@ export default class AuthnWidget {
     }
   }
 
-  displayEditNicknameInput(evt){
+  displayEditNicknameInput(evt) {
     let source = evt.currentTarget;
     let deviceId = source.dataset['mfaSelectionKebabMenuContainer'];
     Array.from(document.querySelectorAll('[data-mfa-selection]')).filter(element => element.dataset['mfaSelection'] === deviceId)
       .forEach(element => element.removeEventListener('click', this.handleMfaDeviceSelection));
     Array.from(document.querySelectorAll('#kebab-menu-icon-id')).filter(element => element.dataset['mfaSelectionKebabMenuContainer'] === deviceId)
       .forEach(element => element.style.display = 'none');
-    document.getElementById(deviceId+'_edit_nickname_id').style.display = 'block'
+    document.getElementById(deviceId + '_edit_nickname_id').style.display = 'block'
     Array.from(document.querySelectorAll('#cancel_edit_name_icon_id')).filter(element => element.dataset['mfaSelection'] === deviceId)
       .forEach(element => element.style.display = 'block')
-    document.getElementById(deviceId+'_device_container').style.display = 'none'
+    document.getElementById(deviceId + '_device_container').style.display = 'none'
   }
 
-  closeEditNicknameInput(evt){
+  closeEditNicknameInput(evt) {
     evt.stopPropagation();
     let source = evt.currentTarget;
     let deviceId = source.dataset['mfaSelection'];
     Array.from(document.querySelectorAll('#kebab-menu-icon-id')).filter(element => element.dataset['mfaSelectionKebabMenuContainer'] === deviceId)
       .forEach(element => element.style.display = 'block');
-    document.getElementById(deviceId+'_edit_nickname_id').style.display = 'none'
+    document.getElementById(deviceId + '_edit_nickname_id').style.display = 'none'
     Array.from(document.querySelectorAll('#cancel_edit_name_icon_id')).filter(element => element.dataset['mfaSelection'] === deviceId)
       .forEach(element => element.style.display = 'none')
-    document.getElementById(deviceId+'_device_container').style.display = 'block'
+    document.getElementById(deviceId + '_device_container').style.display = 'block'
     Array.from(document.querySelectorAll('[data-mfa-selection]')).filter(element => element.dataset['mfaSelection'] === deviceId)
       .forEach(element => element.addEventListener('click', this.handleMfaDeviceSelection));
   }
@@ -1121,7 +1121,7 @@ export default class AuthnWidget {
   handleUpdateDeviceNickName(evt) {
     let source = evt.currentTarget;
     let deviceId = source.dataset['mfaSelection'];
-    let inputElement = document.getElementById('nickname_input_for_'+deviceId);
+    let inputElement = document.getElementById('nickname_input_for_' + deviceId);
     const newNickName = inputElement.value;
     const oldNickName = inputElement.dataset['originName'];
     if (oldNickName === newNickName) {
@@ -1135,13 +1135,13 @@ export default class AuthnWidget {
     document.querySelector('#authentication_required_block_id').style.display = 'block';
   }
 
-  updateDeviceNickName(evt){
+  updateDeviceNickName(evt) {
     let source = evt.currentTarget;
     let deviceId = source.dataset['deviceId'];
-    let newNickname = document.getElementById('nickname_input_for_'+deviceId).value;
-    const request = JSON.stringify({id: deviceId, nickname: newNickname});
+    let newNickname = document.getElementById('nickname_input_for_' + deviceId).value;
+    const request = JSON.stringify({ id: deviceId, nickname: newNickname });
     this.store.dispatch('POST_FLOW', "updateDeviceNickname", request);
-    console.log("INFO - device nickname updated to "+ newNickname);
+    console.log("INFO - device nickname updated to " + newNickname);
   }
 
   registerCASChangeMethodEventHandler() {
