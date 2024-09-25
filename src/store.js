@@ -219,8 +219,8 @@ export default class Store {
           if (!userMessage && msg.code) {
             userMessage = `Error code "${msg.code}" returned from the authorization server.`
           }
-          if(msg.code === 'INVALID_OTP' && msg.attemptsRemaining){
-            userMessage += ' You have '+ msg.attemptsRemaining +' attempts remaining.'
+          if (msg.code === 'INVALID_OTP' && msg.attemptsRemaining) {
+            userMessage += ' You have ' + msg.attemptsRemaining + ' attempts remaining.'
           }
           errors.userMessages.push(userMessage);
         });
