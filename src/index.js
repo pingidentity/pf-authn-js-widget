@@ -1028,7 +1028,7 @@ export default class AuthnWidget {
 
   handleAddMfaMethod() {
     const state = this.store.state;
-    if(state.newPairingAuthRequired){
+    if (state.newPairingAuthRequired) {
       if (document.querySelector('#authentication_required_block_id') != null) {
         document.querySelector('#authentication_required_block_id').style.display = 'block';
         document.getElementById("auth_for_unpair_message").style.display = 'none';
@@ -1041,7 +1041,7 @@ export default class AuthnWidget {
       }
       document.body.style.overflow = "hidden";
       document.body.style.height = "100%";
-    } else{
+    } else {
       this.store.dispatch('POST_FLOW', "setupMfa", null);
     }
   }
@@ -1065,7 +1065,6 @@ export default class AuthnWidget {
       console.log("ERROR - Unable to dispatch device selection as the target was null");
     };
   }
-
 
   handleCancelAddMfaMethod() {
     if (document.querySelector('#authentication_required_block_id') != null) {
@@ -1177,7 +1176,7 @@ export default class AuthnWidget {
       document.querySelector('#last_device_warning_block_id').style.display = 'none';
     }
     const state = this.store.state;
-    if(state.newPairingAuthRequired) {
+    if (state.newPairingAuthRequired) {
       if (document.querySelector('#authentication_required_block_id') != null) {
         document.querySelector('#authentication_required_block_id').style.display = 'block';
         document.getElementById("auth_for_unpair_message").style.display = 'block';
@@ -1186,9 +1185,9 @@ export default class AuthnWidget {
       }
       document.body.style.overflow = "hidden";
       document.body.style.height = "100%";
-    } else{
+    } else {
       const source = evt.currentTarget;
-      if (source){
+      if (source) {
         evt.currentTarget.dataset.deviceId = source.dataset['mfaSelectionKebabMenuContainer'];
       }
       this.handleContinueRemoveDevice(evt);
@@ -1354,7 +1353,7 @@ export default class AuthnWidget {
         }
       })
     }
-    if(document.querySelector('#submit') != null) {
+    if (document.querySelector('#submit') != null) {
       document.querySelector('#submit').disabled = disabled;
     }
   }
@@ -2053,9 +2052,9 @@ export default class AuthnWidget {
       }
     }
 
-  handleUpdateDeviceNicknameSelection(evt){
+  handleUpdateDeviceNicknameSelection(evt) {
     const state = this.store.state;
-    if(state.newPairingAuthRequired){
+    if (state.newPairingAuthRequired) {
       if (document.querySelector('#authentication_required_block_id') != null) {
         document.querySelector('#authentication_required_block_id').style.display = 'block';
         document.getElementById("auth_for_unpair_message").style.display = 'none';
@@ -2063,7 +2062,7 @@ export default class AuthnWidget {
         document.getElementById("auth_for_update_nickname_name_message").style.display = 'block';
         if (document.getElementById('confirmation_button') !== null) {
           let source = evt.currentTarget;
-          if(source){
+          if (source) {
             document.getElementById('confirmation_button').dataset.deviceId = source.dataset['deviceId'];
           }
           document.getElementById('confirmation_button')
@@ -2072,12 +2071,12 @@ export default class AuthnWidget {
       }
       document.body.style.overflow = "hidden";
       document.body.style.height = "100%";
-    } else{
+    } else {
       this.updateDeviceNickname(evt);
     }
   }
 
-  updateDeviceNickname(evt){
+  updateDeviceNickname(evt) {
     evt.preventDefault();
     let source = evt.currentTarget;
     if (source) {
@@ -2085,7 +2084,7 @@ export default class AuthnWidget {
       const originalNickname = document.getElementById(deviceId + "_content_container_id")
         .getElementsByClassName('tile-button__title')[0]?.innerText;
       let nicknameInput = document.getElementById(`nickname_input_for_${deviceId}`);
-      if(nicknameInput && nicknameInput.value.trim() !== "" && nicknameInput.value !== originalNickname){
+      if (nicknameInput && nicknameInput.value.trim() !== "" && nicknameInput.value !== originalNickname) {
         let data = {
           "id": deviceId,
           "nickname": nicknameInput.value.trim()
@@ -2095,14 +2094,14 @@ export default class AuthnWidget {
     }
   }
 
-  transitionToUpdateDeviceNicknameMode(evt){
+  transitionToUpdateDeviceNicknameMode(evt) {
     evt.preventDefault();
     let source = evt.currentTarget;
     if (source) {
       let deviceId = source.dataset['mfaUpdateDeviceSelectionDeviceId'];
       Array.from(document.querySelectorAll('[data-mfa-selection]'))
         .forEach(element => {
-          if(element.dataset.mfaSelection === deviceId) {
+          if (element.dataset.mfaSelection === deviceId) {
             element.removeEventListener('click', this.handleMfaDeviceSelection)
           }
         });
@@ -2123,7 +2122,7 @@ export default class AuthnWidget {
     }
   }
 
-  transitionFromUpdateDeviceNicknameMode(evt){
+  transitionFromUpdateDeviceNicknameMode(evt) {
     evt.preventDefault();
     let source = evt.currentTarget;
     if (source) {
@@ -2135,7 +2134,7 @@ export default class AuthnWidget {
       document.getElementById(deviceId + "_cancel_icon_id").style.display = 'none';
       Array.from(document.querySelectorAll('[data-mfa-selection]'))
         .forEach(element => {
-          if(element.dataset.mfaSelection === deviceId) {
+          if (element.dataset.mfaSelection === deviceId) {
             element.addEventListener('click', this.handleMfaDeviceSelection)
           }
         });
