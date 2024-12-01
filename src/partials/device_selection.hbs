@@ -42,35 +42,35 @@
           {{/ifEq}}
         </div>
       </div>
-      <div class="tile-button__content-container" data-mfa-selection="{{device.id}}">
-        <div
-          class="flex-row flex-row--align-stretch flex-row--justify-start flex-row--flex-direction-column flex-row--column-spacing-sm"
+      <div id="{{device.id}}_device_container" class="tile-button__content-container" data-mfa-selection="{{device.id}}">
+        <div class="flex-row flex-row--align-stretch flex-row--justify-start flex-row--flex-direction-column flex-row--column-spacing-sm"
           data-id="flex-row">
           {{#if device.nickname}}
-          <div class="tile-button__title">{{device.nickname}}</div>
+            {{setVariable "deviceDisplayName" device.nickname}}
           {{else}}
             {{#ifEq device.type "Android"}}
-              <div class="tile-button__title">PingOne Authenticator</div>
+              {{setVariable "deviceDisplayName" 'PingOne Authenticator'}}
             {{else ifEq device.type "iPhone"}}
-              <div class="tile-button__title">PingOne Authenticator</div>
+              {{setVariable "deviceDisplayName" "PingOne Authenticator"}}
             {{else ifEq device.type "TOTP"}}
-              <div class="tile-button__title">Authenticator App</div>
+              {{setVariable "deviceDisplayName" "Authenticator App"}}
             {{else ifEq device.type "SMS"}}
-              <div class="tile-button__title">Text Message</div>
+              {{setVariable "deviceDisplayName" "TextMessage"}}
             {{else ifEq device.type "Email"}}
-              <div class="tile-button__title">Email</div>
+              {{setVariable "deviceDisplayName" "Email"}}
             {{else ifEq device.type "SECURITY_KEY"}}
-              <div class="tile-button__title">Security Key</div>
+              {{setVariable "deviceDisplayName" "Security  Key"}}
             {{else ifEq device.type "PLATFORM"}}
-              <div class="tile-button__title">Biometrics</div>
+              {{setVariable "deviceDisplayName" "Biometrics"}}
             {{else ifEq device.type "Voice"}}
-              <div class="tile-button__title">Voice</div>
+              {{setVariable "deviceDisplayName" "Voice"}}
             {{else ifEq device.type "FIDO2"}}
-              <div class="tile-button__title">PassKey</div>
+              {{setVariable "deviceDisplayName" "PassKey"}}
             {{else}}
-              <div class="tile-button__title">{{device.type}}</div>
+              {{setVariable "deviceDisplayName" device.type}}
             {{/ifEq}}
           {{/if}}
+          <div class="tile-button__title">{{@root.deviceDisplayName}}</div>
           {{#ifEq device.type "Android"}}
           <div class="tile-button__content">{{device.name}}</div>
           {{else ifEq device.type "iPhone"}}
@@ -91,8 +91,20 @@
           {{/if}}
         </div>
       </div>
-      {{#if device.defaultDevice}}
-        {{#if ../manageDevicesAllowed}}
+      <div id="{{device.id}}_edit_nickname_id" class="saveable-textinput" style="display: none">
+        <div class="saveable-textinput__input">
+          <input id="nickname_input_for_{{device.id}}" class="text-input"
+                 data-id="text-input" placeholder="Nickname" type="text"
+                 maxlength="100" value="{{@root.deviceDisplayName}}" data-origin-name="{{@root.deviceDisplayName}}"
+                 style="position: inherit; padding-right: 48px">
+          <div>
+            <button id="save_nickname_button" class="saveable-textinput__save saveable-textinput"
+                    data-id="button" type="button" role="button" data-mfa-selection="{{device.id}}"
+                    style="border:none; position:inherit"></button>
+          </div>
+        </div>
+      </div>
+      {{#if ../manageDevicesAllowed}}
         <div class="device-selector__item-controls" id="kebab-menu-icon-id" data-mfa-selection-kebab-menu-container="{{device.id}}">
           <div class="popover popover--left" data-id="popover-nav-menu">
             <a class="popover__trigger" data-id="popover-nav-menu-trigger">
@@ -111,49 +123,27 @@
                  style="display:none; position: absolute; right: 0px;">
               <div class="popup-frame popup-frame--left">
                 <div class="popover-menu__dialog" data-id="kebab-menu">
-                    <div id="remove-device-{{device.id}}" data-mfa-selection-kebab-menu-container="{{device.id}}" data-id="popup-frame" data-parent="popover-nav-menu">
-                      <button class="button file-input--button popover-menu__item" data-id="button" type="button">Remove</button>
-                    </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        {{/if}}
-      {{/if}}
-      {{#ifEq device.defaultDevice false}}
-      <div class="device-selector__item-controls" id="kebab-menu-icon-id" data-mfa-selection-kebab-menu-container="{{device.id}}">
-        <div class="popover popover--left" data-id="popover-nav-menu">
-          <a class="popover__trigger" data-id="popover-nav-menu-trigger">
-            <div>
-              <button class="button file-input~~button popover-menu__control" data-id="button" style="border:none" type="button">
-                <svg id="kebab-menu-svg-id" viewBox="0 0 24 24" role="presentation" style="width: 26px; height: 26px;">
-                  <path
-                    d="M12,16A2,2 0 0,1 14,18A2,2 0 0,1 12,20A2,2 0 0,1 10,18A2,2 0 0,1 12,16M12,10A2,2 0 0,1 14,12A2,2 0 0,1 12,14A2,2 0 0,1 10,12A2,2 0 0,1 12,10M12,4A2,2 0 0,1 14,6A2,2 0 0,1 12,8A2,2 0 0,1 10,6A2,2 0 0,1 12,4Z"
-                    style="fill: rgb(104, 111, 119);"></path>
-                </svg>
-              </button>
-            </div>
-          </a>
-          <div id="device-management-popup-frame-{{device.id}}"
-            class="popper-container popover-display" ;
-            style="display:none; position: absolute; right: 0px;">
-            <div class="popup-frame popup-frame--left">
-              <div class="popover-menu__dialog" data-id="kebab-menu">
-                <div id="set-default-device-{{device.id}}" data-mfa-selection-kebab-menu-container="{{device.id}}" data-id="popup-frame" data-parent="popover-nav-menu">
-                  <button class="button file-input--button popover-menu__item" data-id="button" type="button">Set As Default</button>
-                </div>
-                {{#if ../manageDevicesAllowed}}
+                  {{#if ../userSelectedDefault}}
+                    {{#ifEq device.defaultDevice false}}
+                      <div id="set-default-device-{{device.id}}" data-mfa-selection-kebab-menu-container="{{device.id}}" data-id="popup-frame" data-parent="popover-nav-menu">
+                        <button class="button file-input--button popover-menu__item" data-id="button" type="button">Set As Default</button>
+                      </div>
+                    {{/ifEq}}
+                  {{/if}}
+                  <div id="edit-device-{{device.id}}" data-mfa-selection-kebab-menu-container="{{device.id}}" data-id="popup-frame" data-parent="popover-nav-menu">
+                    <button class="button file-input--button popover-menu__item" data-id="button" type="button">Edit Name</button>
+                  </div>
                   <div id="remove-device-{{device.id}}" data-mfa-selection-kebab-menu-container="{{device.id}}" data-id="popup-frame" data-parent="popover-nav-menu">
                     <button class="button file-input--button popover-menu__item" data-id="button" type="button">Remove</button>
                   </div>
-                {{/if}}
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-      {{/ifEq}}
+        <div class="saveable-textinput__cancel" id="cancel_edit_name_icon_id" data-mfa-selection="{{device.id}}" style="display: none">
+        </div>
+      {{/if}}
     </div>
     {{/isValidRpId}}
   {{/if}}
