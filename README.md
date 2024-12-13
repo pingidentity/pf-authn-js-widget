@@ -21,8 +21,8 @@
 - [Bug Reports](#bug-reports)
 - [License](#license)
 
-The JavaScript Widget for the PingFederate Authentication API is a customizable JavaScript library that provides the capabilities of the [HTML form Adapter](https://docs.pingidentity.com/csh?Product=pf-latest&topicname=xvy1564003022890.html)
-and other integrations via [Authentication APIs](https://docs.pingidentity.com/csh?Product=pf-latest&topicname=qsl1564002999029.html), including:
+The JavaScript Widget for the PingFederate Authentication API is a customizable JavaScript library that provides the capabilities of the [HTML form Adapter](https://docs.pingidentity.com/pingfederate/latest/administrators_reference_guide/pf_html_form_adapt.html)
+and other integrations via [Authentication APIs](https://docs.pingidentity.com/pingfederate/latest/developers_reference_guide/pf_authentication_api.html), including:
  - user login
  - trouble signing in
  - trouble with username
@@ -56,7 +56,7 @@ To configure PingFederate for the widget:
   4. Select your newly created Authentication Application ("TestApp" if you used the example above) in the drop-down in the "Default Authentication Application" section.
   5. Start the SSO flow as you would normally. For example, by clicking on an existing IdP Connection, and you will be redirected to your "JavaScript Widget for the PingFederate Authentication API" application.
 
-**Note:** The redirect URL of the [Authentication Applications](https://docs.pingidentity.com/csh?Product=pf-latest&topicname=ldc1564002999116.html) must point to where the JavaScript Widget for the PingFederate Authentication API is hosted.
+**Note:** The redirect URL of the [Authentication Applications](https://docs.pingidentity.com/pingfederate/latest/administrators_reference_guide/help_authenticationapplicationtasklet_authenticationapplicationstate.html) must point to where the JavaScript Widget for the PingFederate Authentication API is hosted.
 If you do not wish to use the development server provided by webpack, change the URL of the authentication application to point the correct hosted URL.
 
 # Installation
