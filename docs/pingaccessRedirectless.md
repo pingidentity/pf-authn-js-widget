@@ -10,13 +10,13 @@ cookie, established by the redirectless flow, is included in API requests.
 ### `paOnAuthorizationRequest` function
 
 This function returns a configuration object `onAuthorizationRequest` callback function. A [PingFederate Authentication 
-API Challenge](https://docs.pingidentity.com/csh?Product=pa-latest&topicname=bsa1607124104609.html) response is passed 
+API Challenge](https://docs.pingidentity.com/pingaccess/latest/pingaccess_user_interface_reference_guide/pa_acr_generator_descriptions.html) response is passed 
 to this function as the first argument.
 
 ### `paOnAuthorizationSuccess` function
 
 This function returns a configuration object `onAuthorizationSuccess` callback function. A [PingFederate Authentication
-API Challenge](https://docs.pingidentity.com/csh?Product=pa-latest&topicname=bsa1607124104609.html) response is passed 
+API Challenge](https://docs.pingidentity.com/pingaccess/latest/pingaccess_user_interface_reference_guide/pa_acr_generator_descriptions.html) response is passed 
 to this function as the first argument. An error-first callback function is passed to this function as the second argument.
 
 Here is an example:
