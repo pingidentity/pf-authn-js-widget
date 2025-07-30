@@ -1352,10 +1352,10 @@ export default class AuthnWidget {
 
     document.getElementById('retryVerification').addEventListener('click', this.handleRetryVerification);
 
-    if (data.newTab && data.webVerificationUrl !== undefined &&
+    if (data.sameDevice && data.webVerificationUrl !== undefined &&
         (this.store.getPreviousStore().verificationCode !== data.verificationCode)) {
-      console.log("web link opens newtab: " + data.webVerificationUrl);
-      window.open(data.webVerificationUrl, '_blank');
+      console.log("web link opens in same device: " + data.webVerificationUrl);
+      window.open(data.webVerificationUrl, '_self');
     }
   }
 
