@@ -2,35 +2,64 @@
   <div class="org-logo">
     <img class="org-logo__image" src="{{logo}}" alt="Company Logo"/>
   </div>
-  <form class="form form--spacing-lg idv-form" id="AuthnWidgetForm">
-    <div class="stack stack--small">
-      <h1 id="requiredHeader" class="heading" data-id="heading">
-        {{#if errJson}}
-          Sorry, Something Went Wrong
-        {{else}}
-          Verification Required
-        {{/if}}
-      </h1>
-      <h4 id="requiredDescription" class="heading heading--4 text-block" data-id="heading">
-        {{#if errJson}}
-          We had a problem on our side. Scan the QR code using your mobile device's camera and compare the verification code to the one shown on your device. Select Cancel to send a web link via text or email.
-        {{else}}
-          Click on the web link sent to your mobile device or scan the QR code using your mobile device's camera. Compare the verification code to the one shown on your device.
-        {{/if}}
-      </h4>
-      <h1 id="startedHeader" class="heading" data-id="heading" style="display: none">Verification Started</h1>
-      <h4 id="startedDescription" class="heading heading--4 text-block" data-id="heading" style="display: none">
-        Follow the instructions on your mobile device to complete the verification process. Scan the QR code to resume the process. Select Cancel to start over.
-      </h4>
+  <form class="form form--spacing-lg" id="AuthnWidgetForm">
+    <div id="linkSent" class="icon-feedback icon-feedback--timeout icon-feedback--success" style="display: none">
+      <span class="icon-feedback__icon pingicon-ghost-success"></span>
+      <p id="linkSentSubject" class="heading">
+        {{#ifEq notificationMethod "email"}}
+          Email Sent
+        {{else ifEq notificationMethod "sms"}}
+          Text Message Sent
+        {{/ifEq}}
+      </p>
+      <p id="linkSentMessage" class="heading heading--4 text-block" style="margin: 15px;">
+        {{#ifEq notificationMethod "email"}}
+          A weblink was sent to your email address. Click the weblink to continue.
+        {{else ifEq notificationMethod "sms"}}
+          A weblink was texted to your phone number. Click the weblink to continue.
+        {{/ifEq}}
+      </p>
+      <table style="width:100%;padding-top:15px;padding-bottom:15px;">
+        <tr>
+          <td>
+            <button id="qrbtn" class="button button--primary" data-id="button" type="button" style="font-size:15px;width:100%;">
+              Generate QR Code
+            </button>
+          </td>
+        </tr>
+      </table>
     </div>
-    <div id="qrCodeBlock" class="text-block" style="display: none">
-      <img id="qrCode" height="150px" width="150px" alt="QR Code" src=""/>
-    </div>
-    <div class="text-block stack stack--small" data-id="textblock">
-      <div class="text-block stack stack--xsmall">
-        <div class="heading heading--4 text-block" data-id="heading">Verification code:</div>
-        <div id="verificationCode" class="heading" data-id="heading">
-          {{verificationCode}}
+
+    <div id="verificationData">
+      <div class="stack stack--small">
+        <h1 id="requiredHeader" class="heading" data-id="heading">
+          {{#if errJson}}
+            Sorry, Something Went Wrong
+          {{else}}
+            Scan QR Code
+          {{/if}}
+        </h1>
+        <h4 id="requiredDescription" class="heading heading--4 text-block" data-id="heading">
+          {{#if errJson}}
+            We had a problem on our side. Scan the QR code using the camera on your mobile device.
+          {{else}}
+            Scan the QR code using the camera on your mobile device.
+          {{/if}}
+        </h4>
+        <h1 id="startedHeader" class="heading" data-id="heading" style="display: none">Verification Started</h1>
+        <h4 id="startedDescription" class="heading heading--4 text-block" data-id="heading" style="display: none">
+          Follow the instructions on your mobile device to complete the verification process. Scan the QR code to resume the process. Select Cancel to start over.
+        </h4>
+      </div>
+      <div id="qrCodeBlock" class="text-block" style="display: none">
+        <img id="qrCode" height="150px" width="150px" alt="QR Code" src=""/>
+      </div>
+      <div class="text-block stack stack--small" data-id="textblock">
+        <div class="text-block stack stack--xsmall">
+          <div class="heading heading--4 text-block" data-id="heading">Verification code:</div>
+          <div id="verificationCode" class="heading" data-id="heading">
+            {{verificationCode}}
+          </div>
         </div>
       </div>
     </div>
