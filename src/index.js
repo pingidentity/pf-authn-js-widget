@@ -1367,12 +1367,26 @@ export default class AuthnWidget {
     document.getElementById('verificationCode').innerHTML = data.verificationCode || "";
 
     document.getElementById('retryVerification').addEventListener('click', this.handleRetryVerification);
+    document.getElementById('qrbtn').addEventListener('click', this.displayQR);
 
-    if (data.newTab && data.webVerificationUrl !== undefined &&
+    if (data.sameDevice && data.webVerificationUrl !== undefined &&
         (this.store.getPreviousStore().verificationCode !== data.verificationCode)) {
-      console.log("web link opens newtab: " + data.webVerificationUrl);
-      window.open(data.webVerificationUrl, '_blank');
+      // open weblink in current tab on same device, with autoRedirectToPF & skipIntroScreen
+      data.webVerificationUrl += '&skipIntro=1';
+      console.log("web link opens in same device: " + data.webVerificationUrl);
+      window.open(data.webVerificationUrl, '_self');
     }
+
+    if (data.notificationMethod) {
+      // weblink was sent successfully, show notification sent screen instead of qrcode
+      document.getElementById("linkSent").style.display = "block";
+      document.getElementById("verificationData").style.display = "none";
+    }
+  }
+
+  displayQR() {
+    document.getElementById("linkSent").style.display = "none";
+    document.getElementById("verificationData").style.display = "block";
   }
 
   postIdVerificationRequired() {
@@ -1416,6 +1430,10 @@ export default class AuthnWidget {
   async pollCheckGet(currentVerificationCode, timeout) {
     let newState = await this.store.poll();
 
+    if (Object.hasOwn(newState, 'errJson')) {
+      // failed retry message is shown on qr screen
+      this.displayQR();
+    }
     if (newState.txStatus === 'INITIATED')
     {
       document.getElementById("requiredHeader").style.display = "none";
@@ -1492,15 +1510,17 @@ export default class AuthnWidget {
   }
 
   handleIdVerificationDevice() {
-    document.getElementById('other').addEventListener('click', this.deviceAuthentication);
-    document.getElementById('self').addEventListener('click', this.deviceAuthentication);
+    document.getElementById('beginbtn').addEventListener('click', this.deviceAuthentication);
     document.getElementById('cancelAuthentication').addEventListener('click', this.handleCancelAuthentication);
   }
 
-  deviceAuthentication(event) {
-    console.log("selected device: " + event.target.id);
+  deviceAuthentication() {
     document.getElementById("AuthnWidgetForm").style.pointerEvents = "none";
-    const data = { "deviceAuthentication": event.target.id };
+
+    // javascript from http://detectmobilebrowser.com/
+    const isMobile = (function(a){return /(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce|xda|xiino/i.test(a)||/1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(a.substr(0,4));})(navigator.userAgent||navigator.vendor||window.opera);
+    const device = isMobile ? "self" : "other";
+    const data = { "deviceAuthentication": device };
     this.store.dispatch('POST_FLOW', "deviceAuthentication", JSON.stringify(data));
   }
 
@@ -1509,53 +1529,76 @@ export default class AuthnWidget {
     if (data.forcePolicy) {
       document.getElementById("description").innerHTML = "Select a method to receive a web link on your mobile device to start the verification process.";
       document.getElementById("qrbtn").style.display = "none";
+      document.getElementById("or").style.display = "none";
 
-      const radios = document.getElementsByName("radioGroup");
-      for (let i = 0; i < radios.length; i++) {
-        radios[i].checked = true;
-      }
-      document.getElementById("nextbtn").disabled = false;
       document.getElementById("cancelAuthentication").style.display = "block";
       document.getElementById("retryoptions").style.display = "none";
     }
-    if (data.errorMessage) {
-      document.getElementById("nextbtn").disabled = true;
-    } else {
-      if (data.emails.length) {
-        document.getElementById('emailRadio').addEventListener('click', this.optionsRadioSelected);
+    if (!data.errorMessage) {
+      const tiles = document.querySelectorAll('.tile-button');
+      tiles.forEach(tile => {
+        tile.addEventListener('click', function() {
+          tiles.forEach(otherTile => {
+            if (otherTile !== tile && otherTile.classList.contains('tile-button--selected')) {
+              otherTile.classList.remove('tile-button--selected');
+            }
+          });
+          tile.classList.toggle('tile-button--selected');
+        });
+      });
+
+      const emails = document.getElementsByName("email");
+      const phones = document.getElementsByName("phone");
+      if (emails?.length > 0) {
+        emails[0].checked = true;
       }
-      if (data.phones.length) {
-        document.getElementById('mobileRadio').addEventListener('click', this.optionsRadioSelected);
+      if (phones?.length > 0) {
+        phones[0].checked = true;
       }
-      document.getElementById('qrbtn').addEventListener('click', this.optionsAuthentication);
+
+      Array.from(document.querySelectorAll('[data-method]'))
+        .forEach(element => element.addEventListener('click', this.notificationMethodSelected));
       document.getElementById('nextbtn').addEventListener('click', this.optionsAuthentication);
     }
     document.getElementById('cancelAuthentication').addEventListener('click', this.handleCancelAuthentication);
   }
 
-  optionsRadioSelected() {
+  notificationMethodSelected(evt) {
     document.getElementById("nextbtn").disabled = false;
+
+    evt.preventDefault();
+    const source = evt.currentTarget;
+    if (source) {
+      const method = source.dataset.method;
+    
+      const emailOptions = document.getElementById("emailOptions");
+      const phoneOptions = document.getElementById("phoneOptions");
+      if (emailOptions) {
+        emailOptions.style.display = "none";
+      }
+      if (phoneOptions) {
+        phoneOptions.style.display = "none";
+      }
+      if (method === 'email') {
+        emailOptions.style.display = "block";
+      } else if (method === 'phone') {
+        phoneOptions.style.display = "block";
+      }
+    } else {
+      console.log("ERROR - Unable to dispatch notification method selection as the target was null");
+    }
   }
 
-  optionsAuthentication(event) {
-    console.log("selected option: " + event.target.id);
+  optionsAuthentication() {
     document.getElementById("AuthnWidgetForm").style.pointerEvents = "none";
     let email = null;
     let phone = null;
-    const qrOnly = event.target.id === "qrbtn";
-    if (qrOnly === true) {
-      console.log("skip notification, show qr code only");
-    } else if (document.querySelector('input[name="radioGroup"]:checked')) {
-      const radio = document.querySelector('input[name="radioGroup"]:checked').value;
-      if (radio === "emailRadio") {
-        const select = document.getElementById("emails");
-        email = select.options[select.selectedIndex].value;
-        console.log("selected email: "+email);
-      } else if (radio === "mobileRadio") {
-        const select = document.getElementById("mobiles");
-        phone = select.options[select.selectedIndex].value;
-        console.log("selected phone: "+phone);
-      }
+    const emailNotification = document.getElementById("emailOptions")?.style.display === "block";
+    const phoneNotification = document.getElementById("phoneOptions")?.style.display === "block";
+    if (emailNotification) {
+      email = document.querySelector('input[name="email"]:checked').value;
+    } else if (phoneNotification) {
+      phone = document.querySelector('input[name="phone"]:checked').value;
     }
     const data = { "email": email, "phone": phone, "optionsAuthentication": true };
     this.store.dispatch('POST_FLOW', "optionsAuthentication", JSON.stringify(data));
