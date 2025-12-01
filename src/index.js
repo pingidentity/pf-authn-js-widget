@@ -1570,7 +1570,7 @@ export default class AuthnWidget {
     const source = evt.currentTarget;
     if (source) {
       const method = source.dataset.method;
-    
+
       const emailOptions = document.getElementById("emailOptions");
       const phoneOptions = document.getElementById("phoneOptions");
       if (emailOptions) {
@@ -1667,7 +1667,7 @@ export default class AuthnWidget {
       return;
     }
 
-    let pollAgain = 
+    let pollAgain =
       newState.status === 'CREDENTIAL_VERIFICATION_REQUIRED' &&
       newState.qrUrl === currentQrUrl;
 
