@@ -10,6 +10,10 @@
                   Calling:
                 {{else ifEq device.type "SMS" }}
                   Message sent to:
+                {{else ifEq device.type "WHATSAPP" }}
+                  Message sent to:
+                {{else ifEq device.type "OATH_TOKEN"}}
+                  Passcode displayed on
                 {{else}}
                   {{device.type}} sent to:
                 {{/ifEq}}
@@ -17,22 +21,28 @@
             </div>
             <div class="text-block" data-id="textblock">
               <div class="text-block--overflow-wrap">
-                {{device.target}}
+                {{#ifEq device.type "OATH_TOKEN"}}
+                  {{device.nickname}}
+                {{else}}
+                  {{device.target}}
+                {{/ifEq}}
               </div>
             </div>
           </div>
-          <div class="stack stack--small" data-id="stack">
-            <div>
-              <button class="button file-input--button button--tertiary" data-id="button"
-                      type="button" data-mfa-selection="{{device.id}}">
-                {{#ifEq device.type "Voice" }}
-                  Call again
-                {{else}}
-                  Resend
-                {{/ifEq}}
-              </button>
+          {{#if (not device.type "OATH_TOKEN")}}
+            <div class="stack stack--small" data-id="stack">
+              <div>
+                <button class="button file-input--button button--tertiary" data-id="button"
+                        type="button" data-mfa-selection="{{device.id}}">
+                  {{#ifEq device.type "Voice" }}
+                    Call again
+                  {{else}}
+                    Resend
+                  {{/ifEq}}
+                </button>
+              </div>
             </div>
-          </div>
+          {{/if}}
         {{/ifNotEq}}
       {{/ifNotEq}}
     {{/ifNotEq}}

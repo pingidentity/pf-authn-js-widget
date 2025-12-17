@@ -3,24 +3,53 @@
     <img class="org-logo__image" src="{{logo}}" alt="Company Logo"/>
   </div>
   {{> errors}}
-  <h1 class="heading">Select Authentication Method</h1>
+  <h1 class="heading">
+    {{#if deviceManagementState}}
+      Device Management
+    {{else}}
+      Select Authentication Method
+    {{/if}}
+  </h1>
   <div class="text-block">
     {{#ifEq actionid "removeDevice"}}
       <div class="text-block__text">To remove an existing MFA device you will need to authenticate with an existing method.</div>
     {{else if manualPairing}}
       <div class="text-block__text">To add a new authentication method you will need to authenticate with an existing method.</div>
+    {{else if deviceManagementState}}
+      <div class="text-block__text">Manage your devices.</div>
     {{else}}
       <div class="text-block__text">Select the authentication method you want to use with your account.</div>
     {{/ifEq}}
   </div>
+  {{#hasOneTimeAndPairedDevices devices}}
+    <div style="color: #4b637c">Pair Device</div>
+  {{/hasOneTimeAndPairedDevices}}
   <div class="tile-selector tile-selector--stacked">
     {{> device_selection}}
+  </div>
+  {{#hasOneTimeAndPairedDevices devices}}
+    <div style="color: #4b637c">One-Time Device OTP</div>
+  {{/hasOneTimeAndPairedDevices}}
+  <div class="tile-selector tile-selector--stacked">
+    {{> onetime_device_selection}}
     <form class="form form--margin-small" id="AuthnWidgetForm">
       <div class="stack" data-id="stack">
-        {{#if manualPairingPermitted}}
+        {{#if deviceManagementState}}
           <div class="text-block">
             <button id="addMfaMethod" class="button file-input--button button--primary brand-primary-bg"
-                    data-id="button" type="button">+ Add Method</button>
+                    data-id="button" type="button"
+              {{#if (not manualPairingPermitted)}}
+                    disabled
+                    title="Device limit has been reached. You must remove an existing device to add another."
+              {{/if}}> + Add Method </button>
+          </div>
+          <div>
+            <button id="continueAuth" class="button" data-id="button" type="button"> Continue Authentication </button>
+          </div>
+        {{/if}}
+        {{#if (and (not deviceManagementState) (not manageDeviceRequested))}}
+          <div>
+            <button id="manageDevices" class="button" data-id="button" type="button">Manage Devices</button>
           </div>
         {{/if}}
         <div class="text-block">
@@ -46,6 +75,9 @@
               </div>
               <div id="auth_for_update_nickname_name_message" class="text-block" data-id="textblock">
                   <div class="text-block--overflow-wrap">To edit device's nickname you will need to authenticate with an existing method first.</div>
+              </div>
+              <div id="auth_for_manage_devices_message" class="text-block" data-id="textblock">
+                  <div class="text-block--overflow-wrap">To manage devices you will need to authenticate with an existing device.</div>
               </div>
               <div class="text-block">
                   <div class="stack" data-id="stack">
