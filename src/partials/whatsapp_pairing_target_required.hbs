@@ -58,13 +58,15 @@
     background-color: #fff !important;
   }
 
+  .phone-input {
+    background-color: #fff !important;
+  }
+
   .expanded-dropdown {
     position: absolute;
     width: 100%;
     z-index: 1000;
   }
-
-  .
 </style>
 <div class="card">
   <div class="org-logo">
@@ -87,17 +89,24 @@
     <form class="form" id="AuthnWidgetForm">
       <div class="stack stack--small" data-id="stack">
         <div class="phone-input-wrapper">
-          <div class="dropdown-container">
-            <div class="dropdown-input-container">
-              <input type="text" id="countryCodeInput" name="countryCodeInput" class="dropdown-input" value="+1"
-                     readonly placeholder="Select country">
-              <div id="dropdownArrow" class="dropdown-arrow">v</div>
+          {{#if (not allowedValue)}}
+            <div class="dropdown-container">
+              <div class="dropdown-input-container">
+                <input type="text" id="countryCodeInput" name="countryCodeInput" class="dropdown-input" value="+1"
+                       readonly placeholder="Select country">
+                <div id="dropdownArrow" class="dropdown-arrow">v</div>
+              </div>
+              <div id="dropdownList" class="dropdown-list expanded-dropdown">
+              </div>
             </div>
-            <div id="dropdownList" class="dropdown-list expanded-dropdown">
-            </div>
-          </div>
+          {{/if}}
           <div class="text-input__icon">
-            <input id="phone" type="tel" name="phone" class="text-input text-input required" value=""/>
+            {{#if allowedValue}}
+              <input id="phone" type="tel" name="phone" class="text-input text-input required phone-input"
+                     value="{{allowedValue}}" data-allowed-value="true" readonly/>
+            {{else}}
+              <input id="phone" type="tel" name="phone" class="text-input text-input required" value=""/>
+            {{/if}}
           </div>
         </div>
       </div>

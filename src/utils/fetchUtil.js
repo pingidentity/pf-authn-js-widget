@@ -14,7 +14,7 @@ export default class fetchUtil {
     var url = this.baseUrl + FLOWS_ENDPOINT + flowId;
     var headers = {
       Accept: 'application/json',
-      'X-XSRF-Header': 'PingFederate'
+      'X-XSRF-Header': 'pf-js-widget'
     };
     if (actionId) {
       var contentType = 'application/json';
