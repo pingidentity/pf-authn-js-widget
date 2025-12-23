@@ -238,6 +238,7 @@ export default class AuthnWidget {
     this.transitionFromUpdateDeviceNicknameMode = this.transitionFromUpdateDeviceNicknameMode.bind(this);
     this.updateDeviceNickname = this.updateDeviceNickname.bind(this);
     this.displayDeviceMgmt = this.displayDeviceMgmt.bind(this);
+    this.usePasswordAuth = this.usePasswordAuth.bind(this);
     this.showDeviceMgmt = this.showDeviceMgmt.bind(this);
     this.handleResumeAuthentication = this.handleResumeAuthentication.bind(this);
     this.transitionToResyncOathTokenMode = this.transitionToResyncOathTokenMode.bind(this);
@@ -969,6 +970,10 @@ export default class AuthnWidget {
     if (document.getElementById('manageDevices') !== null) {
       document.getElementById('manageDevices')
         .addEventListener('click', this.displayDeviceMgmt);
+    }
+    if (document.getElementById('usePasswordButton') !== null) {
+      document.getElementById('usePasswordButton')
+        .addEventListener('click', this.usePasswordAuth);
     }
     if (document.getElementById('continueAuth') !== null) {
       document.getElementById('continueAuth')
@@ -2276,6 +2281,11 @@ export default class AuthnWidget {
       this.renderSpinnerTemplate();
       this.store.dispatch('POST_FLOW', "manageDevices", null);
     }
+  }
+
+  usePasswordAuth(){
+    this.renderSpinnerTemplate();
+    this.store.dispatch('POST_FLOW', "usePasswordAuthentication", null);
   }
 
   showDeviceMgmt() {

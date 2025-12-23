@@ -52,6 +52,13 @@
             <button id="manageDevices" class="button" data-id="button" type="button">Manage Devices</button>
           </div>
         {{/if}}
+        {{#if usePasswordAuthenticationEnabled}}
+          <div style="display: flex; justify-content: center;">
+            <a id="usePasswordButton" tabindex="0" data-id="content-link" target="_self" class="anchor" >
+              Use Password
+            </a>
+          </div>
+        {{/if}}
         <div class="text-block">
           <a tabindex="0" data-actionId="cancelAuthentication" target="_self" class="anchor">
             Cancel</a>
