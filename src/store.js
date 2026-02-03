@@ -245,6 +245,10 @@ export default class Store {
           errors.userMessages.push(detail.userMessage);
         });
       }
+    } else if (json.code === 'INVALID_DEVICE_TARGET') {
+      if (json.message) {
+        errors.userMessages.push(json.message);
+      }
     }
     return errors;
   }

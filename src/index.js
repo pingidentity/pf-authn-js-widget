@@ -1344,7 +1344,10 @@ export default class AuthnWidget {
           }
         }
         if (input.type === 'text' && input.id === 'otp') {
-          if (input.value.length !== input.maxLength || !(/^\d+$/.test(input.value))) {
+          const tooShortOrTooLong = (input.value.length < 6 || input.value.length > input.maxLength);
+          const isNumeric = /^\d+$/.test(input.value);
+
+          if (tooShortOrTooLong || !isNumeric) {
             disabled = true;
           }
         }
