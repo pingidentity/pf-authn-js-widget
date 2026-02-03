@@ -1335,12 +1335,9 @@ export default class AuthnWidget {
           disabled = true
         }
         if (input.type === 'email') {
-          const hasAllowedValue = input.dataset.allowedValue === 'true';
-          if (!hasAllowedValue) {
-            let emailIsValid = input.checkValidity() && isValidEmail(input.value);
-            if (!emailIsValid) {
-              disabled = true;
-            }
+          let emailIsValid = input.checkValidity() && isValidEmail(input.value);
+          if (!emailIsValid) {
+            disabled = true;
           }
         }
         if (input.type === 'text' && input.id === 'otp') {
@@ -1357,12 +1354,9 @@ export default class AuthnWidget {
           }
         }
         if (input.type === 'tel') {
-          const hasAllowedValue = input.dataset.allowedValue === 'true';
-          if (!hasAllowedValue) {
-            let phoneIsValid = input.value.length > 0 && input.checkValidity() && isValidPhone(input.value);
-            if (!phoneIsValid) {
-              disabled = true;
-            }
+          let phoneIsValid = input.value.length > 0 && input.checkValidity() && isValidPhone(input.value);
+          if (!phoneIsValid) {
+            disabled = true;
           }
         }
       });
