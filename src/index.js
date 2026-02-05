@@ -43,7 +43,8 @@ export default class AuthnWidget {
 
     const oneTimeDeviceOtpStates = [
       'ONE_TIME_DEVICE_OTP_METHOD_TYPE_INPUT_REQUIRED',
-      'ONE_TIME_DEVICE_OTP_INPUT_REQUIRED'
+      'ONE_TIME_DEVICE_OTP_INPUT_REQUIRED',
+      'ONE_TIME_DEVICE_OTP_REQUIRED'
     ]
 
     const idVerificationStates = [
@@ -85,16 +86,17 @@ export default class AuthnWidget {
       'USERNAME_RECOVERY_EMAIL_SENT', 'SUCCESSFUL_ACCOUNT_UNLOCK', 'IDENTIFIER_REQUIRED',
       'EXTERNAL_AUTHENTICATION_COMPLETED', 'EXTERNAL_AUTHENTICATION_FAILED', 'EXTERNAL_AUTHENTICATION_REQUIRED',
       'DEVICE_PROFILE_REQUIRED', 'REGISTRATION_REQUIRED', 'REFERENCE_ID_REQUIRED','CURRENT_CREDENTIALS_REQUIRED',
-      'DEVICE_SELECTION_REQUIRED', 'MFA_COMPLETED', 'MFA_FAILED', 'OTP_REQUIRED', 'ASSERTION_REQUIRED',
+      'DEVICE_SELECTION_REQUIRED', 'DEVICE_MANAGEMENT', 'MFA_COMPLETED', 'MFA_FAILED', 'OTP_REQUIRED', 'ASSERTION_REQUIRED',
       'PUSH_CONFIRMATION_REJECTED', 'PUSH_CONFIRMATION_TIMED_OUT', 'PUSH_CONFIRMATION_WAITING', 'ACCOUNT_LINKING_FAILED',
       'EMAIL_VERIFICATION_REQUIRED', 'EMAIL_VERIFICATION_OTP_REQUIRED',
-      'MFA_SETUP_REQUIRED', 'DEVICE_PAIRING_METHOD_REQUIRED', 'EMAIL_PAIRING_TARGET_REQUIRED',
-      'EMAIL_ACTIVATION_REQUIRED', 'SMS_PAIRING_TARGET_REQUIRED', 'SMS_ACTIVATION_REQUIRED',
+      'MFA_SETUP_REQUIRED', 'DEVICE_PAIRING_METHOD_REQUIRED', 'EMAIL_PAIRING_TARGET_REQUIRED', 'WHATSAPP_PAIRING_TARGET_REQUIRED',
+      'EMAIL_ACTIVATION_REQUIRED', 'SMS_PAIRING_TARGET_REQUIRED', 'SMS_ACTIVATION_REQUIRED', 'WHATSAPP_ACTIVATION_REQUIRED',
       'VOICE_PAIRING_TARGET_REQUIRED', 'VOICE_ACTIVATION_REQUIRED', 'TOTP_ACTIVATION_REQUIRED', 'PLATFORM_ACTIVATION_REQUIRED',
       'SECURITY_KEY_ACTIVATION_REQUIRED', 'MOBILE_ACTIVATION_REQUIRED', 'MFA_DEVICE_PAIRING_METHOD_FAILED',
       'VIP_ENROLLMENT', 'VIP_CREDENTIAL_REQUIRED', 'VIP_AUTHENTICATION_REQUIRED', 'VIP_CREDENTIAL_RESET_REQUIRED',
       'USER_ID_REQUIRED', 'AUTHENTICATOR_SELECTION_REQUIRED', 'INPUT_REQUIRED', 'ENTRUST_FAILED', 'FRAUD_EVALUATION_CHECK_REQUIRED',
       'AUTHENTICATION_CODE_RESPONSE_REQUIRED', 'BIOMETRIC_DEVICE_AUTHENTICATION_INFO_REQUIRED', 'FIDO2_ACTIVATION_REQUIRED',
+      'UPDATE_NICKNAME', 'OATH_TOKEN_PAIRING_TARGET_REQUIRED', 'OATH_TOKEN_ACTIVATION_REQUIRED'
     ]
     .concat(oauthUserAuthorizationStates)
     .concat(oneTimeDeviceOtpStates)
@@ -174,7 +176,7 @@ export default class AuthnWidget {
     this.handleMfaSetDefaultDeviceSelection = this.handleMfaSetDefaultDeviceSelection.bind(this);
     this.handleMfaRemoveDeviceSelection = this.handleMfaRemoveDeviceSelection.bind(this);
     this.handleAddMfaMethod = this.handleAddMfaMethod.bind(this);
-    this.handleCancelAddMfaMethod = this.handleCancelAddMfaMethod.bind(this);
+    this.handleCancelAuthRequiredWarning = this.handleCancelAuthRequiredWarning.bind(this);
     this.handleCancelRemoveDevice = this.handleCancelRemoveDevice.bind(this);
     this.handleContinueAddMfaMethod = this.handleContinueAddMfaMethod.bind(this);
     this.handleContinueRemoveDevice = this.handleContinueRemoveDevice.bind(this);
@@ -232,6 +234,19 @@ export default class AuthnWidget {
     this.postCredentialVerificationRequired = this.postCredentialVerificationRequired.bind(this);
     this.pollCheckGetCredential = this.pollCheckGetCredential.bind(this);
     this.postContinueCredential = this.postContinueCredential.bind(this);
+    this.transitionToUpdateDeviceNicknameMode = this.transitionToUpdateDeviceNicknameMode.bind(this);
+    this.transitionFromUpdateDeviceNicknameMode = this.transitionFromUpdateDeviceNicknameMode.bind(this);
+    this.updateDeviceNickname = this.updateDeviceNickname.bind(this);
+    this.displayDeviceMgmt = this.displayDeviceMgmt.bind(this);
+    this.usePasswordAuth = this.usePasswordAuth.bind(this);
+    this.showDeviceMgmt = this.showDeviceMgmt.bind(this);
+    this.handleResumeAuthentication = this.handleResumeAuthentication.bind(this);
+    this.transitionToResyncOathTokenMode = this.transitionToResyncOathTokenMode.bind(this);
+    this.transitionFromResyncOathTokenMode = this.transitionFromResyncOathTokenMode.bind(this);
+    this.resyncOathToken = this.resyncOathToken.bind(this);
+    this.registerCountryCodePickerHandler = this.registerCountryCodePickerHandler.bind(this);
+    this.registerOneTimeDeviceChangeEventHandler = this.registerOneTimeDeviceChangeEventHandler.bind(this);
+    this.handleOneTimeDeviceChange = this.handleOneTimeDeviceChange.bind(this);
     this.stateTemplates = new Map();  //state -> handlebar templates
     this.eventHandler = new Map();  //state -> eventHandlers
     this.postRenderCallbacks = new Map();
@@ -263,10 +278,12 @@ export default class AuthnWidget {
     this.addPostRenderCallback('AUTHENTICATION_REQUIRED', this.postEmptyAuthentication);
     this.addPostRenderCallback('MFA_COMPLETED', this.postContinueAuthentication);
     this.addEventHandler('DEVICE_SELECTION_REQUIRED', this.registerMfaEventHandler);
+    this.addEventHandler('DEVICE_MANAGEMENT', this.registerMfaEventHandler);
     this.addEventHandler('SECURID_CAS_CHALLENGE_METHOD_REQUIRED', this.registerSecurIDCASEventHandler);
     this.addPostRenderCallback('DEVICE_SELECTION_REQUIRED', this.postDeviceSelectionRequired);
     this.addEventHandler('ONE_TIME_DEVICE_OTP_METHOD_TYPE_INPUT_REQUIRED', this.registerMfaEventHandler);
     this.addEventHandler('ONE_TIME_DEVICE_OTP_INPUT_REQUIRED', this.registerMfaOneTimeDeviceChangeEventHandler);
+    this.addEventHandler('ONE_TIME_DEVICE_OTP_REQUIRED', this.registerOneTimeDeviceChangeEventHandler);
     this.addEventHandler('OTP_REQUIRED', this.registerMfaEventHandler);
     this.addEventHandler('OTP_REQUIRED', this.registerMfaChangeDeviceEventHandler);
     this.addPostRenderCallback('OTP_REQUIRED', this.postOTPRequired);
@@ -313,6 +330,9 @@ export default class AuthnWidget {
     this.addEventHandler('CREDENTIAL_VERIFICATION_REQUIRED', this.registerCredentialVerificationRequiredEventHandler);
     this.addPostRenderCallback('CREDENTIAL_VERIFICATION_REQUIRED', this.postCredentialVerificationRequired);
     this.addPostRenderCallback('CREDENTIAL_VERIFICATION_COMPLETED', this.postContinueCredential);
+    this.addEventHandler('SMS_PAIRING_TARGET_REQUIRED', this.registerCountryCodePickerHandler);
+    this.addEventHandler('VOICE_PAIRING_TARGET_REQUIRED', this.registerCountryCodePickerHandler);
+    this.addEventHandler('WHATSAPP_PAIRING_TARGET_REQUIRED', this.registerCountryCodePickerHandler);
 
     this.actionModels.set('checkUsernamePassword', { required: ['username', 'password'], properties: ['username', 'password', 'rememberMyUsername', 'thisIsMyDevice', 'captchaResponse'] });
     this.actionModels.set('initiateAccountRecovery', { properties: ['usernameHint'] });
@@ -338,7 +358,9 @@ export default class AuthnWidget {
     this.actionModels.set('submitEmailTarget', {required: ['email']});
     this.actionModels.set('activateEmailDevice', {required: ['otp']});
     this.actionModels.set('submitSmsTarget', {required: ['phone']});
+    this.actionModels.set('submitWhatsAppTarget', {required: ['phone']});
     this.actionModels.set('activateSmsDevice', {required: ['otp']});
+    this.actionModels.set('activateWhatsAppDevice', {required: ['otp']});
     this.actionModels.set('submitVoiceTarget', {required: ['phone']});
     this.actionModels.set('activateVoiceDevice', {required: ['otp']});
     this.actionModels.set('activateTotpDevice', {required: ['otp']});
@@ -355,6 +377,10 @@ export default class AuthnWidget {
     this.actionModels.set('submitUserCode', { required: ['userCode'] });
     this.actionModels.set('confirmUserCode', { required: ['userCode'] });
     this.actionModels.set('useAlternateMethod', {});
+    this.actionModels.set('updateDeviceNickname', { required : ['nickname', 'id'] });
+    this.actionModels.set('submitOathTokenTarget', {required: ['serialNumber']});
+    this.actionModels.set('activateOathTokenDevice', {required: ['otp']});
+    this.actionModels.set('resyncOathToken', {required: ['id', 'otp']});
   }
 
   init() {
@@ -568,6 +594,7 @@ export default class AuthnWidget {
         data['devicePairingMethod']['relyingPartyId'] = rpId;
         data['devicePairingMethod']['userAgent'] = userAgent;
       }
+      this.renderSpinnerTemplate();
       this.store.dispatch('POST_FLOW', "selectDevicePairingMethod", JSON.stringify(data));
     } else {
       console.log("ERROR - Unable to dispatch device selection as the target was null");
@@ -761,14 +788,6 @@ export default class AuthnWidget {
   }
 
   postDeviceSelectionRequired() {
-    let data = this.store.getStore();
-    if (data.userSelectedDefault === false) {
-      var deviceKebabMenus = document.querySelectorAll('#kebab-menu-icon-id');
-      [].forEach.call(deviceKebabMenus, function(deviceKebabMenu) {
-        deviceKebabMenu.style.display = "none";
-      });
-    }
-
     getCompatibility().then(value => {
       if (value === 'SECURITY_KEY_ONLY') {
         var platformDevices = document.querySelectorAll("[id^='PLATFORM-']");
@@ -925,6 +944,12 @@ export default class AuthnWidget {
     Array.from(document.querySelectorAll("[id^='remove-device']"))
       .forEach(element => element.addEventListener('click', this.handleMfaRemoveDeviceSelection));
 
+    Array.from(document.querySelectorAll("[id^='update-device']"))
+      .forEach(element => element.addEventListener('click', this.transitionToUpdateDeviceNicknameMode));
+
+    Array.from(document.querySelectorAll("[id^='resync-device']"))
+      .forEach(element => element.addEventListener('click', this.transitionToResyncOathTokenMode));
+
     if (document.getElementById('addMfaMethod') !== null) {
       document.getElementById('addMfaMethod')
         .addEventListener('click', this.handleAddMfaMethod);
@@ -932,15 +957,27 @@ export default class AuthnWidget {
 
     if (document.getElementById('addMfaMethodModalBackground') !== null) {
       document.getElementById('addMfaMethodModalBackground')
-        .addEventListener('click', this.handleCancelAddMfaMethod);
+        .addEventListener('click', this.handleCancelAuthRequiredWarning);
     }
     if (document.getElementById('cancelAddMfaMethod') !== null) {
       document.getElementById('cancelAddMfaMethod')
-        .addEventListener('click', this.handleCancelAddMfaMethod);
+        .addEventListener('click', this.handleCancelAuthRequiredWarning);
     }
     if (document.getElementById('cancelRemoveDevice') !== null) {
       document.getElementById('cancelRemoveDevice')
         .addEventListener('click', this.handleCancelRemoveDevice);
+    }
+    if (document.getElementById('manageDevices') !== null) {
+      document.getElementById('manageDevices')
+        .addEventListener('click', this.displayDeviceMgmt);
+    }
+    if (document.getElementById('usePasswordButton') !== null) {
+      document.getElementById('usePasswordButton')
+        .addEventListener('click', this.usePasswordAuth);
+    }
+    if (document.getElementById('continueAuth') !== null) {
+      document.getElementById('continueAuth')
+        .addEventListener('click', this.handleResumeAuthentication);
     }
   }
 
@@ -1026,21 +1063,12 @@ export default class AuthnWidget {
   }
 
   handleAddMfaMethod() {
-    if (document.querySelector('#authentication_required_block_id') != null) {
-      document.querySelector('#authentication_required_block_id').style.display = 'block';
-      document.getElementById("auth_for_unpair_message").style.display = 'none'
-      document.getElementById("auth_for_pair_message").style.display = 'block'
-      if (document.getElementById('confirmation_button') !== null) {
-        document.getElementById('confirmation_button')
-          .addEventListener('click', this.handleContinueAddMfaMethod);
-      }
-    }
-    document.body.style.overflow = "hidden";
-    document.body.style.height = "100%";
+    this.renderSpinnerTemplate();
+    this.store.dispatch('POST_FLOW', "setupMfa", null);
   }
 
   handleContinueAddMfaMethod() {
-    this.handleCancelAddMfaMethod();
+    this.handleCancelAuthRequiredWarning();
     this.store.dispatch('POST_FLOW', "setupMfa", null);
   }
 
@@ -1053,14 +1081,14 @@ export default class AuthnWidget {
           "id": deviceId
         }
       };
+      this.renderSpinnerTemplate();
       this.store.dispatch('POST_FLOW', "removeDevice", JSON.stringify(data));
     } else {
       console.log("ERROR - Unable to dispatch device selection as the target was null");
     };
   }
 
-
-  handleCancelAddMfaMethod() {
+  handleCancelAuthRequiredWarning() {
     if (document.querySelector('#authentication_required_block_id') != null) {
       document.querySelector('#authentication_required_block_id').style.display = 'none';
     }
@@ -1088,6 +1116,7 @@ export default class AuthnWidget {
           "id": deviceId
         }
       };
+      this.renderSpinnerTemplate();
       this.store.dispatch('POST_FLOW', "setDefaultDevice", JSON.stringify(data));
     } else {
       console.log("ERROR - Unable to dispatch device selection as the target was null");
@@ -1162,6 +1191,7 @@ export default class AuthnWidget {
     if(shouldWarn && document.querySelector('#last_device_warning_block_id') != null){
       document.querySelector('#last_device_warning_block_id').style.display = 'block';
       document.getElementById('confirmation_warn_button').dataset.skip_warn = "true";
+      document.getElementById('confirmation_warn_button').dataset.mfaSelectionKebabMenuContainer = source.dataset['mfaSelectionKebabMenuContainer'];
       document.getElementById("confirmation_warn_button").addEventListener('click', this.handleMfaRemoveDeviceSelection)
       return;
     }
@@ -1169,16 +1199,12 @@ export default class AuthnWidget {
     if (document.querySelector('#last_device_warning_block_id') != null) {
       document.querySelector('#last_device_warning_block_id').style.display = 'none';
     }
-    if (document.querySelector('#authentication_required_block_id') != null) {
-      document.querySelector('#authentication_required_block_id').style.display = 'block';
-      document.getElementById("auth_for_unpair_message").style.display = 'block'
-      document.getElementById("auth_for_pair_message").style.display = 'none'
-
+    if (source) {
+      console.log("mfaSelectionKebabMenuContainer", source.dataset['mfaSelectionKebabMenuContainer']);
+      evt.currentTarget.dataset.deviceId = source.dataset['mfaSelectionKebabMenuContainer'];
     }
-    document.body.style.overflow = "hidden";
-    document.body.style.height = "100%";
+    this.handleContinueRemoveDevice(evt);
   }
-
 
   registerMfaChangeDeviceEventHandler() {
     document.getElementById('changeDevice')
@@ -1194,6 +1220,18 @@ export default class AuthnWidget {
     evt.preventDefault();
     let state = await this.store.getState();
     state.status = 'ONE_TIME_DEVICE_OTP_METHOD_TYPE_INPUT_REQUIRED';
+    this.render(this.store.getPreviousStore(), state);
+  }
+
+  registerOneTimeDeviceChangeEventHandler() {
+    document.getElementById('changeOneTimeDevice')
+      .addEventListener('click', this.handleOneTimeDeviceChange);
+  }
+
+  async handleOneTimeDeviceChange(evt) {
+    evt.preventDefault();
+    let state = await this.store.getState();
+    state.status = 'DEVICE_SELECTION_REQUIRED';
     this.render(this.store.getPreviousStore(), state);
   }
 
@@ -1303,7 +1341,10 @@ export default class AuthnWidget {
           }
         }
         if (input.type === 'text' && input.id === 'otp') {
-          if (input.value.length !== 6 || !(/^\d+$/.test(input.value))) {
+          const tooShortOrTooLong = (input.value.length < 6 || input.value.length > input.maxLength);
+          const isNumeric = /^\d+$/.test(input.value);
+
+          if (tooShortOrTooLong || !isNumeric) {
             disabled = true;
           }
         }
@@ -1339,7 +1380,9 @@ export default class AuthnWidget {
         }
       })
     }
-    document.querySelector('#submit').disabled = disabled;
+    if (document.querySelector('#submit') != null) {
+      document.querySelector('#submit').disabled = disabled;
+    }
   }
 
   async registerIdVerificationRequiredEventHandler() {
@@ -1554,7 +1597,7 @@ export default class AuthnWidget {
     const source = evt.currentTarget;
     if (source) {
       const method = source.dataset.method;
-    
+
       const emailOptions = document.getElementById("emailOptions");
       const phoneOptions = document.getElementById("phoneOptions");
       if (emailOptions) {
@@ -1651,7 +1694,7 @@ export default class AuthnWidget {
       return;
     }
 
-    let pollAgain = 
+    let pollAgain =
       newState.status === 'CREDENTIAL_VERIFICATION_REQUIRED' &&
       newState.qrUrl === currentQrUrl;
 
@@ -1708,6 +1751,10 @@ export default class AuthnWidget {
     return ['checkNewPassword', 'checkPasswordReset'];
   }
 
+  getSubmitPhoneTargetActions() {
+    return ['submitSmsTarget', 'submitVoiceTarget', 'submitWhatsAppTarget'];
+  }
+
   dispatch(evt) {
     evt.preventDefault();
     let source = evt.target || evt.srcElement;
@@ -1720,7 +1767,27 @@ export default class AuthnWidget {
       return;
     }
 
+    if(this.getSubmitPhoneTargetActions().includes(actionId)) {
+      formData = this.appendCountryCodeToPhoneNumber(formData)
+    }
+
     this.dispatchWithCaptcha(actionId, formData)
+  }
+
+  appendCountryCodeToPhoneNumber(formData) {
+    // Check if both countryCodeInput and phone exist
+    if (formData.countryCodeInput && formData.phone) {
+      // Concatenate country code with phone number
+      const countryCode = formData.countryCodeInput;
+      const phoneNumber = formData.phone;
+
+      // Combine them
+      formData.phone = countryCode + phoneNumber;
+
+      // Remove the countryCodeInput field as backend doesn't need it
+      delete formData.countryCodeInput;
+    }
+    return formData;
   }
 
   dispatchWithCaptcha(actionId, formData) {
@@ -1731,6 +1798,7 @@ export default class AuthnWidget {
       const riskUtils = new RiskUtils(type, attributes, this.store);
       riskUtils.execute(actionId, formData)
     } else {
+      this.renderSpinnerTemplate();
       this.store.dispatch('POST_FLOW', actionId, JSON.stringify(formData));
     }
   }
@@ -1795,6 +1863,9 @@ export default class AuthnWidget {
     if (currentState) {
       if (currentState === 'BIOMETRIC_DEVICE_AUTHENTICATION_INFO_REQUIRED'){
         templateName = 'ASSERTION_REQUIRED';
+      }
+      if (currentState === 'DEVICE_MANAGEMENT'){
+        templateName = 'DEVICE_SELECTION_REQUIRED';
       }
       try {
         template = this.getTemplate(templateName);
@@ -2078,4 +2149,282 @@ export default class AuthnWidget {
         console.log("ERROR - Unable to dispatch authenticator selection as the target was null");
       }
     }
+
+  updateDeviceNickname(evt) {
+    evt.preventDefault();
+    let source = evt.currentTarget;
+    if (source) {
+      let deviceId = source.dataset['deviceId'];
+      const originalNickname = document.getElementById(deviceId + "_content_container_id")
+        .getElementsByClassName('tile-button__title')[0]?.innerText;
+      let nicknameInput = document.getElementById(`nickname_input_for_${deviceId}`);
+      if (nicknameInput && nicknameInput.value.trim() !== "" && nicknameInput.value !== originalNickname) {
+        let data = {
+          "id": deviceId,
+          "nickname": nicknameInput.value.trim()
+        };
+        this.renderSpinnerTemplate();
+        this.store.dispatch('POST_FLOW', "updateDeviceNickname", JSON.stringify(data));
+      }
+    }
+  }
+
+  transitionToUpdateDeviceNicknameMode(evt) {
+    evt.preventDefault();
+    let source = evt.currentTarget;
+    if (source) {
+      let deviceId = source.dataset['mfaUpdateDeviceSelectionDeviceId'];
+      Array.from(document.querySelectorAll('[data-mfa-selection]'))
+        .forEach(element => {
+          if (element.dataset.mfaSelection === deviceId) {
+            element.removeEventListener('click', this.handleMfaDeviceSelection)
+          }
+        });
+      const contentContainer = document.getElementById(deviceId + "_content_container_id");
+      const originalNickname = contentContainer.getElementsByClassName('tile-button__title')[0].innerText;
+      contentContainer.style.display = 'none';
+      document.getElementById(deviceId + "_update_nickname_id").style.display = 'block';
+      if (document.getElementById(`update_device_nickname_${deviceId}`) !== null) {
+        document.getElementById(`update_device_nickname_${deviceId}`)
+          .addEventListener('click', this.updateDeviceNickname);
+      }
+      document.getElementById("nickname_input_for_" + deviceId).value = originalNickname;
+      document.getElementById(deviceId + "_kebab_menu_icon_id").style.display = 'none';
+      document.getElementById(deviceId + "_cancel_icon_id").style.display = 'block';
+      document.getElementById(deviceId + "_cancel_icon_id").addEventListener(
+        'click', this.transitionFromUpdateDeviceNicknameMode
+      );
+    }
+  }
+
+  transitionFromUpdateDeviceNicknameMode(evt) {
+    evt.preventDefault();
+    let source = evt.currentTarget;
+    if (source) {
+      let deviceId = source.dataset['mfaCancelUpdateDeviceSelectionDeviceId'];
+      document.getElementById(deviceId + "_content_container_id").style.display = 'block';
+      document.getElementById(deviceId + "_update_nickname_id").style.display = 'none';
+      document.getElementById(deviceId + "_kebab_menu_icon_id").style.display = 'block';
+      document.getElementById(`device-management-popup-frame-${deviceId}`).style.display = 'none';
+      document.getElementById(deviceId + "_cancel_icon_id").style.display = 'none';
+      Array.from(document.querySelectorAll('[data-mfa-selection]'))
+        .forEach(element => {
+          if (element.dataset.mfaSelection === deviceId) {
+            element.addEventListener('click', this.handleMfaDeviceSelection)
+          }
+        });
+      evt.stopImmediatePropagation();
+    }
+  }
+
+  transitionToResyncOathTokenMode(evt) {
+    evt.preventDefault();
+    let source = evt.currentTarget;
+    if (source) {
+      let deviceId = source.dataset['mfaResyncDeviceSelectionDeviceId'];
+      if (document.getElementById("resyncOathTokenBlock") !== null) {
+        document.getElementById("resyncOathTokenBlock").style.display = "block";
+        if (document.getElementById('resyncCancelButton') !== null) {
+          document.getElementById('resyncCancelButton')
+            .addEventListener('click', this.transitionFromResyncOathTokenMode);
+        }
+        if (document.getElementById('resyncNextButton') !== null) {
+          document.getElementById('resyncNextButton')
+            .addEventListener('click', this.resyncOathToken);
+        }
+        if (document.getElementById('resyncDeviceId') !== null) {
+          document.getElementById('resyncDeviceId').value = deviceId;
+        }
+      }
+    }
+  }
+
+  transitionFromResyncOathTokenMode(evt) {
+    if(document.getElementById("resyncOathTokenBlock") !== null) {
+      document.getElementById("resyncOathTokenBlock").style.display = "none";
+    }
+  }
+
+  resyncOathToken(evt) {
+    if(document.getElementById("resyncPasscode") !== null) {
+      const resyncPasscode = document.getElementById("resyncPasscode").value;
+      const deviceId = document.getElementById("resyncDeviceId").value;
+      const data = {
+        "id": deviceId,
+        "otp": resyncPasscode
+      };
+      this.renderSpinnerTemplate();
+      this.store.dispatch('POST_FLOW', "resyncOathToken", JSON.stringify(data));
+    }
+  }
+
+  displayDeviceMgmt() {
+    const state = this.store.state;
+    if (state.newPairingAuthRequired) {
+      if (document.querySelector('#authentication_required_block_id') != null) {
+        document.querySelector('#authentication_required_block_id').style.display = 'block';
+        document.getElementById("auth_for_unpair_message").style.display = 'none';
+        document.getElementById("auth_for_update_nickname_name_message").style.display = 'none';
+        document.getElementById("auth_for_pair_message").style.display = 'none';
+        document.getElementById("auth_for_manage_devices_message").style.display = 'block';
+        if (document.getElementById('confirmation_button') !== null) {
+          document.getElementById('confirmation_button')
+            .addEventListener('click', this.showDeviceMgmt);
+        }
+      }
+      document.body.style.overflow = "hidden";
+      document.body.style.height = "100%";
+    } else {
+      this.renderSpinnerTemplate();
+      this.store.dispatch('POST_FLOW', "manageDevices", null);
+    }
+  }
+
+  usePasswordAuth(){
+    this.renderSpinnerTemplate();
+    this.store.dispatch('POST_FLOW', "usePasswordAuthentication", null);
+  }
+
+  showDeviceMgmt() {
+    this.handleCancelAuthRequiredWarning();
+    this.renderSpinnerTemplate();
+    this.store.dispatch('POST_FLOW', "manageDevices", null);
+  }
+
+  handleResumeAuthentication() {
+    this.renderSpinnerTemplate();
+    this.store.dispatch('POST_FLOW', 'resumeAuthentication', null);
+  }
+
+  registerCountryCodePickerHandler() {
+    let isExpanded = false;
+    let selectedCountryCode = "+1";
+
+    setupCountryPicker();
+
+    function setupCountryPicker() {
+      const countryCodeInput = document.getElementById('countryCodeInput');
+      const dropdownArrow = document.getElementById('dropdownArrow');
+
+      // Only proceed if the country picker elements exist on this page
+      if (!countryCodeInput || !dropdownArrow) {
+        return;
+      }
+
+      // Add input event listener for filtering
+      countryCodeInput.addEventListener('input', function(e) {
+        filterDropdown(e.target.value);
+      });
+
+      // Add click event listener for dropdown toggle
+      dropdownArrow.addEventListener('click', function() {
+        toggleDropdown();
+      });
+
+      // Close dropdown when clicking outside
+      window.addEventListener('click', function(e) {
+        const dropdownContainer = document.getElementsByClassName("dropdown-container")[0];
+        if (dropdownContainer && !dropdownContainer.contains(e.target)) {
+          document.getElementById("dropdownList").style.display = 'none';
+          document.getElementById("phone").classList.remove("hide-phone-input");
+          document.getElementsByClassName("dropdown-container")[0].style.width = "30%";
+          document.getElementsByClassName("dropdown-arrow")[0].textContent = "v";
+          const countryCodeInput = document.getElementById("countryCodeInput");
+          countryCodeInput.value = selectedCountryCode;
+          countryCodeInput.setAttribute("readonly", "true");
+          isExpanded = false;
+        }
+      });
+
+      // Load country data from JSON
+      loadCountryData();
+    }
+
+    function loadCountryData() {
+      // Dynamically load the JSON file and populate the dropdown
+      fetch('assets/data/CountriesWithCountryCode.json')
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(response.statusText);
+          }
+          return response.json();
+        })
+        .then(data => {
+          // `data` contains the parsed JSON object
+          const dropdownList = document.getElementById('dropdownList');
+          if(dropdownList) {
+            dropdownList.innerHTML = ''; // Clear existing content
+          }
+
+          data.forEach(country => {
+            // Create a new dropdown item
+            const div = document.createElement('div');
+            div.className = 'dropdown-item';
+            div.textContent = `${country.name} (+${country.dialCode})`;
+            div.onclick = () => selectOption(country.dialCode); // Add click handler
+            if (dropdownList) {
+              dropdownList.appendChild(div); // Append to the dropdown list
+            }
+          });
+        })
+        .catch(error => {
+          console.error('Error fetching country list:', error);
+        });
+    }
+
+    function toggleDropdown() {
+      const dropdownList = document.getElementById("dropdownList");
+      const phoneInput = document.getElementById("phone");
+      const countryCodeInput = document.getElementById("countryCodeInput");
+      const dropDownContainer = document.getElementsByClassName("dropdown-container")[0];
+      const dropDownArrow = document.getElementsByClassName("dropdown-arrow")[0];
+
+      if (isExpanded) {
+        dropdownList.style.display = 'none';
+        phoneInput.classList.remove("hide-phone-input");
+        countryCodeInput.value = selectedCountryCode;
+        countryCodeInput.placeholder = "";
+        countryCodeInput.setAttribute("readonly", "true");
+        dropDownContainer.style.width = "30%";
+        dropDownArrow.textContent = "v";
+      } else {
+        dropdownList.style.display = 'block';
+        phoneInput.classList.add("hide-phone-input");
+        countryCodeInput.value = ""; // Clear input for search
+        countryCodeInput.placeholder = "Search Countries...";
+        countryCodeInput.removeAttribute("readonly");
+        countryCodeInput.focus();
+        dropDownContainer.style.width = "100%";
+        dropDownArrow.textContent = "A";
+
+        // Clear any previous filters to show the full list
+        const items = document.getElementsByClassName("dropdown-item");
+        for (let item of items) {
+          item.style.display = "block"; // Reset display to show all items
+        }
+      }
+
+      isExpanded = !isExpanded;
+    }
+
+    function filterDropdown(search) {
+      const items = document.getElementsByClassName("dropdown-item");
+      for (let item of items) {
+        const text = item.textContent || item.innerText;
+        item.style.display = text.toLowerCase().includes(search.toLowerCase()) ? "" : "none";
+      }
+    }
+
+    function selectOption(countryCode) {
+      document.getElementById("dropdownList").style.display = 'none';
+      document.getElementById("phone").classList.remove("hide-phone-input");
+      document.getElementsByClassName("dropdown-container")[0].style.width = "30%";
+      document.getElementsByClassName("dropdown-arrow")[0].textContent = "v";
+      const countryCodeInput = document.getElementById("countryCodeInput");
+      countryCodeInput.value = `+${countryCode}`;
+      countryCodeInput.setAttribute("readonly", "true");
+      selectedCountryCode = `+${countryCode}`;
+      isExpanded = false;
+    }
+  }
 }

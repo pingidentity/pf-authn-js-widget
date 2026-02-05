@@ -219,6 +219,9 @@ export default class Store {
           if (!userMessage && msg.code) {
             userMessage = `Error code "${msg.code}" returned from the authorization server.`
           }
+          if (msg.code === 'INVALID_OTP' && msg.attemptsRemaining) {
+            userMessage += ' You have ' + msg.attemptsRemaining + ' attempts remaining.'
+          }
           errors.userMessages.push(userMessage);
         });
       } else {
@@ -241,6 +244,10 @@ export default class Store {
         json.authnError.details.forEach(detail => {
           errors.userMessages.push(detail.userMessage);
         });
+      }
+    } else if (json.code === 'INVALID_DEVICE_TARGET') {
+      if (json.message) {
+        errors.userMessages.push(json.message);
       }
     }
     return errors;

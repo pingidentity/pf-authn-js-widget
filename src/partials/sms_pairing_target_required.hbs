@@ -1,3 +1,79 @@
+<style>
+  .phone-input-wrapper {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+  }
+
+  .dropdown-container {
+    position: relative;
+    width: 30%;
+  }
+
+  .dropdown-list {
+    display: none;
+    position: absolute;
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    background-color: white;
+    z-index: 1000;
+    width: 100%;
+  }
+
+  .dropdown-item {
+    padding: 8px;
+    cursor: pointer;
+    font-size: 15px;
+  }
+
+  .dropdown-item:hover {
+    background: #2996cc;
+    color: #fff;
+  }
+
+  .dropdown-input-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  .dropdown-input-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  .dropdown-arrow {
+    font-family: iconfont;
+    font-size: 13px;
+    line-height: 13px;
+    position: absolute;
+    right: 8px;
+    top: 18px;
+    height: 16px;
+    width: 16px;
+    pointer-events: auto; /* Allow clicks */
+    cursor: pointer;
+  }
+
+  .dropdown-input {
+    width: 100%;
+    padding: 16px 10px;
+    border: 1px solid #8b9197;
+    background-color: #fff !important;
+  }
+
+  .phone-input {
+    background-color: #fff !important;
+  }
+
+  .expanded-dropdown {
+    position: absolute;
+    width: 100%;
+    z-index: 1000;
+  }
+</style>
 <div class="card">
   <div class="org-logo">
     <img class="org-logo__image" src="{{logo}}" alt="Company Logo"/>
@@ -15,8 +91,18 @@
   <div class="tile-selector tile-selector--stacked">
     <form class="form" id="AuthnWidgetForm">
       <div class="stack stack--small" data-id="stack">
-        <div class="text-input__icon">
-          <input id="phone" type="tel" name="phone" class="text-input text-input required" value=""/>
+        <div class="phone-input-wrapper">
+          <div class="dropdown-container">
+            <div class="dropdown-input-container">
+              <input type="text" id="countryCodeInput" name="countryCodeInput" class="dropdown-input" value="+1"
+                     readonly placeholder="Select country">
+              <div id="dropdownArrow" class="dropdown-arrow">v</div>
+            </div>
+            <div id="dropdownList" class="dropdown-list expanded-dropdown"></div>
+          </div>
+          <div class="text-input__icon">
+            <input id="phone" type="tel" name="phone" class="text-input text-input required" value=""/>
+          </div>
         </div>
       </div>
       <div class="text-block" data-id="textblock">
