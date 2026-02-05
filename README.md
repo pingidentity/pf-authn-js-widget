@@ -1,6 +1,7 @@
 # JavaScript Widget for the PingFederate Authentication API
 
 **Table of Contents**
+
 - [JavaScript Widget for the PingFederate Authentication API](#javascript-widget-for-the-pingfederate-authentication-api)
 - [PingFederate Configuration](#pingfederate-configuration)
 - [Installation](#installation)
@@ -23,15 +24,16 @@
 
 The JavaScript Widget for the PingFederate Authentication API is a customizable JavaScript library that provides the capabilities of the [HTML form Adapter](https://docs.pingidentity.com/pingfederate/latest/administrators_reference_guide/pf_html_form_adapt.html)
 and other integrations via [Authentication APIs](https://docs.pingidentity.com/pingfederate/latest/developers_reference_guide/pf_authentication_api.html), including:
- - user login
- - trouble signing in
- - trouble with username
- - password reset
- - authenticate with identifier
- - risk-based authentication
- - social login
- - multi-factor authentication
- - identity verification
+
+- user login
+- trouble signing in
+- trouble with username
+- password reset
+- authenticate with identifier
+- risk-based authentication
+- social login
+- multi-factor authentication
+- identity verification
 
  A full list of the supported integrations can be found [here](/docs/supportedIntegrations.md).
 
@@ -46,6 +48,7 @@ The widget is a ready-to-use drop-in bundle with a CSS and customizable template
 PingFederate acts as the server interacting with the widget via APIs to authenticate the user.
 
 To configure PingFederate for the widget:
+
   1. First enable the authentication API: Authentication > Authentication API Applications > Enable Authentication API.
   2. Then, add an application by clicking the "Add Authentication Application" button and entering the appropriate values. For example: **Name:** TestApp, **URL:** `https://localhost:8443`.
   3. Click "Save".
@@ -53,8 +56,8 @@ To configure PingFederate for the widget:
   **Caution:** setting your Authentication Application as the "Default Authentication Application" will make it the default authentication for all of your existing connections. This is the easiest way to configure your connections, but it
   is not very precise. For more precision, configure the desired authentication policies to use your Authentication API Application.
 
-  4. Select your newly created Authentication Application ("TestApp" if you used the example above) in the drop-down in the "Default Authentication Application" section.
-  5. Start the SSO flow as you would normally. For example, by clicking on an existing IdP Connection, and you will be redirected to your "JavaScript Widget for the PingFederate Authentication API" application.
+  1. Select your newly created Authentication Application ("TestApp" if you used the example above) in the drop-down in the "Default Authentication Application" section.
+  2. Start the SSO flow as you would normally. For example, by clicking on an existing IdP Connection, and you will be redirected to your "JavaScript Widget for the PingFederate Authentication API" application.
 
 **Note:** The redirect URL of the [Authentication Applications](https://docs.pingidentity.com/pingfederate/latest/administrators_reference_guide/help_authenticationapplicationtasklet_authenticationapplicationstate.html) must point to where the JavaScript Widget for the PingFederate Authentication API is hosted.
 If you do not wish to use the development server provided by webpack, change the URL of the authentication application to point the correct hosted URL.
@@ -64,19 +67,22 @@ If you do not wish to use the development server provided by webpack, change the
 There are three ways to get the widget. You can include it from Ping Identity's CDN, build and install it locally on your development machine or get it as a node dependency.
 You also need a running PingFederate instance that is version 9.3 or above.
 
-## Option 1: Using CDN Links:
+## Option 1: Using CDN Links
 
 A pre-built widget is available for incorporating directly into your application. All versions of the widget, starting with 1.7.0, will be available via CDN.
 
 To include the latest released version the following links can be used:
-- https://downloads.pingidentity.com/pf-authn-widget/latest/v2/pf.authn-widget.js
-- https://downloads.pingidentity.com/pf-authn-widget/latest/v2/main-styles.css
+
+- <https://downloads.pingidentity.com/pf-authn-widget/latest/v2/pf.authn-widget.js>
+- <https://downloads.pingidentity.com/pf-authn-widget/latest/v2/main-styles.css>
 
 To include a specific version of the widget, replace `latest` with the version required.
-- https://downloads.pingidentity.com/pf-authn-widget/2.0.0/pf.authn-widget.js
-- https://downloads.pingidentity.com/pf-authn-widget/2.0.0/main-styles.css
+
+- <https://downloads.pingidentity.com/pf-authn-widget/2.0.0/pf.authn-widget.js>
+- <https://downloads.pingidentity.com/pf-authn-widget/2.0.0/main-styles.css>
 
 A working example that utilizes the pre-built widget would look like:
+
 ```html
 <html>
   <head>
@@ -84,7 +90,7 @@ A working example that utilizes the pre-built widget would look like:
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <script src="https://downloads.pingidentity.com/pf-authn-widget/latest/v2/pf.authn-widget.js"></script>
-    <link rel="stylesheet" type="text/css" href="https://assets.pingone.com/ux/end-user/0.36.1/end-user.css">
+    <link rel="stylesheet" type="text/css" href="https://assets.pingone.com/ux/end-user/2.14.0/end-user.css">
     <link rel="stylesheet" type="text/css" href="https://downloads.pingidentity.com/pf-authn-widget/latest/v2/main-styles.css">
     <script>
       function load() {
@@ -109,10 +115,11 @@ A working example that utilizes the pre-built widget would look like:
 Before installing, make sure you have [node.js](https://nodejs.org/en/) installed. Then check out this repository.
 
 Run the following commands:
- - `npm install` - install the dependencies
- - `npm run start` - start the webpack development server
 
-This will start the webpack development server on https://localhost:8443 (as specified in webpack.config.js) and instantiate the widget.
+- `npm install` - install the dependencies
+- `npm run start` - start the webpack development server
+
+This will start the webpack development server on <https://localhost:8443> (as specified in webpack.config.js) and instantiate the widget.
 
 If you need to modify the base URL from `localhost:9031`, you can modify it in `demo-server/templates/index-template.handlebars` or pass a `BASEURL` command line parameter (see [Technical Notes](#tech-notes)).
 
@@ -125,12 +132,14 @@ Note: A 'flowId' value is required for the widget to interact with PingFederate,
 This is a good choice if you already have a node project with `package.json` and can just add this widget as a dependency.
 
 To add the widget as a dependency:
+
 1. Run `npm install @ping-identity/pf-authn-js-widget --save`
 2. Add `<div id="authnwidget"></div>` to your app.
 
 ## Widget Configuration
 
 The only information required to configure the widget is PingFederate's base URL. The widget can be instantiated and initialized using the following code example:
+
 ```javascript
 var baseUrl = 'https://localhost:9031';
 var authnWidget = new PfAuthnWidget(baseurl);
@@ -138,10 +147,11 @@ authnWidget.init();
 ```
 
 Here are all the available constructor parameters, their descriptions, and a usage code example:
-  - **baseUrl**: full address of where PingFederate is running, such as https://localhost:9031
-  - **divId**: where the widget should be rendered (optional)
-  - **logo**: to display on top of every page (this can be passed in as a file or as the URL where the image is hosted)
-  - **useActionParam**: By default the widget uses a custom content type to request authentication API actions. If this flag is set to true, the widget instead uses a query parameter, which may be required in environments where custom content types are blocked. This query parameter is only supported for version 10.2 of PingFederate and later.
+
+- **baseUrl**: full address of where PingFederate is running, such as <https://localhost:9031>
+- **divId**: where the widget should be rendered (optional)
+- **logo**: to display on top of every page (this can be passed in as a file or as the URL where the image is hosted)
+- **useActionParam**: By default the widget uses a custom content type to request authentication API actions. If this flag is set to true, the widget instead uses a query parameter, which may be required in environments where custom content types are blocked. This query parameter is only supported for version 10.2 of PingFederate and later.
 
 ```javascript
 var baseUrl = 'https://localhost:9031';
@@ -150,29 +160,32 @@ authnWidget.init();
 ```
 
 # Upgrade from version 1 to version 2
+
 The JavaScript Widget for PingFederate Authentication API no longer requires custom javascript code to enable CAPTCHA as of version 2.
 
 When upgrading from version 1 to version 2, remove the custom javascript code and replace it with standard widget initialization code to leverage the new capability. More information is available in the [Widget Configuration](#widget-configuration) section of this document.
 
 <a name="tech-notes"></a>
+
 # Technical Notes
 
 Here are all available npm commands:
 
--  `npm install` - install the dependencies locally
--  `npm run build` - build for production
--  `npm run start` - start the dev server
--  `BASEURL=https://PingFederateBaseUrl:9031 npm run start` - pass a custom base URL from the command line (Mac/Linux only)
--  `npm run clean` - remove the `dist/` and `coverage` directory
--  `npm run coverage` - run ESLint coverage
--  `npm run test` - run tests
--  `npm run test:watch` - just watch the tests
+- `npm install` - install the dependencies locally
+- `npm run build` - build for production
+- `npm run start` - start the dev server
+- `BASEURL=https://PingFederateBaseUrl:9031 npm run start` - pass a custom base URL from the command line (Mac/Linux only)
+- `npm run clean` - remove the `dist/` and `coverage` directory
+- `npm run coverage` - run ESLint coverage
+- `npm run test` - run tests
+- `npm run test:watch` - just watch the tests
 
 ## Building the Latest Version of the Widget
 
 Before installing, make sure you have [node.js](https://nodejs.org/en/) installed. Then check out this repository.
 
 To build the widget:
+
 1. `npm install`
 1. `npm run build`
 1. Copy all the files in the `dist` folder to where your application will be hosted (this part can be skipped if webpack's development server is used).
@@ -181,9 +194,10 @@ To build the widget:
 ## Adding the Widget to an Application
 
 At minimum you must include:
-  - `pf.authn-widget.js` - main javascript library
-  - `https://assets.pingone.com/ux/end-user/0.36.1/end-user.css` - basic CSS from CDN
-  - `main-styles.css` - widget CSS
+
+- `pf.authn-widget.js` - main javascript library
+- `https://assets.pingone.com/ux/end-user/2.14.0/end-user.css` - basic CSS from CDN
+- `main-styles.css` - widget CSS
 
 ## Creating the index.html File
 
@@ -196,7 +210,7 @@ Create a file called `index.html` with the following content and host it in your
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <script src="./pf.authn-widget.js"></script>
-    <link rel="stylesheet" type="text/css" href="https://assets.pingone.com/ux/end-user/0.36.1/end-user.css">
+    <link rel="stylesheet" type="text/css" href="https://assets.pingone.com/ux/end-user/2.14.0/end-user.css">
     <link rel="stylesheet" type="text/css" href="main-styles.css">
     <script>
       function load() {
@@ -224,6 +238,7 @@ All the HTML pages are rendered using [Handlebars](https://handlebarsjs.com/) un
 Basic CSS should be imported by default from CDN.
 
 Note: Some items cannot be customized:
+
 - the `data-actionId` must match the actionId that is sent to PingFederate
 - the form IDs in the handlebars templates must match what's being referenced in the index.js `FORM_ID`
 - the basic CSS `end-user.css` is provided via CDN, as shown in `demo-server/templates/index-template.handlebars`
@@ -251,10 +266,12 @@ Please refer to the [Typescript Support](/docs/typescript.md) guide for more inf
 The widget relies upon a cookie that is transferred between the widget and PingFederate. If the widget and PingFederate are hosted on different domains, this cookie will be a cross-origin or third-party cookie. Some browsers such as Firefox and Safari block third-party cookies by default, which will break the widget's functionality.
 
 To be compatible with all major browsers, the widget must be deployed on the same domain as PingFederate, or on a subdomain of the same domain. For example, the following configuration will work for all browsers
+
 - PingFederate instance hosted at sso.example.com
 - Widget instance hosted at auth.example.com
 
 While the configuration
+
 - PingFederate hosted at sso.example.com
 - Widget hosted at auth.differentdomain.com
 
