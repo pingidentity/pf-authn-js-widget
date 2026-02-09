@@ -1288,6 +1288,8 @@ export default class AuthnWidget {
       this.pollPushNoticationState = setTimeout(() => {
         this.postPushNotificationWait();
       }, 1000);
+    } else if (pollState.status === 'DEVICE_MANAGEMENT') {
+      this.render(this.store.getPreviousStore(), pollState);
     } else {
       clearTimeout(this.pollPushNoticationState);
       this.store
