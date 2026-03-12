@@ -13,6 +13,7 @@ export interface IRedirectlessConfig {
 export interface IOptions {
   divId: string,
   flowId?: string,
+  flowIdMaxLength?: number,
   logo?: string,
   useActionParam?: boolean,
   deviceProfileScript?: string

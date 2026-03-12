@@ -10,6 +10,7 @@ import paOnAuthorizationRequest from './utils/paOnAuthorizationRequest';
 import paOnAuthorizationSuccess from './utils/paOnAuthorizationSuccess';
 import './scss/main.scss';
 import {isValidEmail, isValidPhone} from "./validators/inputs";
+import {isValidFlowId} from "./validators/flowId";
 import captchaPostRenderCallback from './utils/callbacks/riskPostRenderCallback';
 import RiskUtils from './utils/riskUtils';
 //uncomment to add your personal branding
@@ -114,6 +115,10 @@ export default class AuthnWidget {
     return "'flowId' query parameter is required.";
   }
 
+  static get FLOW_ID_INVALID_MSG() {
+    return "'flowId' is invalid. It must contain only alphanumeric characters and not exceed the maximum allowed length.";
+  }
+
   static get BASE_URL_REQUIRED_MSG() {
     return "PingFederate Base URL is required."
   }
@@ -137,9 +142,13 @@ export default class AuthnWidget {
    */
   constructor(baseUrl, options) {
     let flowId = (options && options.flowId) || this.getBrowserFlowId();
+    this.flowIdMaxLength = (options && options.flowIdMaxLength) || 30;
     this.divId = (options && options.divId) || 'authnwidget';
     if (!baseUrl) {
       throw new Error(AuthnWidget.BASE_URL_REQUIRED_MSG);
+    }
+    if (flowId && !isValidFlowId(flowId, this.flowIdMaxLength)) {
+      throw new Error(AuthnWidget.FLOW_ID_INVALID_MSG);
     }
     this.assets = new Assets(options);
     this.deviceProfileScript = options && options.deviceProfileScript;
