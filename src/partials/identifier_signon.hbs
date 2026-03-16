@@ -8,6 +8,10 @@
       disabled>
       Next
     </button>
+    {{#with _links as |actions|}}
+    {{#if actions.cancelIdentifierSubmission}}
     <button data-actionId="cancelIdentifierSubmission" class="button">Cancel</button>
+    {{/if}}
+    {{/with}}
   </div>
 </form>
