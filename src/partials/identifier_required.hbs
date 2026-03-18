@@ -27,9 +27,13 @@
     <div class="identifier-first__account-item__another_acount">
       <a data-idFirstAction="selectidentifier" href="#">Use Another Account</a>
     </div>
+    {{#with _links as |actions|}}
+    {{#if actions.cancelIdentifierSubmission}}
     <div class="identifier-first__cancel">
       <button data-actionId="cancelIdentifierSubmission" class="button">Cancel</button>
     </div>
+    {{/if}}
+    {{/with}}
   </div>
   <div id="signonidentifier" style="display: none">
     {{> identifier_signon}}
