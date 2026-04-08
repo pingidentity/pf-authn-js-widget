@@ -56,5 +56,28 @@ describe('AuthnWidget index', () => {
     expect(authn.eventHandler.get('USERNAME_PASSWORD_REQUIRED')).toContain(customHandler);
   });
 
-});
+  test('shows an error instead of redirecting in redirectless mode', () => {
+    const authn = new AuthnWidget('https://localhost:9031');
+    const generalErrorRendererSpy = jest.spyOn(authn, 'generalErrorRenderer').mockImplementation(() => {});
 
+    const originalLocation = window.location;
+    delete window.location;
+    window.location = { ...originalLocation, replace: jest.fn() };
+
+    authn.redirectlessEnabled = true;
+    authn.store.state = {
+      presentationMode: 'REDIRECT',
+      authenticationUrl: 'https://localhost:9031/example'
+    };
+
+    authn.openExternalAuthnPopup();
+
+    expect(generalErrorRendererSpy).toHaveBeenCalledWith(
+      'The widget is in redirectless mode and redirect is required to complete authentication.'
+    );
+    expect(window.location.replace).not.toHaveBeenCalled();
+
+    window.location = originalLocation;
+  });
+
+});
