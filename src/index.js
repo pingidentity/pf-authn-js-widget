@@ -111,6 +111,10 @@ export default class AuthnWidget {
     return "Unable to start the authentication flow, please contact your system administrator.";
   }
 
+  static get REDIRECTLESS_REDIRECT_REQUIRED_ERROR_MSG() {
+    return "The widget is in redirectless mode and redirect is required to complete authentication.";
+  }
+
   static get FLOW_ID_REQUIRED_MSG() {
     return "'flowId' query parameter is required.";
   }
@@ -260,6 +264,7 @@ export default class AuthnWidget {
     this.eventHandler = new Map();  //state -> eventHandlers
     this.postRenderCallbacks = new Map();
     this.actionModels = new Map();
+    this.redirectlessEnabled = false;
     this.store = new Store(flowId, baseUrl, options);
     this.store.registerListener(this.render);
     AuthnWidget.CORE_STATES.forEach(state => this.registerState(state), this);
@@ -423,6 +428,7 @@ export default class AuthnWidget {
     try {
       console.log(configuration);
       redirectlessConfigValidator(configuration);
+      this.redirectlessEnabled = true;
       this.addPostRenderCallback('COMPLETED', (state) => completeStateCallback(state, configuration));
       this.addPostRenderCallback('FAILED', (state) => failedStateCallback(state, configuration));
       const isCookieless = Boolean(configuration.cookieless);
@@ -541,6 +547,10 @@ export default class AuthnWidget {
 
   openExternalAuthnPopup() {
     if (this.store.getStore().presentationMode === 'REDIRECT') {
+      if (this.redirectlessEnabled) {
+        this.generalErrorRenderer(AuthnWidget.REDIRECTLESS_REDIRECT_REQUIRED_ERROR_MSG);
+        return;
+      }
       window.location.replace(this.store.getStore().authenticationUrl);
     } else {
       if (document.querySelector("#externalAuthnHeaderId")) {
