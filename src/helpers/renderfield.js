@@ -1,21 +1,21 @@
-let handlebars = require('handlebars');
+import { SafeString } from 'handlebars';
 
 function escapeForHTML(unsafeText) {
-    return unsafeText.replace(/[&<"']/g, function(char) {
-      switch (char) {
-        case '&':
-          return '&amp;';
-        case '<':
-          return '&lt;';
-        case '"':
-          return '&quot;';
-        default:
-          return '&#039;';
-      }
-    });
-  };
+  return unsafeText.replace(/[&<"']/g, function(char) {
+    switch (char) {
+      case '&':
+        return '&amp;';
+      case '<':
+        return '&lt;';
+      case '"':
+        return '&quot;';
+      default:
+        return '&#039;';
+    }
+  });
+}
 
-module.exports = function (field_info) {
+export default function (field_info) {
   let html = '';
   let field_value = '';
   let escaped_id = escapeForHTML(field_info.id);
@@ -45,7 +45,7 @@ module.exports = function (field_info) {
         '         for="' + escaped_id + '">' + escaped_label +
         '  </label>' +
         '</div>';
-      return new handlebars.SafeString(html);
+      return new SafeString(html);
     case "dropdown":
       html = '' +
         '<div class="dropdown float-label dropdown--standard" data-id="dropdown">' +
@@ -63,7 +63,7 @@ module.exports = function (field_info) {
         '         for="' + escaped_id + '">' + escaped_label + '</label>' +
         '</div>';
 
-      return new handlebars.SafeString(html);
+      return new SafeString(html);
     case "checkbox":
       html = '' +
         '<div class="' + css_classes + ' checkbox__single">' +
@@ -80,7 +80,7 @@ module.exports = function (field_info) {
           '    <span class="checkbox__label">' + escaped_label + '</span>' +
           '</label>' +
         '</div>';
-      return new handlebars.SafeString(html);
+      return new SafeString(html);
     case "checkbox group":
       html = '<div class="checkbox__group__label">' + escaped_label + '</div>' +
                 '<div class="' + css_classes + ' checkbox__group">';
@@ -102,7 +102,7 @@ module.exports = function (field_info) {
           '</div>';
       });
       html += '</div>'
-      return new handlebars.SafeString(html);
+      return new SafeString(html);
 
     case "hidden":
       return;
@@ -110,4 +110,4 @@ module.exports = function (field_info) {
       console.log("Unsupported field type: " + field_info.type);
       return;
   }
-};
+}

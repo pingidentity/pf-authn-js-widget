@@ -1,8 +1,10 @@
-module.exports = function (vipCredentials, options) {
+export default function (vipCredentials, options) {
   if (vipCredentials === null) {
     return options.fn(this);
   }
-  return (vipCredentials.some(function (it) {
+  return vipCredentials.some(function (it) {
     return it.pushEnabled;
-  })) ? options.fn(this) : options.inverse(this);
-};
+  })
+    ? options.fn(this)
+    : options.inverse(this);
+}

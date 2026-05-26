@@ -1,4 +1,5 @@
 //test constructor cannot start without flowId
+import { vi } from 'vitest'
 import AuthnWidget from '../src'
 
 describe('AuthnWidget index', () => {
@@ -58,11 +59,11 @@ describe('AuthnWidget index', () => {
 
   test('shows an error instead of redirecting in redirectless mode', () => {
     const authn = new AuthnWidget('https://localhost:9031');
-    const generalErrorRendererSpy = jest.spyOn(authn, 'generalErrorRenderer').mockImplementation(() => {});
+    const generalErrorRendererSpy = vi.spyOn(authn, 'generalErrorRenderer').mockImplementation(() => {});
 
     const originalLocation = window.location;
     delete window.location;
-    window.location = { ...originalLocation, replace: jest.fn() };
+    window.location = { ...originalLocation, replace: vi.fn() };
 
     authn.redirectlessEnabled = true;
     authn.store.state = {

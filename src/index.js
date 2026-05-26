@@ -1,20 +1,32 @@
 import Assets from './utils/assets';
 import queryString from 'query-string';
+import Handlebars from 'handlebars';
 import 'core-js/stable';
+import 'formdata-polyfill';
 import 'regenerator-runtime/runtime'; //for async await
+import 'whatwg-fetch';
 import Store from './store';
 import redirectlessConfigValidator from './validators/redirectless';
 import { getCompatibility, doWebAuthn, doRegisterWebAuthn } from './utils/fidoFlowUtil';
 import { completeStateCallback, failedStateCallback, FLOW_TYPE_USER_AUTHZ, FLOW_TYPE_AUTHZ } from './utils/redirectless';
 import paOnAuthorizationRequest from './utils/paOnAuthorizationRequest';
 import paOnAuthorizationSuccess from './utils/paOnAuthorizationSuccess';
+import QRCode from 'qrcode';
+import './registerHandlebarsHelpers';
 import './scss/main.scss';
-import {isValidEmail, isValidPhone} from "./validators/inputs";
-import {isValidFlowId} from "./validators/flowId";
+import { isValidEmail, isValidPhone } from "./validators/inputs";
+import { isValidFlowId } from "./validators/flowId";
 import captchaPostRenderCallback from './utils/callbacks/riskPostRenderCallback';
 import RiskUtils from './utils/riskUtils';
 //uncomment to add your personal branding
 // import './scss/branding.scss';
+
+const templateModules = import.meta.glob('./partials/*.hbs', { eager: true, query: '?raw', import: 'default' });
+Object.entries(templateModules)
+  .forEach(([filePath, templateSource]) => {
+    const templateName = filePath.split('/').pop().replace('.hbs', '');
+    Handlebars.registerPartial(templateName, templateSource);
+  });
 
 (function () {
 
@@ -74,7 +86,7 @@ export default class AuthnWidget {
       'SECURID_USER_PIN_RESET_REQUIRED',
     ]
 
-	const credentialVerificationStates = [
+    const credentialVerificationStates = [
       'CREDENTIAL_VERIFICATION_REQUIRED',
       'CREDENTIAL_VERIFICATION_FAILED',
       'CREDENTIAL_VERIFICATION_TIMED_OUT',
@@ -86,7 +98,7 @@ export default class AuthnWidget {
       'SUCCESSFUL_PASSWORD_RESET', 'CHALLENGE_RESPONSE_REQUIRED', 'USERNAME_RECOVERY_EMAIL_REQUIRED',
       'USERNAME_RECOVERY_EMAIL_SENT', 'SUCCESSFUL_ACCOUNT_UNLOCK', 'IDENTIFIER_REQUIRED',
       'EXTERNAL_AUTHENTICATION_COMPLETED', 'EXTERNAL_AUTHENTICATION_FAILED', 'EXTERNAL_AUTHENTICATION_REQUIRED',
-      'DEVICE_PROFILE_REQUIRED', 'REGISTRATION_REQUIRED', 'REFERENCE_ID_REQUIRED','CURRENT_CREDENTIALS_REQUIRED',
+      'DEVICE_PROFILE_REQUIRED', 'REGISTRATION_REQUIRED', 'REFERENCE_ID_REQUIRED', 'CURRENT_CREDENTIALS_REQUIRED',
       'DEVICE_SELECTION_REQUIRED', 'DEVICE_MANAGEMENT', 'MFA_COMPLETED', 'MFA_FAILED', 'OTP_REQUIRED', 'ASSERTION_REQUIRED',
       'PUSH_CONFIRMATION_REJECTED', 'PUSH_CONFIRMATION_TIMED_OUT', 'PUSH_CONFIRMATION_WAITING', 'ACCOUNT_LINKING_FAILED',
       'EMAIL_VERIFICATION_REQUIRED', 'EMAIL_VERIFICATION_OTP_REQUIRED',
@@ -99,12 +111,12 @@ export default class AuthnWidget {
       'AUTHENTICATION_CODE_RESPONSE_REQUIRED', 'BIOMETRIC_DEVICE_AUTHENTICATION_INFO_REQUIRED', 'FIDO2_ACTIVATION_REQUIRED',
       'UPDATE_NICKNAME', 'OATH_TOKEN_PAIRING_TARGET_REQUIRED', 'OATH_TOKEN_ACTIVATION_REQUIRED'
     ]
-    .concat(oauthUserAuthorizationStates)
-    .concat(oneTimeDeviceOtpStates)
-    .concat(idVerificationStates)
-    .concat(magicLinkStates)
-    .concat(securIdStates)
-    .concat(credentialVerificationStates);
+      .concat(oauthUserAuthorizationStates)
+      .concat(oneTimeDeviceOtpStates)
+      .concat(idVerificationStates)
+      .concat(magicLinkStates)
+      .concat(securIdStates)
+      .concat(credentialVerificationStates);
   }
 
   static get COMMUNICATION_ERROR_MSG() {
@@ -156,9 +168,9 @@ export default class AuthnWidget {
     }
     this.assets = new Assets(options);
     this.deviceProfileScript = options && options.deviceProfileScript;
-    this.fraudClientSessionID =  options && options.fraudClientSessionID;
-    this.fraudClientPlatform =  options && options.fraudClientPlatform;
-    this.fraudClientVersion =  options && options.fraudClientVersion;
+    this.fraudClientSessionID = options && options.fraudClientSessionID;
+    this.fraudClientPlatform = options && options.fraudClientPlatform;
+    this.fraudClientVersion = options && options.fraudClientVersion;
     this.registrationFlowConfig = options && options.registrationFlowConfig;
     this.dispatch = this.dispatch.bind(this);
     this.render = this.render.bind(this);
@@ -360,41 +372,41 @@ export default class AuthnWidget {
     this.actionModels.set('checkChallengeResponse', { required: ['challengeResponse'], properties: ['challengeResponse'] });
     this.actionModels.set('submitIdentifier', { required: ['identifier'], properties: ['identifier', 'captchaResponse'] });
     this.actionModels.set('clearIdentifier', { required: ['identifier'], properties: ['identifier', 'captchaResponse'] });
-    this.actionModels.set('registerUser', {required: ['password', 'fieldValues'], properties: ['password', 'captchaResponse', 'fieldValues', 'thisIsMyDevice']});
-    this.actionModels.set('checkOtp', {required: ['otp']});
-    this.actionModels.set('checkAssertion', {required: ['assertion', 'origin', 'compatibility'],  properties: ['assertion', 'origin', 'compatibility'] });
+    this.actionModels.set('registerUser', { required: ['password', 'fieldValues'], properties: ['password', 'captchaResponse', 'fieldValues', 'thisIsMyDevice'] });
+    this.actionModels.set('checkOtp', { required: ['otp'] });
+    this.actionModels.set('checkAssertion', { required: ['assertion', 'origin', 'compatibility'], properties: ['assertion', 'origin', 'compatibility'] });
     this.actionModels.set('checkCredential', { required: ['passcode'], properties: ['username', 'passcode'] });
     this.actionModels.set('checkNextTokencode', { required: ['tokencode'], properties: ['tokencode'] });
     this.actionModels.set('checkTokencode', { required: ['tokencode'], properties: ['tokencode'] });
     this.actionModels.set('checkPasscode', { required: ['passcode'], properties: ['passcode'] });
     this.actionModels.set('resetPin', { required: ['newPin', 'confirmPin'], properties: ['newPin', 'confirmPin'] });
     this.actionModels.set('validatePasscode', { required: ['passcode'], properties: ['passcode'] });
-    this.actionModels.set('submitEmailTarget', {required: ['email']});
-    this.actionModels.set('activateEmailDevice', {required: ['otp']});
-    this.actionModels.set('submitSmsTarget', {required: ['phone']});
-    this.actionModels.set('submitWhatsAppTarget', {required: ['phone']});
-    this.actionModels.set('activateSmsDevice', {required: ['otp']});
-    this.actionModels.set('activateWhatsAppDevice', {required: ['otp']});
-    this.actionModels.set('submitVoiceTarget', {required: ['phone']});
-    this.actionModels.set('activateVoiceDevice', {required: ['otp']});
-    this.actionModels.set('activateTotpDevice', {required: ['otp']});
-    this.actionModels.set('activatePlatformDevice', {required: ['origin', 'attestation']});
-    this.actionModels.set('activateSecurityKeyDevice', {required: ['origin', 'attestation']});
-    this.actionModels.set('activateFido2Device', {required: ['origin', 'attestation']});
-    this.actionModels.set('submitVIPCredential', {required: ['vipCredentialId', 'securityCode']});
-    this.actionModels.set('resetVIPCredential', {required: ['vipCredentialId', 'securityCode', 'nextSecurityCode']});
-    this.actionModels.set('checkUserId', {required: ['userid']});
-    this.actionModels.set('selectAuthenticator', {required: ['authenticator']});
-    this.actionModels.set('checkInput', {required: ['input']});
+    this.actionModels.set('submitEmailTarget', { required: ['email'] });
+    this.actionModels.set('activateEmailDevice', { required: ['otp'] });
+    this.actionModels.set('submitSmsTarget', { required: ['phone'] });
+    this.actionModels.set('submitWhatsAppTarget', { required: ['phone'] });
+    this.actionModels.set('activateSmsDevice', { required: ['otp'] });
+    this.actionModels.set('activateWhatsAppDevice', { required: ['otp'] });
+    this.actionModels.set('submitVoiceTarget', { required: ['phone'] });
+    this.actionModels.set('activateVoiceDevice', { required: ['otp'] });
+    this.actionModels.set('activateTotpDevice', { required: ['otp'] });
+    this.actionModels.set('activatePlatformDevice', { required: ['origin', 'attestation'] });
+    this.actionModels.set('activateSecurityKeyDevice', { required: ['origin', 'attestation'] });
+    this.actionModels.set('activateFido2Device', { required: ['origin', 'attestation'] });
+    this.actionModels.set('submitVIPCredential', { required: ['vipCredentialId', 'securityCode'] });
+    this.actionModels.set('resetVIPCredential', { required: ['vipCredentialId', 'securityCode', 'nextSecurityCode'] });
+    this.actionModels.set('checkUserId', { required: ['userid'] });
+    this.actionModels.set('selectAuthenticator', { required: ['authenticator'] });
+    this.actionModels.set('checkInput', { required: ['input'] });
     this.actionModels.set('submitFraudSessionInfo', { required: ['sessionId', 'clientPlatform', 'clientAction'] });
     this.actionModels.set('continueBiometricDeviceAuthentication', { required: ['origin'] });
     this.actionModels.set('submitUserCode', { required: ['userCode'] });
     this.actionModels.set('confirmUserCode', { required: ['userCode'] });
     this.actionModels.set('useAlternateMethod', {});
-    this.actionModels.set('updateDeviceNickname', { required : ['nickname', 'id'] });
-    this.actionModels.set('submitOathTokenTarget', {required: ['serialNumber']});
-    this.actionModels.set('activateOathTokenDevice', {required: ['otp']});
-    this.actionModels.set('resyncOathToken', {required: ['id', 'otp']});
+    this.actionModels.set('updateDeviceNickname', { required: ['nickname', 'id'] });
+    this.actionModels.set('submitOathTokenTarget', { required: ['serialNumber'] });
+    this.actionModels.set('activateOathTokenDevice', { required: ['otp'] });
+    this.actionModels.set('resyncOathToken', { required: ['id', 'otp'] });
   }
 
   init() {
@@ -609,7 +621,7 @@ export default class AuthnWidget {
       if (devicePairingMethod.length > 1 && devicePairingMethod[1] !== '') {
         data['devicePairingMethod']['applicationName'] = devicePairingMethod[1];
       }
-      if (devicePairingMethod[0] === 'SECURITY_KEY' || devicePairingMethod[0] === 'PLATFORM' || devicePairingMethod[0] === 'FIDO2' ) {
+      if (devicePairingMethod[0] === 'SECURITY_KEY' || devicePairingMethod[0] === 'PLATFORM' || devicePairingMethod[0] === 'FIDO2') {
         data['devicePairingMethod']['relyingPartyId'] = rpId;
         data['devicePairingMethod']['userAgent'] = userAgent;
       }
@@ -622,7 +634,6 @@ export default class AuthnWidget {
 
   async postMobileActivationRequired() {
     let data = this.store.getStore();
-    let QRCode = require('qrcode');
     QRCode.toCanvas(document.getElementById('qrcode'), data.pairingKey, error => {
       if (error) {
         document.getElementById("pairing-message").innerText =
@@ -669,12 +680,11 @@ export default class AuthnWidget {
 
   postTOTPActivationRequired() {
     let data = this.store.getStore();
-    let QRCode = require('qrcode');
     QRCode.toCanvas(document.getElementById('qrcode'), data.keyUri, { 'width': 128, 'height': 128 },
       function (error) {
         if (error) {
           document.getElementById("pairing-message").innerText =
-          `Enter the pairing key using your authenticator app,  then enter the code displayed to finish.`;
+            `Enter the pairing key using your authenticator app,  then enter the code displayed to finish.`;
           console.error(error);
         }
       });
@@ -687,15 +697,13 @@ export default class AuthnWidget {
     }
   }
 
-  async postAuthenticationCodeResponseRequired()
-  {
+  async postAuthenticationCodeResponseRequired() {
     let data = this.store.getStore();
-    let QRCode = require('qrcode');
     QRCode.toCanvas(document.getElementById('qrcode'), data.uri, { 'width': 128, 'height': 128 },
       function (error) {
         if (error) {
           document.getElementById("scan-message").innerText =
-          `Scan the code displayed to finish authentication.`;
+            `Scan the code displayed to finish authentication.`;
           console.error(error);
         }
       });
@@ -763,7 +771,7 @@ export default class AuthnWidget {
 
   postAssertionRequired() {
     let data = this.store.getStore();
-    var selectedDevice = data.devices.filter(device => {return device.id === data.selectedDeviceRef.id;});
+    var selectedDevice = data.devices.filter(device => { return device.id === data.selectedDeviceRef.id; });
     if (data.changeDevicePermitted === false) {
       document.querySelector('#changeDevice').style.display = 'none';
     }
@@ -772,15 +780,13 @@ export default class AuthnWidget {
       // PLATFORM - FULL
       // SECURITY_KEY - SECURITY_KEY_ONLY
       // Usernameless flow
-      if (selectedDevice === null || selectedDevice.length === 0)
-      {
+      if (selectedDevice === null || selectedDevice.length === 0) {
         doWebAuthn(this);
-      } else if (((selectedDevice[0].type === 'SECURITY_KEY' || selectedDevice[0].type ==='FIDO2') && value === 'NONE')
+      } else if (((selectedDevice[0].type === 'SECURITY_KEY' || selectedDevice[0].type === 'FIDO2') && value === 'NONE')
         || (selectedDevice[0].type === 'PLATFORM' && value !== 'FULL')) {
         // Cancel authentication if this is the only device so we don't loop
         console.log("No acceptable authenticator");
-        if(data.devices.length == 1)
-        {
+        if (data.devices.length == 1) {
           // Hide back button and all other stuff. Only Cancel is allowed
           document.querySelector('#assertionRequiredSpinnerId').style.display = 'none';
           document.querySelector('#assertionRequiredAuthenticatingId').style.display = 'none';
@@ -802,7 +808,7 @@ export default class AuthnWidget {
 
   postRegistrationRequired() {
     this.store.registrationflow = true;
-    if(this.registrationFlowConfig && this.registrationFlowConfig.registrationFlowAddTag)
+    if (this.registrationFlowConfig && this.registrationFlowConfig.registrationFlowAddTag)
       this.registrationFlowConfig.registrationFlowAddTag();
   }
 
@@ -810,17 +816,17 @@ export default class AuthnWidget {
     getCompatibility().then(value => {
       if (value === 'SECURITY_KEY_ONLY') {
         var platformDevices = document.querySelectorAll("[id^='PLATFORM-']");
-        [].forEach.call(platformDevices, function(platformDevice) {
+        [].forEach.call(platformDevices, function (platformDevice) {
           platformDevice.style.display = "none";
         });
       } else if (value === 'NONE') {
         var platformDevices = document.querySelectorAll("[id^='PLATFORM-']");
-        [].forEach.call(platformDevices, function(platformDevice) {
+        [].forEach.call(platformDevices, function (platformDevice) {
           platformDevice.style.display = "none";
         });
 
         var securityKeyDevices = document.querySelectorAll("[id^='SECURITY_KEY-']");
-        [].forEach.call(securityKeyDevices, function(securityKeyDevice) {
+        [].forEach.call(securityKeyDevices, function (securityKeyDevice) {
           securityKeyDevice.style.display = "none";
         });
       }
@@ -832,20 +838,20 @@ export default class AuthnWidget {
     if (this.store.registrationflow === true)
       clientAction = "registration";
     let fraudClientInfo = {
-        "sessionId": this.fraudClientSessionID,
-        "clientToken": window["_securedTouchToken"],
-        "clientAction": clientAction,
-        "clientPlatform": this.fraudClientPlatform,
-        "clientVersion": this.fraudClientVersion,
-      };
+      "sessionId": this.fraudClientSessionID,
+      "clientToken": window["_securedTouchToken"],
+      "clientAction": clientAction,
+      "clientPlatform": this.fraudClientPlatform,
+      "clientVersion": this.fraudClientVersion,
+    };
     this.store.dispatch('POST_FLOW', 'submitFraudSessionInfo', JSON.stringify(fraudClientInfo));
   }
 
   postContinueBiometricDeviceAuthentication() {
     let hostName = window.location.hostname;
     let hostInfo = {
-        "origin": hostName
-      };
+      "origin": hostName
+    };
     this.store.dispatch('POST_FLOW', 'continueBiometricDeviceAuthentication', JSON.stringify(hostInfo));
   }
 
@@ -866,7 +872,7 @@ export default class AuthnWidget {
       case 'TMX-SDK':
         script = document.createElement('script');
         script.src = this.deviceProfileScript;
-        script.onload = function() {
+        script.onload = function () {
           pinghelper.run_sid_provided(data.deviceProfilingDomain,
             data.riskOrgId,
             data.riskSessionId);
@@ -936,7 +942,7 @@ export default class AuthnWidget {
 
   async registerSecurIDCASEventHandler() {
     Array.from(document.querySelectorAll('[data-cas-challenge-method-selection]'))
-    .forEach(element => element.addEventListener('click', this.handleCASChallengeMethodSelection));
+      .forEach(element => element.addEventListener('click', this.handleCASChallengeMethodSelection));
     let state = await this.store.getState();
     if (state.challengeMethodIds !== undefined && state.challengeMethodIds.length >= 1) {
       this.store.securIdChallengeMethods = state.challengeMethodIds;
@@ -1144,7 +1150,7 @@ export default class AuthnWidget {
 
   registerCASChangeMethodEventHandler() {
     document.getElementById('useAlternateMethod')
-            .addEventListener('click', this.handleCASUseAlternateMethod);
+      .addEventListener('click', this.handleCASUseAlternateMethod);
   }
 
   async postCASChallengeMethodRequired() {
@@ -1154,8 +1160,8 @@ export default class AuthnWidget {
   async postCASFlow() {
     if (document.getElementById('useAlternateMethod') != null) {
       document.getElementById('useAlternateMethod')
-      .addEventListener('click', this.handleCASUseAlternateMethod);
-      if (this.store.securIdChallengeMethods !== undefined && this.store.securIdChallengeMethods.length  >= 1) {
+        .addEventListener('click', this.handleCASUseAlternateMethod);
+      if (this.store.securIdChallengeMethods !== undefined && this.store.securIdChallengeMethods.length >= 1) {
         document.getElementById('useAlternateMethod').style.display = 'block';
       }
     }
@@ -1174,7 +1180,7 @@ export default class AuthnWidget {
       document.querySelector('#spinnerId').style.display = 'block';
     }
     document.getElementById('useAlternateMethod')
-    .addEventListener('click', this.handleCASUseAlternateMethod);
+      .addEventListener('click', this.handleCASUseAlternateMethod);
     let newState = await this.store.poll();
     let pollState = await this.store.getState();
     if (pollState.status === 'SECURID_CAS_APPROVE_METHOD_PENDING_VERIFICATION') {
@@ -1196,18 +1202,18 @@ export default class AuthnWidget {
     let source = evt.currentTarget;
     if (document.getElementById('confirmation_button') != null && document.getElementById('confirmation_button').dataset.deviceId == null) {
       if (source) {
-      let deviceId = source.dataset['mfaSelectionKebabMenuContainer'];
+        let deviceId = source.dataset['mfaSelectionKebabMenuContainer'];
         document.getElementById('confirmation_button').dataset.deviceId = deviceId;
         document.getElementById('confirmation_button').addEventListener('click', this.handleContinueRemoveDevice)
         document.getElementById('cancelAddMfaMethod').addEventListener('click', this.handleCancelRemoveDevice)
-      }else {
+      } else {
         console.log("ERROR - Unable to remove device, as the target was null");
         return;
       }
     }
 
     let shouldWarn = Array.from(document.querySelectorAll("[id^='remove-device']")).length === 1 && document.getElementById('confirmation_warn_button').dataset.skip_warn !== "true"
-    if(shouldWarn && document.querySelector('#last_device_warning_block_id') != null){
+    if (shouldWarn && document.querySelector('#last_device_warning_block_id') != null) {
       document.querySelector('#last_device_warning_block_id').style.display = 'block';
       document.getElementById('confirmation_warn_button').dataset.skip_warn = "true";
       document.getElementById('confirmation_warn_button').dataset.mfaSelectionKebabMenuContainer = source.dataset['mfaSelectionKebabMenuContainer'];
@@ -1227,12 +1233,12 @@ export default class AuthnWidget {
 
   registerMfaChangeDeviceEventHandler() {
     document.getElementById('changeDevice')
-            .addEventListener('click', this.handleMfaDeviceChange);
+      .addEventListener('click', this.handleMfaDeviceChange);
   }
 
   registerMfaOneTimeDeviceChangeEventHandler() {
     document.getElementById('changeOneTimeDevice')
-            .addEventListener('click', this.handleMfaOneTimeDeviceChange);
+      .addEventListener('click', this.handleMfaOneTimeDeviceChange);
   }
 
   async handleMfaOneTimeDeviceChange(evt) {
@@ -1320,7 +1326,7 @@ export default class AuthnWidget {
   registerAgentlessHandler() {
     console.log("registering event handlers for 'data-agentlessActionid' elements in 'reference_id_required.hbs'");
     Array.from(document.querySelectorAll('[data-agentlessActionid]')).
-    forEach(element => element.addEventListener('click', this.handleAgentlessSignOn));
+      forEach(element => element.addEventListener('click', this.handleAgentlessSignOn));
   }
 
   handleAgentlessSignOn(evt) {
@@ -1484,8 +1490,7 @@ export default class AuthnWidget {
       // failed retry message is shown on qr screen
       this.displayQR();
     }
-    if (newState.txStatus === 'INITIATED')
-    {
+    if (newState.txStatus === 'INITIATED') {
       document.getElementById("requiredHeader").style.display = "none";
       document.getElementById("requiredDescription").style.display = "none";
       document.getElementById("startedHeader").style.display = "block";
@@ -1533,13 +1538,13 @@ export default class AuthnWidget {
     if (data.prevState.username && !data.state.username) {
       data.state.username = data.prevState.username;
     }
-    console.log('dispatching retry: ' + actionId+" #"+cnt);
+    console.log('dispatching retry: ' + actionId + " #" + cnt);
     console.log(data.state);
 
     if (data.state.status === 'ID_VERIFICATION_REQUIRED') {
       console.log("not returning to first screen, resubmiting post request in 1 second");
       await new Promise(r => setTimeout(r, 1000));
-      this.handleRetryVerification(event, cnt+1);
+      this.handleRetryVerification(event, cnt + 1);
     } else {
       this.store.notifyListeners();
     }
@@ -1588,7 +1593,7 @@ export default class AuthnWidget {
     if (!data.errorMessage) {
       const tiles = document.querySelectorAll('.tile-button');
       tiles.forEach(tile => {
-        tile.addEventListener('click', function() {
+        tile.addEventListener('click', function () {
           tiles.forEach(otherTile => {
             if (otherTile !== tile && otherTile.classList.contains('tile-button--selected')) {
               otherTile.classList.remove('tile-button--selected');
@@ -1691,7 +1696,7 @@ export default class AuthnWidget {
     document.getElementById('appOpenUrl').addEventListener('click', this.handleAppOpenUrl(data.appOpenUrl));
 
     if (data.redirect && data.appOpenUrl !== undefined &&
-        this.store.getPreviousStore.appOpenUrl != data.appOpenUrl) {
+      this.store.getPreviousStore.appOpenUrl != data.appOpenUrl) {
       console.log("redirect to " + data.appOpenUrl);
       window.open(data.appOpenUrl, "_blank");
     }
@@ -1791,7 +1796,7 @@ export default class AuthnWidget {
       return;
     }
 
-    if(this.getSubmitPhoneTargetActions().includes(actionId)) {
+    if (this.getSubmitPhoneTargetActions().includes(actionId)) {
       formData = this.appendCountryCodeToPhoneNumber(formData)
     }
 
@@ -1852,9 +1857,9 @@ export default class AuthnWidget {
         formDataEntry = formDataEntries.next();
       }
 
-      for(let key in convertedData) {
+      for (let key in convertedData) {
         let values = formData.getAll(key);
-        if(this.isMultiValueField(formElement, key))
+        if (this.isMultiValueField(formElement, key))
           object[key] = values;
         else
           object[key] = values[0]
@@ -1885,10 +1890,10 @@ export default class AuthnWidget {
     let templateName = currentState;
     let template = this.getTemplate('general_error');
     if (currentState) {
-      if (currentState === 'BIOMETRIC_DEVICE_AUTHENTICATION_INFO_REQUIRED'){
+      if (currentState === 'BIOMETRIC_DEVICE_AUTHENTICATION_INFO_REQUIRED') {
         templateName = 'ASSERTION_REQUIRED';
       }
-      if (currentState === 'DEVICE_MANAGEMENT'){
+      if (currentState === 'DEVICE_MANAGEMENT') {
         templateName = 'DEVICE_SELECTION_REQUIRED';
       }
       try {
@@ -1899,7 +1904,7 @@ export default class AuthnWidget {
       }
     }
     let widgetDiv = document.getElementById(this.divId);
-    const store = {store: this.store};
+    const store = { store: this.store };
     var params = Object.assign(state, this.assets.toTemplateParams(), store);
     widgetDiv.innerHTML = template(params);
     this.registerEventListeners(currentState);
@@ -1939,7 +1944,12 @@ export default class AuthnWidget {
     key = key.toLowerCase();
     let template = this.stateTemplates.get(key);
     if (template === undefined) {
-      template = require(`./partials/${key}.hbs`);
+      const templatePath = `./partials/${key}.hbs`;
+      const templateSource = templateModules[templatePath];
+      if (templateSource === undefined) {
+        throw new Error(`Template not found: ${templatePath}`);
+      }
+      template = Handlebars.compile(templateSource);
       this.stateTemplates.set(key, template);
     }
     return template;
@@ -2002,7 +2012,7 @@ export default class AuthnWidget {
 
   checkDropdownSelected(field) {
     let selected_options = field.querySelectorAll(`option[selected]`);
-    if(selected_options.length > 0)
+    if (selected_options.length > 0)
       field.classList.remove("placeholder-shown");
   }
 
@@ -2011,14 +2021,14 @@ export default class AuthnWidget {
     let formData = this.getFormData();
     let actionModelProperties = this.actionModels.get('registerUser').properties;
 
-    let payload = {fieldValues: {}};
+    let payload = { fieldValues: {} };
     Object.keys(formData).forEach((key) => {
-      if(actionModelProperties.indexOf(key) >= 0)
+      if (actionModelProperties.indexOf(key) >= 0)
         payload[key] = formData[key];
       else {
         let field_value = formData[key];
 
-        if(Array.isArray(field_value)) {
+        if (Array.isArray(field_value)) {
           let values = {};
           field_value.forEach(option => {
             values[option] = true;
@@ -2116,7 +2126,7 @@ export default class AuthnWidget {
     let source = evt.currentTarget;
     if (source) {
       let authenticator = source.dataset['authenticatorSelection'];
-      const data = {authenticator};
+      const data = { authenticator };
       this.store.dispatch('POST_FLOW', 'selectAuthenticator', JSON.stringify(data));
     } else {
       console.log("ERROR - Unable to dispatch authenticator selection as the target was null");
@@ -2146,33 +2156,33 @@ export default class AuthnWidget {
    * @param evt
    */
   checkInputHandler(evt) {
-      evt.preventDefault();
-      let source = evt.currentTarget;
-      if (source) {
-        let answers = [];
-        let data = {};
-        // Get the answers from the KBA Answer field
-        let answerElements = document.getElementsByName('kbaAnswer');
-        for (let i = 0; i < answerElements.length; i++) {
-          let answer = {};
-          let input = answerElements[i];
-          answer.id = input.id;
-          answer.answer = input.value;
-          answers.push({...answer});
-        }
-        data.answers = answers;
-
-        // Either the KBA fields are visible or the passcode field is visible
-        let inputElement = document.getElementById('passcode');
-        if (null !== inputElement) {
-          let input = inputElement.value;
-          data.input = input;
-        }
-        this.store.dispatch('POST_FLOW', 'checkInput', JSON.stringify(data));
-      } else {
-        console.log("ERROR - Unable to dispatch authenticator selection as the target was null");
+    evt.preventDefault();
+    let source = evt.currentTarget;
+    if (source) {
+      let answers = [];
+      let data = {};
+      // Get the answers from the KBA Answer field
+      let answerElements = document.getElementsByName('kbaAnswer');
+      for (let i = 0; i < answerElements.length; i++) {
+        let answer = {};
+        let input = answerElements[i];
+        answer.id = input.id;
+        answer.answer = input.value;
+        answers.push({ ...answer });
       }
+      data.answers = answers;
+
+      // Either the KBA fields are visible or the passcode field is visible
+      let inputElement = document.getElementById('passcode');
+      if (null !== inputElement) {
+        let input = inputElement.value;
+        data.input = input;
+      }
+      this.store.dispatch('POST_FLOW', 'checkInput', JSON.stringify(data));
+    } else {
+      console.log("ERROR - Unable to dispatch authenticator selection as the target was null");
     }
+  }
 
   updateDeviceNickname(evt) {
     evt.preventDefault();
@@ -2264,13 +2274,13 @@ export default class AuthnWidget {
   }
 
   transitionFromResyncOathTokenMode(evt) {
-    if(document.getElementById("resyncOathTokenBlock") !== null) {
+    if (document.getElementById("resyncOathTokenBlock") !== null) {
       document.getElementById("resyncOathTokenBlock").style.display = "none";
     }
   }
 
   resyncOathToken(evt) {
-    if(document.getElementById("resyncPasscode") !== null) {
+    if (document.getElementById("resyncPasscode") !== null) {
       const resyncPasscode = document.getElementById("resyncPasscode").value;
       const deviceId = document.getElementById("resyncDeviceId").value;
       const data = {
@@ -2304,7 +2314,7 @@ export default class AuthnWidget {
     }
   }
 
-  usePasswordAuth(){
+  usePasswordAuth() {
     this.renderSpinnerTemplate();
     this.store.dispatch('POST_FLOW', "usePasswordAuthentication", null);
   }
@@ -2336,17 +2346,17 @@ export default class AuthnWidget {
       }
 
       // Add input event listener for filtering
-      countryCodeInput.addEventListener('input', function(e) {
+      countryCodeInput.addEventListener('input', function (e) {
         filterDropdown(e.target.value);
       });
 
       // Add click event listener for dropdown toggle
-      dropdownArrow.addEventListener('click', function() {
+      dropdownArrow.addEventListener('click', function () {
         toggleDropdown();
       });
 
       // Close dropdown when clicking outside
-      window.addEventListener('click', function(e) {
+      window.addEventListener('click', function (e) {
         const dropdownContainer = document.getElementsByClassName("dropdown-container")[0];
         if (dropdownContainer && !dropdownContainer.contains(e.target)) {
           document.getElementById("dropdownList").style.display = 'none';
@@ -2376,7 +2386,7 @@ export default class AuthnWidget {
         .then(data => {
           // `data` contains the parsed JSON object
           const dropdownList = document.getElementById('dropdownList');
-          if(dropdownList) {
+          if (dropdownList) {
             dropdownList.innerHTML = ''; // Clear existing content
           }
 

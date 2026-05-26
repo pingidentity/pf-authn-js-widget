@@ -1,3 +1,3 @@
-module.exports = function(condition) {
-    return (condition) ? "checked" : "";
-};
+export default function (condition) {
+  return condition ? "checked" : "";
+}
