@@ -1,7 +1,9 @@
 import { defineConfig } from "vite";
 import basicSsl from "@vitejs/plugin-basic-ssl";
 import { resolve as _resolve } from "path";
-import { renderIndex } from "./demo-server/templates";
+import { createRequire } from "module";
+const require = createRequire(import.meta.url);
+const { renderIndex } = require("./demo-server/templates/index.cjs");
 
 function demoServerPlugin() {
   return {
@@ -47,7 +49,7 @@ export default defineConfig({
   build: {
     sourcemap: true,
     lib: {
-      entry: _resolve(__dirname, "src/index.js"),
+      entry: _resolve(__dirname, "src/index.ts"),
       name: "PfAuthnWidget",
       formats: ["umd"],
       fileName: () => "pf.authn-widget.js",

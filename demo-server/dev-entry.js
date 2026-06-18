@@ -1,3 +1,3 @@
-import AuthnWidget from '/src/index.js';
+import AuthnWidget from '/src/index.ts';
 
 window.PfAuthnWidget = AuthnWidget;

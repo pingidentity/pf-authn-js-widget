@@ -1,4 +1,4 @@
-const templates = require('./templates');
+const templates = require('./templates/index.cjs');
 
 export default function(server, options = {}) {
   server.app.get('/', function (req, res) {
