@@ -60,7 +60,7 @@ To configure PingFederate for the widget:
   2. Start the SSO flow as you would normally. For example, by clicking on an existing IdP Connection, and you will be redirected to your "JavaScript Widget for the PingFederate Authentication API" application.
 
 **Note:** The redirect URL of the [Authentication Applications](https://docs.pingidentity.com/pingfederate/latest/administrators_reference_guide/help_authenticationapplicationtasklet_authenticationapplicationstate.html) must point to where the JavaScript Widget for the PingFederate Authentication API is hosted.
-If you do not wish to use the development server provided by webpack, change the URL of the authentication application to point the correct hosted URL.
+If you do not wish to use the development server provided by Vite, change the URL of the authentication application to point the correct hosted URL.
 
 # Installation
 
@@ -112,14 +112,14 @@ A working example that utilizes the pre-built widget would look like:
 
 ## Option 2: Building the Widget
 
-Before installing, make sure you have [node.js](https://nodejs.org/en/) installed. Then check out this repository.
+Before installing, make sure you have [Node.js 24 LTS](https://nodejs.org/en/) installed. Then check out this repository.
 
 Run the following commands:
 
-- `npm install` - install the dependencies
-- `npm run start` - start the webpack development server
+- `pnpm install` - install the dependencies
+- `pnpm start` - start the Vite development server
 
-This will start the webpack development server on <https://localhost:8443> (as specified in webpack.config.js) and instantiate the widget.
+This will start the Vite development server on <https://localhost:8443> (as specified in `vite.config.js`) and instantiate the widget.
 
 If you need to modify the base URL from `localhost:9031`, you can modify it in `demo-server/templates/index-template.handlebars` or pass a `BASEURL` command line parameter (see [Technical Notes](#tech-notes)).
 
@@ -133,7 +133,7 @@ This is a good choice if you already have a node project with `package.json` and
 
 To add the widget as a dependency:
 
-1. Run `npm install @ping-identity/pf-authn-js-widget --save`
+1. Run `pnpm add @ping-identity/pf-authn-js-widget`
 2. Add `<div id="authnwidget"></div>` to your app.
 
 ## Widget Configuration
@@ -169,26 +169,26 @@ When upgrading from version 1 to version 2, remove the custom javascript code an
 
 # Technical Notes
 
-Here are all available npm commands:
+Here are all available pnpm commands:
 
-- `npm install` - install the dependencies locally
-- `npm run build` - build for production
-- `npm run start` - start the dev server
-- `BASEURL=https://PingFederateBaseUrl:9031 npm run start` - pass a custom base URL from the command line (Mac/Linux only)
-- `npm run clean` - remove the `dist/` and `coverage` directory
-- `npm run coverage` - run ESLint coverage
-- `npm run test` - run tests
-- `npm run test:watch` - just watch the tests
+- `pnpm install` - install the dependencies locally
+- `pnpm build` - build for production
+- `pnpm start` - start the dev server
+- `BASEURL=https://PingFederateBaseUrl:9031 pnpm start` - pass a custom base URL from the command line (Mac/Linux only)
+- `pnpm clean` - remove the `dist/` and `coverage` directory
+- `pnpm coverage` - run test coverage
+- `pnpm test` - run tests
+- `pnpm test:watch` - watch tests
 
 ## Building the Latest Version of the Widget
 
-Before installing, make sure you have [node.js](https://nodejs.org/en/) installed. Then check out this repository.
+Before installing, make sure you have [Node.js 24 LTS](https://nodejs.org/en/) installed. Then check out this repository.
 
 To build the widget:
 
-1. `npm install`
-1. `npm run build`
-1. Copy all the files in the `dist` folder to where your application will be hosted (this part can be skipped if webpack's development server is used).
+1. `pnpm install`
+1. `pnpm build`
+1. Copy all the files in the `dist` folder to where your application will be hosted (this part can be skipped if Vite's development server is used).
 1. Create an `index.html` as shown below.
 
 ## Adding the Widget to an Application

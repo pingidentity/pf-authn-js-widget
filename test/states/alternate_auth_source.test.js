@@ -1,17 +1,15 @@
 //test constructor cannot start without flowId
+import { vi } from 'vitest'
 import AuthnWidget from '../../src'
 import Store from "../../src/store";
 
 describe('Alternate Auth Source tests', () => {
-
-  jest.mock('../../src/store');
-
   test('Test handle auth source', () => {
     const authn = new AuthnWidget('https://localhost:9031');
     let target = { "dataset": { "altauthsource": "testsource"}};
     let evt = { "currentTarget": target };
-    evt.preventDefault = jest.fn().mockName("preventDefault");
-    Store.prototype.dispatch = jest.fn().mockName("dispatch").mockResolvedValue("42");
+    evt.preventDefault = vi.fn().mockName("preventDefault");
+    Store.prototype.dispatch = vi.fn().mockName("dispatch").mockResolvedValue("42");
 
     authn.handleAltAuthSource(evt);
     expect(evt.preventDefault).toHaveBeenCalledTimes(1);
@@ -22,8 +20,8 @@ describe('Alternate Auth Source tests', () => {
   test('Test no target on event', () => {
     const authn = new AuthnWidget('https://localhost:9031');
     let evt = { };
-    evt.preventDefault = jest.fn().mockName("preventDefault");
-    Store.prototype.dispatch = jest.fn().mockName("dispatch").mockResolvedValue("42");
+    evt.preventDefault = vi.fn().mockName("preventDefault");
+    Store.prototype.dispatch = vi.fn().mockName("dispatch").mockResolvedValue("42");
 
     authn.handleAltAuthSource(evt);
     expect(evt.preventDefault).toHaveBeenCalledTimes(1);
@@ -31,7 +29,7 @@ describe('Alternate Auth Source tests', () => {
   });
 
   test('Test button has handler registered and triggered on click.', () => {
-    const mockHandle = jest.fn().mockName("handleAltAuthSource");
+    const mockHandle = vi.fn().mockName("handleAltAuthSource");
     document.body.innerHTML = '<div><button id="testing" data-altauthsource="testing"/></div>';
     const authn = new AuthnWidget('https://localhost:9031');
     authn.handleAltAuthSource = mockHandle;

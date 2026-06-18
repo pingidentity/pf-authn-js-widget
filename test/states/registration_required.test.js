@@ -1,4 +1,5 @@
 //test constructor cannot start without flowId
+import { vi } from 'vitest'
 import AuthnWidget from '../../src'
 
 describe('REGISTRATION_REQUIRED tests', () => {
@@ -19,9 +20,9 @@ describe('REGISTRATION_REQUIRED tests', () => {
     }
 
     const authn = new AuthnWidget('https://localhost:9031');
-    authn.dispatchWithCaptcha = jest.fn().mockName("dispatchWithCaptcha");
+    authn.dispatchWithCaptcha = vi.fn().mockName("dispatchWithCaptcha");
     let evt = {};
-    evt.preventDefault = jest.fn().mockName("preventDefault");
+    evt.preventDefault = vi.fn().mockName("preventDefault");
     authn.handleRegisterUser(evt);
 
     expect(evt.preventDefault).toHaveBeenCalledTimes(1);
@@ -30,7 +31,7 @@ describe('REGISTRATION_REQUIRED tests', () => {
   });
 
   test('Test register button triggers registration handler.', () => {
-    const mockHandle = jest.fn().mockName("handleRegisterUser");
+    const mockHandle = vi.fn().mockName("handleRegisterUser");
     document.body.innerHTML = '<div><button id="testing" data-registrationactionid="registerUser"/></div>';
     const authn = new AuthnWidget('https://localhost:9031');
     authn.handleRegisterUser = mockHandle;

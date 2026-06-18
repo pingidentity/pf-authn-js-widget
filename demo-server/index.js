@@ -1,7 +1,7 @@
-const templates = require('./templates');
+const templates = require('./templates/index.cjs');
 
-module.exports = function (server, options = {}) {
+export default function(server, options = {}) {
   server.app.get('/', function (req, res) {
-    templates.renderIndex(res, options)
+    templates.renderIndex(res, options);
   });
 }

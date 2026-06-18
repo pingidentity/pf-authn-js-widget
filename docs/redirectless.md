@@ -168,11 +168,11 @@ var config = {
 authnWidget.initRedirectless(config);
 ```
 
-## Starting webpack-dev-server with redirectless support
-To configure and start the webpack-dev-server with redirectless support:
+## Starting Vite dev server with redirectless support
+To configure and start the Vite dev server with redirectless support:
 1. Update the demo server's [index template](../demo-server/templates/index-template.handlebars) file with a configuration object. Configuration object examples are available in the [Configuration object examples](#configuration-object-examples) section of this document.
-1. Execute the following command to start the webpack-dev-server and initialize the widget in redirectless mode:
+1. Execute the following command to start the dev server and initialize the widget in redirectless mode:
     ```bash
-    OPERATIONMODE=redirectless npm run start
+    OPERATIONMODE=redirectless pnpm start
     ```
 1. In your browser, go to https://localhost:8443 to see the widget in action.
