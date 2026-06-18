@@ -55,6 +55,7 @@
     "@vitejs/plugin-basic-ssl": "^1.2.0",
     "@vitest/coverage-v8": "^2.1.9",
     "eslint": "^10.4.0",
+    "globals": "^17.6.0",
     "rimraf": "^2.7.1",
     "sass": "^1.100.0",
     "typescript": "^6.0.3",
