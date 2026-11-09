@@ -39,6 +39,67 @@ describe('MFA IK 4.2 support', () => {
     });
   });
 
+  describe('YubiKey OTP validation', () => {
+    test('44-character alphanumeric YubiKey OTP enables submit', () => {
+      const authn = new AuthnWidget('https://localhost:9031');
+      document.body.innerHTML = '<form id="AuthnWidgetForm">' +
+        '<button id="submit">Sign On</button>' +
+        '<input id="otp" name="otp" type="text" class="required" maxlength="44" value=""/></form>';
+      const input = document.getElementById('otp');
+      const submit = document.getElementById('submit');
+      input.value = 'cccccctivbtdnkjjgjrvvudebvhjblnefubktuufvivi'; // YubiKey modhex OTP
+
+      authn.enableSubmit();
+
+      expect(submit.disabled).toBe(false);
+    });
+
+    test('44-character OTP with invalid characters keeps submit disabled', () => {
+      const authn = new AuthnWidget('https://localhost:9031');
+      document.body.innerHTML = '<form id="AuthnWidgetForm">' +
+        '<button id="submit">Sign On</button>' +
+        '<input id="otp" name="otp" type="text" class="required" maxlength="44" value=""/></form>';
+      const input = document.getElementById('otp');
+      const submit = document.getElementById('submit');
+      input.value = 'cccccctivbtdnkjjgjrvvudebvhjblnefubktuufvi!@#';
+
+      authn.enableSubmit();
+
+      expect(submit.disabled).toBe(true);
+    });
+
+    test('short numeric OTP still validates with 6-char minimum', () => {
+      const authn = new AuthnWidget('https://localhost:9031');
+      document.body.innerHTML = '<form id="AuthnWidgetForm">' +
+        '<button id="submit">Sign On</button>' +
+        '<input id="otp" name="otp" type="text" class="required" maxlength="6" value=""/></form>';
+      const input = document.getElementById('otp');
+      const submit = document.getElementById('submit');
+
+      input.value = '12345';
+      authn.enableSubmit();
+      expect(submit.disabled).toBe(true);
+
+      input.value = '123456';
+      authn.enableSubmit();
+      expect(submit.disabled).toBe(false);
+    });
+
+    test('numeric OTP rejected when longer than maxlength', () => {
+      const authn = new AuthnWidget('https://localhost:9031');
+      document.body.innerHTML = '<form id="AuthnWidgetForm">' +
+        '<button id="submit">Sign On</button>' +
+        '<input id="otp" name="otp" type="text" class="required" maxlength="6" value=""/></form>';
+      const input = document.getElementById('otp');
+      const submit = document.getElementById('submit');
+      input.value = '12345678901234';
+
+      authn.enableSubmit();
+
+      expect(submit.disabled).toBe(true);
+    });
+  });
+
   describe('forgotYourDevice', () => {
     test('handleForgotDevice dispatches forgotYourDevice action', () => {
       const authn = new AuthnWidget('https://localhost:9031');

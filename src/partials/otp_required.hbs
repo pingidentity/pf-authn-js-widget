@@ -13,7 +13,7 @@
       {{/each}}
     </div>
     <div class="text-input__icon">
-      <input id="otp" name="otp" type="text" class="text-input text-input--primary input--otp required" maxlength="{{otpLength}}" value=""/>
+      <input id="otp" name="otp" type="text" class="text-input text-input--primary input--otp {{#if (gt otpLength 20)}}input--otp-wide{{/if}} required" maxlength="{{otpLength}}" value=""/>
     </div>
     {{#each devices as |device|}}
       {{#ifEq device.id ../selectedDeviceRef.id}}

@@ -210,6 +210,11 @@ input:read-only {
   margin: 0 auto;
 }
 
+/* Wider input for long OTPs such as the 44-character YubiKey one-time password */
+.input--otp-wide {
+  max-width: 360px;
+}
+
 .back-button {
   width: 30px;
   height: 30px;

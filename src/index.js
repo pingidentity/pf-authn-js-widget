@@ -1522,10 +1522,16 @@ export default class AuthnWidget {
           }
         }
         if (input.type === 'text' && input.id === 'otp') {
-          const tooShortOrTooLong = (input.value.length < 6 || input.value.length > input.maxLength);
-          const isNumeric = /^\d+$/.test(input.value);
+          // YubiKey OTPs are 44-character alphanumeric (modhex) strings; other OTPs are numeric.
+          // The input's maxlength comes from the state's otpLength, so derive the expected length
+          // from it instead of assuming a fixed numeric length.
+          const expectedLength = input.maxLength > 0 ? input.maxLength : 6;
+          const isYubikey = expectedLength > 20;
+          const tooShortOrTooLong = input.value.length < (isYubikey ? expectedLength : 6) ||
+            input.value.length > expectedLength;
+          const isAllowedChars = isYubikey ? /^[a-zA-Z0-9]+$/.test(input.value) : /^\d+$/.test(input.value);
 
-          if (tooShortOrTooLong || !isNumeric) {
+          if (tooShortOrTooLong || !isAllowedChars) {
             disabled = true;
           }
         }
