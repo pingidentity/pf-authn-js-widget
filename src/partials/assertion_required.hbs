@@ -27,6 +27,8 @@
       <p class="icon-feedback__label">Authenticating</p>
     </div>
         {{> device_selection_body bodyText='Request sent to:'}}
+    {{> forgot_device_link}}
+    {{> admin_message}}
     <input style="display:none" type="hidden" id="assertion" name="assertion" type="text" class="text-input text-input--primary" value=""/>
     <input  style="display:none"  type="hidden" type="origin" id="origin" name="origin" type="text" class="text-input text-input--primary" value=""/>
     <input  style="display:none" type="hidden" type="compatibility" id="compatibility" name="compatibility" type="text" class="text-input text-input--primary" value=""/>

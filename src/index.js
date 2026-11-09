@@ -5,6 +5,7 @@ import 'regenerator-runtime/runtime'; //for async await
 import Store from './store';
 import redirectlessConfigValidator from './validators/redirectless';
 import { getCompatibility, doWebAuthn, doRegisterWebAuthn } from './utils/fidoFlowUtil';
+import { callPingIdDesktopConnector, authenticateViaSSOExtension, checkSSOCallback, isSafari, getGen2ErrorMessage } from './utils/pingIdDesktopGen2Util';
 import { completeStateCallback, failedStateCallback, FLOW_TYPE_USER_AUTHZ, FLOW_TYPE_AUTHZ } from './utils/redirectless';
 import paOnAuthorizationRequest from './utils/paOnAuthorizationRequest';
 import paOnAuthorizationSuccess from './utils/paOnAuthorizationSuccess';
@@ -97,7 +98,9 @@ export default class AuthnWidget {
       'VIP_ENROLLMENT', 'VIP_CREDENTIAL_REQUIRED', 'VIP_AUTHENTICATION_REQUIRED', 'VIP_CREDENTIAL_RESET_REQUIRED',
       'USER_ID_REQUIRED', 'AUTHENTICATOR_SELECTION_REQUIRED', 'INPUT_REQUIRED', 'ENTRUST_FAILED', 'FRAUD_EVALUATION_CHECK_REQUIRED',
       'AUTHENTICATION_CODE_RESPONSE_REQUIRED', 'BIOMETRIC_DEVICE_AUTHENTICATION_INFO_REQUIRED', 'FIDO2_ACTIVATION_REQUIRED',
-      'UPDATE_NICKNAME', 'OATH_TOKEN_PAIRING_TARGET_REQUIRED', 'OATH_TOKEN_ACTIVATION_REQUIRED'
+      'UPDATE_NICKNAME', 'OATH_TOKEN_PAIRING_TARGET_REQUIRED', 'OATH_TOKEN_ACTIVATION_REQUIRED',
+      'MFA_DENIED', 'YUBIKEY_ACTIVATION_REQUIRED', 'MOBILE_PAIRING_REQUIRED',
+      'PINGID_DESKTOP_ACTIVATION_REQUIRED', 'PINGID_DESKTOP_GEN2_ACTIVATION_REQUIRED', 'PINGID_DESKTOP_GEN2_ASSERTION_REQUIRED'
     ]
     .concat(oauthUserAuthorizationStates)
     .concat(oneTimeDeviceOtpStates)
@@ -260,6 +263,11 @@ export default class AuthnWidget {
     this.registerCountryCodePickerHandler = this.registerCountryCodePickerHandler.bind(this);
     this.registerOneTimeDeviceChangeEventHandler = this.registerOneTimeDeviceChangeEventHandler.bind(this);
     this.handleOneTimeDeviceChange = this.handleOneTimeDeviceChange.bind(this);
+    this.registerForgotDeviceHandler = this.registerForgotDeviceHandler.bind(this);
+    this.handleForgotDevice = this.handleForgotDevice.bind(this);
+    this.postPingIdDesktopGen2AssertionRequired = this.postPingIdDesktopGen2AssertionRequired.bind(this);
+    this.postPingIdDesktopGen2ActivationRequired = this.postPingIdDesktopGen2ActivationRequired.bind(this);
+    this.postPingIdDesktopActivationRequired = this.postPingIdDesktopActivationRequired.bind(this);
     this.stateTemplates = new Map();  //state -> handlebar templates
     this.eventHandler = new Map();  //state -> eventHandlers
     this.postRenderCallbacks = new Map();
@@ -320,6 +328,20 @@ export default class AuthnWidget {
     this.addEventHandler('PUSH_CONFIRMATION_TIMED_OUT', this.registerMfaEventHandler);
     this.addEventHandler('PUSH_CONFIRMATION_TIMED_OUT', this.registerMfaChangeDeviceEventHandler);
     this.addPostRenderCallback('MOBILE_PAIRING_REQUIRED', this.postContinueAuthentication);
+    this.addEventHandler('YUBIKEY_ACTIVATION_REQUIRED', this.registerMfaEventHandler);
+    this.addEventHandler('DEVICE_SELECTION_REQUIRED', this.registerForgotDeviceHandler);
+    this.addEventHandler('OTP_REQUIRED', this.registerForgotDeviceHandler);
+    this.addEventHandler('ASSERTION_REQUIRED', this.registerForgotDeviceHandler);
+    this.addEventHandler('PUSH_CONFIRMATION_WAITING', this.registerForgotDeviceHandler);
+    this.addEventHandler('PUSH_CONFIRMATION_TIMED_OUT', this.registerForgotDeviceHandler);
+    this.addEventHandler('PUSH_CONFIRMATION_REJECTED', this.registerForgotDeviceHandler);
+    this.addEventHandler('PINGID_DESKTOP_GEN2_ASSERTION_REQUIRED', this.registerMfaEventHandler);
+    this.addEventHandler('PINGID_DESKTOP_GEN2_ASSERTION_REQUIRED', this.registerMfaChangeDeviceEventHandler);
+    this.addEventHandler('PINGID_DESKTOP_GEN2_ASSERTION_REQUIRED', this.registerForgotDeviceHandler);
+    this.addPostRenderCallback('PINGID_DESKTOP_GEN2_ASSERTION_REQUIRED', this.postPingIdDesktopGen2AssertionRequired);
+    this.addEventHandler('PINGID_DESKTOP_GEN2_ACTIVATION_REQUIRED', this.registerMfaEventHandler);
+    this.addPostRenderCallback('PINGID_DESKTOP_GEN2_ACTIVATION_REQUIRED', this.postPingIdDesktopGen2ActivationRequired);
+    this.addPostRenderCallback('PINGID_DESKTOP_ACTIVATION_REQUIRED', this.postPingIdDesktopActivationRequired);
     this.addEventHandler('ID_VERIFICATION_REQUIRED', this.registerIdVerificationRequiredEventHandler);
     this.addPostRenderCallback('ID_VERIFICATION_REQUIRED', this.postIdVerificationRequired);
     this.addPostRenderCallback('ID_VERIFICATION_IN_PROGRESS', this.handleIdVerificationInProgress);
@@ -395,6 +417,9 @@ export default class AuthnWidget {
     this.actionModels.set('submitOathTokenTarget', {required: ['serialNumber']});
     this.actionModels.set('activateOathTokenDevice', {required: ['otp']});
     this.actionModels.set('resyncOathToken', {required: ['id', 'otp']});
+    this.actionModels.set('activateYubikeyDevice', {required: ['otp']});
+    this.actionModels.set('activatePingIdDesktopGen2Device', {required: ['origin', 'attestation']});
+    this.actionModels.set('pingIdDesktopGen2CheckAssertion', {required: ['assertion', 'origin']});
   }
 
   init() {
@@ -759,6 +784,141 @@ export default class AuthnWidget {
         doRegisterWebAuthn(this, data.status);
       }
     });
+  }
+
+  registerForgotDeviceHandler() {
+    if (document.getElementById('forgotDevice') !== null) {
+      document.getElementById('forgotDevice')
+        .addEventListener('click', this.handleForgotDevice);
+    }
+  }
+
+  handleForgotDevice(evt) {
+    evt.preventDefault();
+    clearTimeout(this.pollPushNoticationState);
+    this.renderSpinnerTemplate();
+    this.store.dispatch('POST_FLOW', 'forgotYourDevice', '{}');
+  }
+
+  postPingIdDesktopGen2AssertionRequired() {
+    let data = this.store.getStore();
+    if (data.changeDevicePermitted === false && document.querySelector('#changeDevice')) {
+      document.querySelector('#changeDevice').style.display = 'none';
+    }
+    // Handle an SSO extension callback (Safari redirect back with the assertion)
+    const ssoResult = checkSSOCallback();
+    if (ssoResult && ssoResult.error) {
+      this.showPingIdDesktopGen2Error(ssoResult.error);
+      return;
+    }
+    if (ssoResult && ssoResult.token) {
+      this.submitPingIdDesktopGen2Assertion(ssoResult.token);
+      return;
+    }
+    if (isSafari()) {
+      authenticateViaSSOExtension(data.publicKeyCredentialRequestOptions, 'authenticate');
+      return;
+    }
+    // Standard flow: send the request JWT to the local PingID Desktop connector
+    callPingIdDesktopConnector(data.port, data.publicKeyCredentialRequestOptions, 'authenticate')
+      .then((assertion) => {
+        this.submitPingIdDesktopGen2Assertion(assertion);
+      })
+      .catch((err) => {
+        this.showPingIdDesktopGen2Error(err.message);
+      });
+  }
+
+  submitPingIdDesktopGen2Assertion(assertion) {
+    if (document.querySelector('#pingIdDesktopGen2SpinnerId')) {
+      document.querySelector('#pingIdDesktopGen2SpinnerId').style.display = 'block';
+    }
+    let formData = {
+      assertion: assertion,
+      origin: window.location.origin
+    };
+    this.store.dispatch('POST_FLOW', 'pingIdDesktopGen2CheckAssertion', JSON.stringify(formData));
+  }
+
+  showPingIdDesktopGen2Error(errorCode) {
+    if (document.querySelector('#pingIdDesktopGen2SpinnerId')) {
+      document.querySelector('#pingIdDesktopGen2SpinnerId').style.display = 'none';
+    }
+    if (document.querySelector('#pingIdDesktopGen2AuthenticatingId')) {
+      document.querySelector('#pingIdDesktopGen2AuthenticatingId').style.display = 'none';
+    }
+    if (document.querySelector('#pingIdDesktopGen2UnsupportedId')) {
+      document.querySelector('#pingIdDesktopGen2UnsupportedId').style.display = 'block';
+    }
+    if (document.querySelector('#pingIdDesktopGen2ErrorText')) {
+      const message = getGen2ErrorMessage(errorCode);
+      if (message) {
+        document.querySelector('#pingIdDesktopGen2ErrorText').innerText = message;
+      }
+    }
+    console.log('PingID Desktop Gen2 authentication failed: ' + errorCode);
+  }
+
+  postPingIdDesktopGen2ActivationRequired() {
+    let data = this.store.getStore();
+    // Handle an SSO extension callback (Safari redirect back with the registration token)
+    const ssoResult = checkSSOCallback();
+    if (ssoResult && ssoResult.error) {
+      this.showPingIdDesktopGen2ActivationError(ssoResult.error);
+      return;
+    }
+    if (ssoResult && ssoResult.token) {
+      this.submitPingIdDesktopGen2Attestation(ssoResult.token);
+      return;
+    }
+    if (isSafari()) {
+      authenticateViaSSOExtension(data.pingIdDesktopCredentialCreationOptions, 'register');
+      return;
+    }
+    // Standard flow: send the creation JWT to the local PingID Desktop connector
+    callPingIdDesktopConnector(data.port, data.pingIdDesktopCredentialCreationOptions, 'register')
+      .then((attestation) => {
+        this.submitPingIdDesktopGen2Attestation(attestation);
+      })
+      .catch((err) => {
+        this.showPingIdDesktopGen2ActivationError(err.message);
+      });
+  }
+
+  submitPingIdDesktopGen2Attestation(attestation) {
+    let formData = {
+      attestation: attestation,
+      origin: window.location.origin
+    };
+    this.renderSpinnerTemplate();
+    this.store.dispatch('POST_FLOW', 'activatePingIdDesktopGen2Device', JSON.stringify(formData));
+  }
+
+  showPingIdDesktopGen2ActivationError(errorCode) {
+    // Cancel the pairing and surface the error through the flow's error handling
+    console.log('PingID Desktop Gen2 activation failed: ' + errorCode);
+    this.store.dispatch('POST_FLOW', 'cancelDevicePairing', '{}');
+  }
+
+  postPingIdDesktopActivationRequired() {
+    // The IK treats a GET on the flow in this state as a pairing-status poll
+    this.pollPingIdDesktopActivationState();
+  }
+
+  async pollPingIdDesktopActivationState() {
+    let pollState = await this.store.getState();
+    if (pollState.status === 'PINGID_DESKTOP_ACTIVATION_REQUIRED') {
+      // continue waiting
+      clearTimeout(this.pollPingIdDesktopActivationStateHandler);
+      this.pollPingIdDesktopActivationStateHandler = setTimeout(() => {
+        this.pollPingIdDesktopActivationState();
+      }, 2000);
+    } else {
+      clearTimeout(this.pollPingIdDesktopActivationStateHandler);
+      this.store
+        .dispatch('GET_FLOW')
+        .catch(() => this.generalErrorRenderer(AuthnWidget.COMMUNICATION_ERROR_MSG));
+    }
   }
 
   postAssertionRequired() {

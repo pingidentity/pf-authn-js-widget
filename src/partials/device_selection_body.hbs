@@ -21,6 +21,14 @@
         {{else}}
           <span class="text-block__text">{{device.type}}</span>
         {{/if}}
+      {{else ifEq device.type "YUBIKEY"}}
+        <span class="text-block__text">YubiKey</span>
+      {{else ifEq device.type "PINGID_DESKTOP"}}
+        <span class="text-block__text">PingID Desktop</span>
+      {{else ifEq device.type "PINGID_DESKTOP_GEN2"}}
+        <span class="text-block__text">PingId Desktop</span>
+      {{else ifEq device.type "PINGID_MOBILE"}}
+        <span class="text-block__text">PingID Mobile</span>
       {{else}}
         <span class="text-block__text">{{device.type}}</span>
       {{/ifEq}}
