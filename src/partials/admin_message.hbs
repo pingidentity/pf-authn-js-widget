@@ -1,8 +1,8 @@
-{{#if adminMessage}}
+{{#if @root.adminMessage}}
 <div class="text-block text-block--small" data-id="admin-message" style="margin-top: 15px; text-align: center; color: #6b7280; display: flex; align-items: center; justify-content: center; gap: 6px;">
   <svg width="25" height="25" viewBox="0 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink: 0;">
     <path d="M13.5417 9.37501H11.4583V7.29168H13.5417V9.37501ZM13.5417 17.7083H11.4583V11.4583H13.5417V17.7083ZM12.5 2.08334C11.1321 2.08334 9.77753 2.35278 8.51372 2.87627C7.24992 3.39975 6.10159 4.16704 5.13431 5.13431C3.18081 7.08782 2.08334 9.73734 2.08334 12.5C2.08334 15.2627 3.18081 17.9122 5.13431 19.8657C6.10159 20.833 7.24992 21.6003 8.51372 22.1238C9.77753 22.6472 11.1321 22.9167 12.5 22.9167C15.2627 22.9167 17.9122 21.8192 19.8657 19.8657C21.8192 17.9122 22.9167 15.2627 22.9167 12.5C22.9167 11.1321 22.6472 9.77753 22.1238 8.51372C21.6003 7.24992 20.833 6.10159 19.8657 5.13431C18.8984 4.16704 17.7501 3.39975 16.4863 2.87627C15.2225 2.35278 13.8679 2.08334 12.5 2.08334Z" fill="#303F5F"/>
   </svg>
-  <span>{{adminMessage}}</span>
+  <span>{{@root.adminMessage}}</span>
 </div>
 {{/if}}

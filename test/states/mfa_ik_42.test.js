@@ -1,6 +1,7 @@
 //tests for the MFA IK 4.2 features: new states, actions, and PingID Desktop Gen2 util
 import AuthnWidget from '../../src'
 import Store from '../../src/store';
+
 import {
   callPingIdDesktopConnector,
   buildSSOExtensionUrl,
@@ -100,19 +101,79 @@ describe('MFA IK 4.2 support', () => {
     });
   });
 
+  describe('gt helper (inline-safe)', () => {
+    // Regression: a block-style helper used inside an inline subexpression
+    // crashes template rendering with "n.fn/n.inverse is not a function".
+    // gt must return a plain boolean so {{#if (gt otpLength 20)}} works.
+    const gt = require('../../src/helpers/gt');
+
+    test('works as an inline subexpression returning a boolean', () => {
+      expect(gt(44, 20, {})).toBe(true);
+      expect(gt(6, 20, {})).toBe(false);
+      expect(gt(undefined, 20, {})).toBe(false);
+      expect(gt('44', 20, {})).toBe(true);
+    });
+  });
+
   describe('forgotYourDevice', () => {
     test('handleForgotDevice dispatches forgotYourDevice action', () => {
       const authn = new AuthnWidget('https://localhost:9031');
       authn.renderSpinnerTemplate = jest.fn().mockName('renderSpinnerTemplate');
       Store.prototype.dispatch = jest.fn().mockName('dispatch').mockResolvedValue('42');
-      let evt = { preventDefault: jest.fn().mockName('preventDefault') };
+      let evt = {
+        preventDefault: jest.fn().mockName('preventDefault'),
+        stopPropagation: jest.fn().mockName('stopPropagation')
+      };
 
       authn.handleForgotDevice(evt);
 
       expect(evt.preventDefault).toHaveBeenCalledTimes(1);
+      expect(evt.stopPropagation).toHaveBeenCalledTimes(1);
       expect(Store.prototype.dispatch).toHaveBeenCalledTimes(1);
       expect(Store.prototype.dispatch).toBeCalledWith('POST_FLOW', 'forgotYourDevice', '{}');
       expect(authn.renderSpinnerTemplate).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('dispatch bubbled-click guard', () => {
+    // A click on a child without its own actionId (e.g. the Forgot Your Device
+    // link) bubbles to the form's [data-actionId] listener and must NOT re-post
+    // the form's action (the FIDO/Gen2 assertion replay bug).
+    test('ignores bubbled clicks whose target has no actionId', () => {
+      const authn = new AuthnWidget('https://localhost:9031');
+      authn.getFormData = jest.fn().mockName('getFormData').mockReturnValue({});
+      Store.prototype.dispatch = jest.fn().mockName('dispatch').mockResolvedValue('42');
+      const form = { dataset: { actionid: 'checkAssertion' } };
+      const anchor = { dataset: {} };
+      const evt = {
+        preventDefault: jest.fn().mockName('preventDefault'),
+        stopPropagation: jest.fn().mockName('stopPropagation'),
+        target: anchor,
+        currentTarget: form
+      };
+
+      authn.dispatch(evt);
+
+      expect(Store.prototype.dispatch).not.toHaveBeenCalled();
+    });
+
+    test('still dispatches when the click starts on an action element', () => {
+      const authn = new AuthnWidget('https://localhost:9031');
+      authn.renderSpinnerTemplate = jest.fn().mockName('renderSpinnerTemplate');
+      authn.getFormData = jest.fn().mockName('getFormData').mockReturnValue({ otp: '123456' });
+      authn.validateActionModel = jest.fn().mockName('validateActionModel').mockReturnValue({ otp: '123456' });
+      Store.prototype.dispatch = jest.fn().mockName('dispatch').mockResolvedValue('42');
+      const button = { dataset: { actionid: 'checkOtp' } };
+      const evt = {
+        preventDefault: jest.fn().mockName('preventDefault'),
+        stopPropagation: jest.fn().mockName('stopPropagation'),
+        target: button,
+        currentTarget: button
+      };
+
+      authn.dispatch(evt);
+
+      expect(Store.prototype.dispatch).toBeCalledWith('POST_FLOW', 'checkOtp', '{"otp":"123456"}');
     });
   });
 

@@ -261,6 +261,7 @@ export default class AuthnWidget {
     this.transitionFromResyncOathTokenMode = this.transitionFromResyncOathTokenMode.bind(this);
     this.resyncOathToken = this.resyncOathToken.bind(this);
     this.registerCountryCodePickerHandler = this.registerCountryCodePickerHandler.bind(this);
+    this.postPairingTargetRequired = this.postPairingTargetRequired.bind(this);
     this.registerOneTimeDeviceChangeEventHandler = this.registerOneTimeDeviceChangeEventHandler.bind(this);
     this.handleOneTimeDeviceChange = this.handleOneTimeDeviceChange.bind(this);
     this.registerForgotDeviceHandler = this.registerForgotDeviceHandler.bind(this);
@@ -273,6 +274,10 @@ export default class AuthnWidget {
     this.postRenderCallbacks = new Map();
     this.actionModels = new Map();
     this.redirectlessEnabled = false;
+    // Incremented whenever the user takes an explicit action (e.g. Forgot Your
+    // Device). In-flight polling loops and pending connector callbacks compare
+    // against it and abort instead of re-rendering stale state.
+    this.mfaPollToken = 0;
     this.store = new Store(flowId, baseUrl, options);
     this.store.registerListener(this.render);
     AuthnWidget.CORE_STATES.forEach(state => this.registerState(state), this);
@@ -369,6 +374,13 @@ export default class AuthnWidget {
     this.addEventHandler('SMS_PAIRING_TARGET_REQUIRED', this.registerCountryCodePickerHandler);
     this.addEventHandler('VOICE_PAIRING_TARGET_REQUIRED', this.registerCountryCodePickerHandler);
     this.addEventHandler('WHATSAPP_PAIRING_TARGET_REQUIRED', this.registerCountryCodePickerHandler);
+    // Pre-populate / Pre-Populate and Restrict: the email/phone field arrives
+    // filled (and possibly read-only) from allowedValue, so enable submit up
+    // front instead of waiting for an input event that never fires.
+    this.addPostRenderCallback('EMAIL_PAIRING_TARGET_REQUIRED', this.postPairingTargetRequired);
+    this.addPostRenderCallback('SMS_PAIRING_TARGET_REQUIRED', this.postPairingTargetRequired);
+    this.addPostRenderCallback('VOICE_PAIRING_TARGET_REQUIRED', this.postPairingTargetRequired);
+    this.addPostRenderCallback('WHATSAPP_PAIRING_TARGET_REQUIRED', this.postPairingTargetRequired);
 
     this.actionModels.set('checkUsernamePassword', { required: ['username', 'password'], properties: ['username', 'password', 'rememberMyUsername', 'thisIsMyDevice', 'captchaResponse'] });
     this.actionModels.set('initiateAccountRecovery', { properties: ['usernameHint'] });
@@ -648,7 +660,10 @@ export default class AuthnWidget {
   async postMobileActivationRequired() {
     let data = this.store.getStore();
     let QRCode = require('qrcode');
-    QRCode.toCanvas(document.getElementById('qrcode'), data.pairingKey, error => {
+    // Match the IK mobile-activation template: encode the pairing URI when the
+    // state provides one (PingID Mobile), otherwise the plain pairing key.
+    const qrCodeText = data.pairingUrl || data.pairingKey;
+    QRCode.toCanvas(document.getElementById('qrcode'), qrCodeText, error => {
       if (error) {
         document.getElementById("pairing-message").innerText =
           `Enter the pairing key using ${data.applicationName} to finish pairing.`;
@@ -659,7 +674,11 @@ export default class AuthnWidget {
   }
 
   async pollMobileActivationState() {
+    const pollToken = this.mfaPollToken;
     let pollState = await this.store.getState();
+    if (pollToken !== this.mfaPollToken) {
+      return; // user took an explicit action; drop the stale poll
+    }
     if (pollState.status === 'MOBILE_ACTIVATION_REQUIRED') {
       // continue waiting
       clearTimeout(this.pollMobileActivationStateHandler);
@@ -714,6 +733,7 @@ export default class AuthnWidget {
 
   async postAuthenticationCodeResponseRequired()
   {
+    const pollToken = this.mfaPollToken;
     let data = this.store.getStore();
     let QRCode = require('qrcode');
     QRCode.toCanvas(document.getElementById('qrcode'), data.uri, { 'width': 128, 'height': 128 },
@@ -725,6 +745,9 @@ export default class AuthnWidget {
         }
       });
     let pollState = await this.store.getState();
+    if (pollToken !== this.mfaPollToken) {
+      return; // user took an explicit action; drop the stale poll
+    }
     if (pollState.status === 'AUTHENTICATION_CODE_RESPONSE_REQUIRED') {
       // continue waiting
       clearTimeout(this.pollPushNoticationState);
@@ -795,7 +818,16 @@ export default class AuthnWidget {
 
   handleForgotDevice(evt) {
     evt.preventDefault();
+    // The link lives inside forms that carry their own data-actionId (assertion
+    // and Gen2 assertion flows). Without stopping propagation the click bubbles
+    // to the form's dispatch handler, which would read the anchor as the target
+    // and re-post the outer action (e.g. checkAssertion), replaying the request.
+    evt.stopPropagation();
+    // Invalidate any in-flight polling loop or pending connector callback so it
+    // cannot re-render or re-post stale state after this dispatch starts.
+    this.mfaPollToken++;
     clearTimeout(this.pollPushNoticationState);
+    clearTimeout(this.pollPingIdDesktopActivationStateHandler);
     this.renderSpinnerTemplate();
     this.store.dispatch('POST_FLOW', 'forgotYourDevice', '{}');
   }
@@ -820,11 +852,18 @@ export default class AuthnWidget {
       return;
     }
     // Standard flow: send the request JWT to the local PingID Desktop connector
+    const pollToken = this.mfaPollToken;
     callPingIdDesktopConnector(data.port, data.publicKeyCredentialRequestOptions, 'authenticate')
       .then((assertion) => {
+        if (pollToken !== this.mfaPollToken) {
+          return; // user took an explicit action; drop the stale connector response
+        }
         this.submitPingIdDesktopGen2Assertion(assertion);
       })
       .catch((err) => {
+        if (pollToken !== this.mfaPollToken) {
+          return;
+        }
         this.showPingIdDesktopGen2Error(err.message);
       });
   }
@@ -876,11 +915,18 @@ export default class AuthnWidget {
       return;
     }
     // Standard flow: send the creation JWT to the local PingID Desktop connector
+    const pollToken = this.mfaPollToken;
     callPingIdDesktopConnector(data.port, data.pingIdDesktopCredentialCreationOptions, 'register')
       .then((attestation) => {
+        if (pollToken !== this.mfaPollToken) {
+          return; // user took an explicit action; drop the stale connector response
+        }
         this.submitPingIdDesktopGen2Attestation(attestation);
       })
       .catch((err) => {
+        if (pollToken !== this.mfaPollToken) {
+          return;
+        }
         this.showPingIdDesktopGen2ActivationError(err.message);
       });
   }
@@ -906,7 +952,11 @@ export default class AuthnWidget {
   }
 
   async pollPingIdDesktopActivationState() {
+    const pollToken = this.mfaPollToken;
     let pollState = await this.store.getState();
+    if (pollToken !== this.mfaPollToken) {
+      return; // user took an explicit action; drop the stale poll
+    }
     if (pollState.status === 'PINGID_DESKTOP_ACTIVATION_REQUIRED') {
       // continue waiting
       clearTimeout(this.pollPingIdDesktopActivationStateHandler);
@@ -1440,6 +1490,7 @@ export default class AuthnWidget {
   }
 
   async postPushNotificationWait() {
+    const pollToken = this.mfaPollToken;
     let storeState = this.store.getStore();
     let data = this.store.getStore();
     if (data.changeDevicePermitted === false) {
@@ -1462,14 +1513,23 @@ export default class AuthnWidget {
 
     let pollState = await this.store.getState();
     if (pollState.status === 'PUSH_CONFIRMATION_WAITING') {
-      // continue waiting
+      // continue waiting (abort if the user took an explicit action meanwhile)
+      if (pollToken !== this.mfaPollToken) {
+        return;
+      }
       clearTimeout(this.pollPushNoticationState);
       this.pollPushNoticationState = setTimeout(() => {
         this.postPushNotificationWait();
       }, 1000);
     } else if (pollState.status === 'DEVICE_MANAGEMENT') {
+      if (pollToken !== this.mfaPollToken) {
+        return;
+      }
       this.render(this.store.getPreviousStore(), pollState);
     } else {
+      if (pollToken !== this.mfaPollToken) {
+        return;
+      }
       clearTimeout(this.pollPushNoticationState);
       this.store
         .dispatch('GET_FLOW')
@@ -1947,7 +2007,19 @@ export default class AuthnWidget {
 
   dispatch(evt) {
     evt.preventDefault();
+    // The handler is registered on every [data-actionId] element, including
+    // forms (e.g. the assertion form). Handle the innermost action and stop the
+    // event from reaching the outer container's listener, which would otherwise
+    // POST the outer action a second time (replaying checkAssertion etc.).
+    evt.stopPropagation();
     let source = evt.target || evt.srcElement;
+    // A click on a child that is not itself an action element (e.g. the
+    // Forgot Your Device link) bubbles here; only POST when the click actually
+    // started on an action element or the form itself.
+    if (source !== evt.currentTarget && !source.dataset['actionid']) {
+      console.log('ignoring bubbled click without an actionId target');
+      return;
+    }
     console.log('source: ' + source.dataset['actionid']);
     let actionId = source.dataset['actionid'];
     let formData = this.getFormData();
@@ -2484,6 +2556,18 @@ export default class AuthnWidget {
   handleResumeAuthentication() {
     this.renderSpinnerTemplate();
     this.store.dispatch('POST_FLOW', 'resumeAuthentication', null);
+  }
+
+  // Pre-populate / Pre-Populate and Restrict modes for the email/phone pairing
+  // target screens: when the state carries allowedValue the field is already
+  // filled (and with readOnly, not editable), so enable the submit button up
+  // front — the normal input-event path never fires for a read-only field.
+  postPairingTargetRequired() {
+    const input = document.getElementById('email') || document.getElementById('phone');
+    const submit = document.getElementById('submit');
+    if (input && input.value && submit && submit.disabled) {
+      submit.disabled = false;
+    }
   }
 
   registerCountryCodePickerHandler() {

@@ -89,12 +89,19 @@ export default class Store {
     let timeout;
     if (document.querySelector("#spinnerId")) {
       timeout = setTimeout(function() {
-        document.querySelector('#spinnerId').style.display = 'block';
-        if (document.querySelector("#AuthnWidgetForm")) {
-          document.querySelector("#AuthnWidgetForm").style.display = 'none';
+        const spinner = document.querySelector('#spinnerId');
+        // The widget may have re-rendered since the timeout was scheduled,
+        // removing the spinner from the DOM — guard every lookup.
+        if (spinner) {
+          spinner.style.display = 'block';
         }
-        if (document.querySelector(".feedback--error")) {
-          document.querySelector(".feedback--error").style.display = 'none';
+        const form = document.querySelector("#AuthnWidgetForm");
+        if (form) {
+          form.style.display = 'none';
+        }
+        const feedback = document.querySelector(".feedback--error");
+        if (feedback) {
+          feedback.style.display = 'none';
         }
       }, 600)
     }
@@ -111,12 +118,15 @@ export default class Store {
         break;
     }
     json = await result.json();
-    if (document.querySelector("#spinnerId")) {
-      if (timeout)
-        clearTimeout(timeout);
-      document.querySelector("#spinnerId").style.display = 'none';
-      if (document.querySelector("#AuthnWidgetForm")) {
-        document.querySelector("#AuthnWidgetForm").style.display = 'none';
+    if (timeout) {
+      clearTimeout(timeout);
+    }
+    const spinner = document.querySelector("#spinnerId");
+    if (spinner) {
+      spinner.style.display = 'none';
+      const form = document.querySelector("#AuthnWidgetForm");
+      if (form) {
+        form.style.display = 'none';
       }
     }
 

@@ -4,7 +4,6 @@
   </div>
   <div class="tile-selector tile-selector--stacked">
     {{> error errorHeader="Access Denied" msg=(concat "You couldn't be authenticated. " userMessage)}}
-    {{> admin_message}}
     <form class="form form--margin-small" id="AuthnWidgetForm">
       <div class="text-block" data-id="textblock">
         <div class="text-block--overflow-wrap">
@@ -14,4 +13,5 @@
       </div>
   </form>
   </div>
+  {{> admin_message}}
 </div>
