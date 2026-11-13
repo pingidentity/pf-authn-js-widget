@@ -1,5 +1,4 @@
 <div class="card">
-  {{> back_button}}
   <div class="org-logo">
     <img class="org-logo__image" src="{{logo}}" alt="Company Logo"/>
   </div>
@@ -41,11 +40,14 @@
                     type="button" data-mfa-selection="{{../selectedDeviceRef.id}}">
               Retry
             </button>
+            {{> change_device_link}}
             {{> forgot_device_link}}
             <div class="text-block" data-id="textblock">
               <div class="text-block--overflow-wrap">
+                {{#unless @root.canChangeDevice}}
                 <a tabindex="0" data-actionId="cancelAuthentication" target="_self" class="anchor">
                   Cancel</a>
+                {{/unless}}
               </div>
             </div>
           </div>

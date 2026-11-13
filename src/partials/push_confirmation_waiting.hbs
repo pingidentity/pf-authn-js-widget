@@ -1,22 +1,29 @@
 <div class="card">
-  {{> back_button}}
   <div class="org-logo">
     <img class="org-logo__image" src="{{logo}}" alt="Company Logo"/>
   </div>
   <div class="stack stack--small" data-id="stack"> <h1 class="heading-text centered-text icon-heading">
     <svg viewBox="0 0 24 24" role="presentation">
       <path d="M16,18H7V4H16M11.5,22A1.5,1.5 0 0,1 10,20.5A1.5,1.5 0 0,1 11.5,19A1.5,1.5 0 0,1 13,20.5A1.5,1.5 0 0,1 11.5,22M15.5,1H7.5A2.5,2.5 0 0,0 5,3.5V20.5A2.5,2.5 0 0,0 7.5,23H15.5A2.5,2.5 0 0,0 18,20.5V3.5A2.5,2.5 0 0,0 15.5,1Z"/>
-    </svg><span>PingOne Authenticator</span></h1>
+    </svg><span>{{#if targetApplicationName}}{{targetApplicationName}}{{else if isPingIdMobile}}PingID Mobile{{else}}PingOne Authenticator{{/if}}</span></h1>
   </div>
   {{> errors}}
   {{#if numberMatching}}
   <div class="text-block" data-id="textblock">
     <div class="text-block--overflow-wrap">
-      {{#ifEq numberMatching.type "ENTER_MANUALLY"}}
-        Enter the number displayed in your PingOne Authenticator mobile app
+      {{#if isPingIdMobile}}
+        {{#ifEq numberMatching.type "ENTER_MANUALLY"}}
+          Enter the number displayed in your PingID mobile app.
+        {{else}}
+          Select the number displayed in your PingID mobile app.
+        {{/ifEq}}
       {{else}}
-        Select the number displayed in your PingOne Authenticator mobile app
-      {{/ifEq}}
+        {{#ifEq numberMatching.type "ENTER_MANUALLY"}}
+          Enter the number displayed in your PingOne Authenticator mobile app
+        {{else}}
+          Select the number displayed in your PingOne Authenticator mobile app
+        {{/ifEq}}
+      {{/if}}
     </div>
   </div>
   <div style="position: relative; display: flex; align-items: center; justify-content: center; margin-bottom: 15px;">
@@ -39,13 +46,18 @@
   <div class="icon-feedback icon-feedback--success" style="margin-bottom: 30px;">
     <p class="icon-feedback__label">Authenticating</p>
   </div>
-  {{> device_selection_body bodyText='Request sent to:'}}
+  {{> device_selection_body bodyText='Request sent to:' changeDeviceInline=true}}
   {{#each devices as |device|}}
     {{#ifEq device.id ../selectedDeviceRef.id}}
       {{#if device.otpEnabled}}
         <div class="text-block" data-id="textblock" style="margin-top: 25px">
           <div class="text-block--overflow-wrap">
-            <a id="usePasscode" data-id="change-button">Use passcode</a>
+            {{#if @root.canChangeDevice}}
+              <button id="usePasscode" data-id="change-button" type="button"
+                      class="button file-input--button button--tertiary">Use passcode</button>
+            {{else}}
+              <a id="usePasscode" data-id="change-button">Use passcode</a>
+            {{/if}}
           </div>
         </div>
       {{/if}}

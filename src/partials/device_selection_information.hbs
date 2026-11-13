@@ -28,6 +28,10 @@
                 {{else}}
                   {{device.target}}
                 {{/ifEq}}
+                {{!-- P14C-85737: Change Method inline with the target line,
+                     matching the IK auth templates (margin-left anchor inside
+                     the nickname/target text-block). --}}
+                {{> change_device_link inline=true}}
               </div>
             </div>
           </div>
@@ -45,8 +49,14 @@
               </div>
             </div>
           {{/if}}
+        {{else}}
+          {{> change_device_link}}
         {{/ifNotEq}}
+      {{else}}
+        {{> change_device_link}}
       {{/ifNotEq}}
+    {{else}}
+      {{> change_device_link}}
     {{/ifNotEq}}
   </div>
 </div>

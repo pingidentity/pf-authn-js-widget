@@ -726,7 +726,7 @@ export default class AuthnWidget {
 
   postOTPRequired() {
     let data = this.store.getStore();
-    if (data.changeDevicePermitted === false) {
+    if (data.changeDevicePermitted === false && document.querySelector('#changeDevice')) {
       document.querySelector('#changeDevice').style.display = 'none';
     }
   }
@@ -974,7 +974,7 @@ export default class AuthnWidget {
   postAssertionRequired() {
     let data = this.store.getStore();
     var selectedDevice = data.devices.filter(device => {return device.id === data.selectedDeviceRef.id;});
-    if (data.changeDevicePermitted === false) {
+    if (data.changeDevicePermitted === false && document.querySelector('#changeDevice')) {
       document.querySelector('#changeDevice').style.display = 'none';
     }
     getCompatibility().then(value => {
@@ -995,7 +995,9 @@ export default class AuthnWidget {
           document.querySelector('#assertionRequiredSpinnerId').style.display = 'none';
           document.querySelector('#assertionRequiredAuthenticatingId').style.display = 'none';
           document.querySelector('#unsupportedDeviceId').style.display = 'block';
-          document.querySelector('#changeDevice').style.display = 'none';
+          if (document.querySelector('#changeDevice')) {
+            document.querySelector('#changeDevice').style.display = 'none';
+          }
           document.querySelector('#deviceInfoBlockId').style.display = 'none';
         } else {
           // Hide spinner and info section, show error so user can go back to device selection if required or cancel
@@ -1436,8 +1438,12 @@ export default class AuthnWidget {
   }
 
   registerMfaChangeDeviceEventHandler() {
-    document.getElementById('changeDevice')
-            .addEventListener('click', this.handleMfaDeviceChange);
+    // P14C-85737: the Change Method link is rendered conditionally
+    // (canChangeDevice), so guard the lookup.
+    const changeDevice = document.getElementById('changeDevice');
+    if (changeDevice) {
+      changeDevice.addEventListener('click', this.handleMfaDeviceChange);
+    }
   }
 
   registerMfaOneTimeDeviceChangeEventHandler() {
@@ -1464,14 +1470,24 @@ export default class AuthnWidget {
     this.render(this.store.getPreviousStore(), state);
   }
 
-  async handleMfaDeviceChange(evt) {
+  handleMfaDeviceChange(evt) {
     evt.preventDefault();
-    let state = await this.store.getState();
     if (this.pollPushNoticationState) {
       clearTimeout(this.pollPushNoticationState);
     }
-    state.status = 'DEVICE_SELECTION_REQUIRED';
-    this.render(this.store.getPreviousStore(), state);
+    // Invalidate any in-flight poller or pending connector callback so it
+    // cannot re-render stale state after the device-selection screen shows.
+    this.mfaPollToken++;
+    clearTimeout(this.pollPingIdDesktopActivationStateHandler);
+    // Deselect the current device the way the IK templates' unselectDevice()
+    // does: POST selectDevice with a blank device id. A GET of the flow would
+    // not work from every state (e.g. PINGID_DESKTOP_GEN2_ASSERTION_REQUIRED
+    // has no resume branch in the IK's status handler), while the blank
+    // selectDevice is explicitly supported server-side from any auth state.
+    // The spinner renders synchronously first so the link cannot be clicked
+    // again while the round-trip completes (same pattern as other buttons).
+    this.renderSpinnerTemplate();
+    this.store.dispatch('POST_FLOW', 'selectDevice', JSON.stringify({ deviceRef: { id: '' } }));
   }
 
   registerMfaUsePasscodeEventHandler() {
@@ -1493,7 +1509,7 @@ export default class AuthnWidget {
     const pollToken = this.mfaPollToken;
     let storeState = this.store.getStore();
     let data = this.store.getStore();
-    if (data.changeDevicePermitted === false) {
+    if (data.changeDevicePermitted === false && document.querySelector('#changeDevice')) {
       document.querySelector('#changeDevice').style.display = 'none';
     }
     if (storeState.status === 'OTP_REQUIRED') {
@@ -2118,6 +2134,42 @@ export default class AuthnWidget {
     return count > 1;
   }
 
+  // P14C-85737: derive the Change Device / Forgot Device gating flags the IK
+  // templates compute. Paired devices exclude one-time (backup) devices;
+  // Change Method needs a choice to change to (paired > 1, or a single paired
+  // device in a manual-pairing flow); Forgot Your Device on auth screens
+  // applies to the single-paired-device-with-one-time-backup case, and on
+  // device selection the loose gate only needs one-time backup devices.
+  static deriveDeviceGatingFlags(devices, changeDevicePermitted, manualPairing, backupAuthEnabled) {
+    const list = Array.isArray(devices) ? devices : [];
+    const pairedDevices = list.filter(device => device.isOneTimeDevice !== true);
+    const oneTimeDevices = list.filter(device => device.isOneTimeDevice === true);
+    return {
+      pairedDeviceCount: pairedDevices.length,
+      oneTimeDeviceCount: oneTimeDevices.length,
+      canChangeDevice: changeDevicePermitted === true &&
+        (pairedDevices.length > 1 || (pairedDevices.length === 1 && manualPairing === true)),
+      canForgotDevice: backupAuthEnabled === true &&
+        pairedDevices.length === 1 && oneTimeDevices.length > 0,
+      canForgotDeviceLoose: backupAuthEnabled === true && oneTimeDevices.length > 0,
+    };
+  }
+
+  // Flags for the SELECTED device, for templates that render outside a device
+  // loop (e.g. push_confirmation_waiting's heading and number-matching text).
+  // The IK templates differentiate a PingID Mobile device from the native
+  // PingOne Authenticator via sourceDeviceType == "PINGID_MOBILE" (the mapped
+  // device.type is Android/iPhone for both).
+  static deriveSelectedDeviceFlags(devices, selectedDeviceRef) {
+    const list = Array.isArray(devices) ? devices : [];
+    const selected = selectedDeviceRef && selectedDeviceRef.id !== undefined
+      ? list.find(device => device.id === selectedDeviceRef.id)
+      : null;
+    return {
+      isPingIdMobile: !!(selected && selected.sourceDeviceType === 'PINGID_MOBILE'),
+    };
+  }
+
   render(prevState, state) {
     let currentState = state.status;
     let templateName = currentState;
@@ -2138,7 +2190,10 @@ export default class AuthnWidget {
     }
     let widgetDiv = document.getElementById(this.divId);
     const store = {store: this.store};
-    var params = Object.assign(state, this.assets.toTemplateParams(), store);
+    const derivedFlags = AuthnWidget.deriveDeviceGatingFlags(
+      state.devices, state.changeDevicePermitted, state.manualPairing, state.backupAuthEnabled);
+    const selectedDeviceFlags = AuthnWidget.deriveSelectedDeviceFlags(state.devices, state.selectedDeviceRef);
+    var params = Object.assign(state, derivedFlags, selectedDeviceFlags, this.assets.toTemplateParams(), store);
     widgetDiv.innerHTML = template(params);
     this.registerEventListeners(currentState);
     // execute all post render callbacks

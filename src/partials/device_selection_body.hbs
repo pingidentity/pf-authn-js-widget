@@ -32,6 +32,12 @@
       {{else}}
         <span class="text-block__text">{{device.type}}</span>
       {{/ifEq}}
+      {{!-- P14C-85737: Change Method inline with the nickname line, matching
+           the IK push-confirmation-waiting template (anchor inside the same
+           <p class="text-block"> as the device nickname). --}}
+      {{#if ../changeDeviceInline}}
+        {{> change_device_link inline=true}}
+      {{/if}}
       </p>
     </span>
   {{/ifEq}}

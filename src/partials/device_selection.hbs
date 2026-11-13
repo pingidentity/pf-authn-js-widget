@@ -84,9 +84,9 @@
           <div class="tile-button__title">{{device.nickname}}</div>
           {{else}}
             {{#ifEq device.type "Android"}}
-              <div class="tile-button__title">PingOne Authenticator</div>
+              <div class="tile-button__title">{{#ifEq device.sourceDeviceType "PINGID_MOBILE"}}PingID Mobile{{else}}PingOne Authenticator{{/ifEq}}</div>
             {{else ifEq device.type "iPhone"}}
-              <div class="tile-button__title">PingOne Authenticator</div>
+              <div class="tile-button__title">{{#ifEq device.sourceDeviceType "PINGID_MOBILE"}}PingID Mobile{{else}}PingOne Authenticator{{/ifEq}}</div>
             {{else ifEq device.type "TOTP"}}
               <div class="tile-button__title">Authenticator App</div>
             {{else ifEq device.type "SMS"}}

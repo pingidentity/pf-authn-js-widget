@@ -115,6 +115,56 @@ describe('MFA IK 4.2 support', () => {
     });
   });
 
+  describe('P14C-85737 Change Device gating', () => {
+    // The IK formulas: canChangeDevice = changeDevicePermitted && (paired > 1
+    // || (paired == 1 && manualPairing)); canForgotDevice (auth screens) =
+    // backupAuthEnabled && paired == 1 && oneTimeCount > 0; loose FYD gate =
+    // backupAuthEnabled && oneTimeCount > 0. One-time (backup) devices are
+    // excluded from the paired count.
+    const derive = AuthnWidget.deriveDeviceGatingFlags;
+
+    test('two paired devices allow Change Method, not FYD', () => {
+      const flags = derive(
+        [{ id: 'd1' }, { id: 'd3' }], true, false, true);
+      expect(flags.canChangeDevice).toBe(true);
+      expect(flags.canForgotDevice).toBe(false);
+      expect(flags.canForgotDeviceLoose).toBe(false);
+    });
+
+    test('single paired device with manualPairing allows Change Method', () => {
+      expect(derive([{ id: 'd1' }], true, true, true).canChangeDevice).toBe(true);
+      expect(derive([{ id: 'd1' }], true, false, true).canChangeDevice).toBe(false);
+    });
+
+    test('one paired plus one-time backup allows FYD but not Change Method', () => {
+      const flags = derive(
+        [{ id: 'd1' }, { id: 'd2', isOneTimeDevice: true }], true, false, true);
+      expect(flags.canChangeDevice).toBe(false);
+      expect(flags.canForgotDevice).toBe(true);
+      expect(flags.canForgotDeviceLoose).toBe(true);
+      expect(flags.pairedDeviceCount).toBe(1);
+      expect(flags.oneTimeDeviceCount).toBe(1);
+    });
+
+    test('changeDevicePermitted false disables Change Method everywhere', () => {
+      const flags = derive([{ id: 'd1' }, { id: 'd3' }], false, false, true);
+      expect(flags.canChangeDevice).toBe(false);
+    });
+
+    test('backupAuthEnabled false disables FYD', () => {
+      const flags = derive([{ id: 'd1' }, { id: 'd2', isOneTimeDevice: true }], true, false, false);
+      expect(flags.canForgotDevice).toBe(false);
+      expect(flags.canForgotDeviceLoose).toBe(false);
+    });
+
+    test('missing devices list yields all-false flags without throwing', () => {
+      const flags = derive(undefined, true, false, true);
+      expect(flags.canChangeDevice).toBe(false);
+      expect(flags.canForgotDevice).toBe(false);
+      expect(flags.pairedDeviceCount).toBe(0);
+    });
+  });
+
   describe('forgotYourDevice', () => {
     test('handleForgotDevice dispatches forgotYourDevice action', () => {
       const authn = new AuthnWidget('https://localhost:9031');
@@ -317,6 +367,73 @@ describe('MFA IK 4.2 support', () => {
 
       expect(Store.prototype.dispatch).toBeCalledWith('POST_FLOW', 'cancelDevicePairing', '{}');
       window.location.hash = '';
+    });
+  });
+
+  describe('P14C-85737 Change Device click behavior', () => {
+    // The link deselects the current device the way the IK templates'
+    // unselectDevice() does: POST selectDevice with a blank device id. A GET
+    // of the flow would not work from every state (Gen2 assertion has no
+    // resume branch in the IK status handler). The spinner renders
+    // synchronously first, blocking double-clicks.
+    test('handleMfaDeviceChange shows spinner then POSTs selectDevice with blank id', () => {
+      const authn = new AuthnWidget('https://localhost:9031');
+      document.body.innerHTML = '<div id="authnwidget"></div>';
+      authn.renderSpinnerTemplate = jest.fn().mockName('renderSpinnerTemplate');
+      Store.prototype.dispatch = jest.fn().mockName('dispatch').mockResolvedValue('42');
+      const evt = { preventDefault: jest.fn().mockName('preventDefault') };
+
+      authn.handleMfaDeviceChange(evt);
+
+      expect(authn.renderSpinnerTemplate).toHaveBeenCalledTimes(1);
+      expect(Store.prototype.dispatch).toHaveBeenCalledTimes(1);
+      expect(Store.prototype.dispatch).toBeCalledWith('POST_FLOW', 'selectDevice',
+        JSON.stringify({ deviceRef: { id: '' } }));
+    });
+  });
+
+  describe('P14C-88164 targetApplicationName', () => {
+    test('widget option flows into template params', () => {
+      const authn = new AuthnWidget('https://localhost:9031', { targetApplicationName: 'My App' });
+      expect(authn.assets.toTemplateParams().targetApplicationName).toBe('My App');
+    });
+
+    test('option absent leaves targetApplicationName undefined so the state value wins', () => {
+      const authn = new AuthnWidget('https://localhost:9031');
+      expect(authn.assets.toTemplateParams().targetApplicationName).toBeUndefined();
+    });
+  });
+
+  describe('PingID Mobile differentiation', () => {
+    // The IK templates branch on selectedDevice.sourceDeviceType == PINGID_MOBILE
+    // (the mapped device.type is Android/iPhone for both native and PingID Mobile).
+    const derive = AuthnWidget.deriveSelectedDeviceFlags;
+
+    test('flags the selected device when sourceDeviceType is PINGID_MOBILE', () => {
+      const flags = derive(
+        [{ id: 'd1', type: 'iPhone', sourceDeviceType: 'PINGID_MOBILE' }, { id: 'd2', type: 'Email' }],
+        { id: 'd1' });
+      expect(flags.isPingIdMobile).toBe(true);
+    });
+
+    test('native mobile (no sourceDeviceType) is not PingID Mobile', () => {
+      const flags = derive(
+        [{ id: 'd1', type: 'Android' }, { id: 'd2', type: 'Email' }],
+        { id: 'd1' });
+      expect(flags.isPingIdMobile).toBe(false);
+    });
+
+    test('a PingID Mobile device that is NOT selected does not set the flag', () => {
+      const flags = derive(
+        [{ id: 'd1', type: 'iPhone', sourceDeviceType: 'PINGID_MOBILE' }, { id: 'd2', type: 'Email' }],
+        { id: 'd2' });
+      expect(flags.isPingIdMobile).toBe(false);
+    });
+
+    test('missing devices or ref yields false without throwing', () => {
+      expect(derive(undefined, { id: 'd1' }).isPingIdMobile).toBe(false);
+      expect(derive([{ id: 'd1' }], undefined).isPingIdMobile).toBe(false);
+      expect(derive(undefined, undefined).isPingIdMobile).toBe(false);
     });
   });
 });

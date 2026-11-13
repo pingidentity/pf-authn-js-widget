@@ -1,5 +1,4 @@
 <div class="card">
-  {{> back_button}}
   <div class="org-logo">
     <img class="org-logo__image" src="{{logo}}" alt="Company Logo"/>
   </div>
@@ -20,6 +19,7 @@
       <p class="icon-feedback__label">Authenticating</p>
     </div>
     {{> device_selection_body bodyText='Request sent to:'}}
+    {{> change_device_link}}
     {{> forgot_device_link}}
     <div class="text-block" data-id="textblock">
       <div class="text-block--overflow-wrap">

@@ -1,9 +1,27 @@
-{{#if @root.backupAuthEnabled}}
-<div class="text-block" data-id="textblock">
-  <div class="text-block--overflow-wrap">
-    <a tabindex="0" id="forgotDevice" data-id="content-link" target="_self" class="anchor" style="margin-top: 10px; display: inline-block;">
-      Forgot Your Device?
-    </a>
+{{!-- P14C-85737: Forgot Your Device link.
+     Default (auth screens): tight gate — backupAuthEnabled && exactly one paired
+     device && one-time backup devices exist (canForgotDevice, computed at render
+     time on the root state).
+     Loose gate (device selection): backupAuthEnabled && one-time backup devices
+     exist (canForgotDeviceLoose). --}}
+{{#if looseGate}}
+  {{#if @root.canForgotDeviceLoose}}
+  <div class="text-block" data-id="textblock">
+    <div class="text-block--overflow-wrap">
+      <a tabindex="0" id="forgotDevice" data-id="content-link" target="_self" class="anchor" style="margin-top: 10px; display: inline-block;">
+        Forgot Your Device?
+      </a>
+    </div>
   </div>
-</div>
+  {{/if}}
+{{else}}
+  {{#if @root.canForgotDevice}}
+  <div class="text-block" data-id="textblock">
+    <div class="text-block--overflow-wrap">
+      <a tabindex="0" id="forgotDevice" data-id="content-link" target="_self" class="anchor" style="margin-top: 10px; display: inline-block;">
+        Forgot Your Device?
+      </a>
+    </div>
+  </div>
+  {{/if}}
 {{/if}}

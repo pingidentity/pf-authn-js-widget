@@ -3,6 +3,9 @@
     <img class="org-logo__image" src="{{logo}}" alt="Company Logo"/>
   </div>
   {{> error msg=" " errorHeader="Blocked"}}
+  {{#ifEq reason "NUMBER_MATCHING_FAILED"}}
+    {{> change_device_link}}
+  {{/ifEq}}
   {{> forgot_device_link}}
   <form class="form form--margin-small" id="AuthnWidgetForm">
     <div class="text-block" data-id="textblock">

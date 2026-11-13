@@ -16,7 +16,11 @@ export interface IOptions {
   flowIdMaxLength?: number,
   logo?: string,
   useActionParam?: boolean,
-  deviceProfileScript?: string
+  deviceProfileScript?: string,
+  /** Display name of the application the user is authenticating to (P14C-88164).
+   *  Rendered on authentication screens in place of the default device-type
+   *  labels; overrides the targetApplicationName the IK returns in state. */
+  targetApplicationName?: string
 }
 
 export interface IAuthnWidget {
