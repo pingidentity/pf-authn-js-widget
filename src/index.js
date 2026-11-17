@@ -610,7 +610,10 @@ export default class AuthnWidget {
     if (document.querySelector("#spinnerId")) {
       document.querySelector('#spinnerId').style.display = 'block';
     }
-    setTimeout(() => {
+    // The handle is kept so the screen-skip path (maybeSkipScreenPerAdapterSetting)
+    // can cancel the delayed continue when it advances immediately instead.
+    clearTimeout(this.continueAuthenticationTimer);
+    this.continueAuthenticationTimer = setTimeout(() => {
       this.store.dispatch('POST_FLOW', 'continueAuthentication', '{}');
     }, 1000)
   }
@@ -2207,6 +2210,71 @@ export default class AuthnWidget {
       if (firstInput) {
         firstInput.focus();
       }
+    }
+
+    // Issue #154: the adapter surfaces its "Show Error / Success / Timeout Screens"
+    // settings on the state models. When the screen is disabled, skip rendering it
+    // and take the action the user would have taken (Cancel on error states,
+    // Continue on completion) so PF advances the policy chain.
+    this.maybeSkipScreenPerAdapterSetting(state);
+  }
+
+  /*
+   * Issue #154: the MFA IK adapter surfaces its "Show Error Screens" /
+   * "Show Success Screens" / "Show Timeout Screens" settings as boolean fields on the
+   * state models (displayErrorScreen / displaySuccessScreen / displayTimeoutScreen).
+   * When a screen is disabled the widget must not render it — instead it dispatches
+   * the action the user would have taken, letting PingFederate advance to the next
+   * adapter in the policy chain (whose state arrives in the same response).
+   * States without the flag (older IK versions, non-adapter states) render normally.
+   */
+  maybeSkipScreenPerAdapterSetting(state) {
+    const skipAction = AuthnWidget.getScreenSkipAction(state);
+    if (!skipAction) {
+      return;
+    }
+    // Guard against loops: a skip dispatch must never trigger another skip from the
+    // same state (e.g. the next adapter also parks us on a screen-flagged state).
+    // Bump the token so in-flight pollers drop their stale renders too.
+    if (state.__screenSkipAttempted) {
+      console.log('screen already skipped for this state; rendering as-is');
+      return;
+    }
+    state.__screenSkipAttempted = true;
+    this.mfaPollToken++;
+    // MFA_COMPLETED normally auto-continues on a 1s timer (postContinueAuthentication);
+    // the skip advances immediately, so cancel the pending timer to avoid a double POST.
+    clearTimeout(this.continueAuthenticationTimer);
+    console.log(`screen disabled by adapter setting; dispatching ${skipAction}`);
+    this.renderSpinnerTemplate();
+    this.store.dispatch('POST_FLOW', skipAction, '{}');
+  }
+
+  /*
+   * Issue #154: map a state to the action that advances past its disabled screen,
+   * or null when the screen should be shown. The flag names mirror the IK's
+   * Custom* state models (CustomMfaFailed, CustomPushConfirmationRejected,
+   * CustomPushConfirmationTimedOut, CustomDevicePairingMethodFailed,
+   * CustomMfaCompleted).
+   */
+  static getScreenSkipAction(state) {
+    if (!state || !state.status) {
+      return null;
+    }
+    switch (state.status) {
+      case 'MFA_FAILED':
+      case 'MFA_DENIED':
+        return state.displayErrorScreen === false ? 'cancelAuthentication' : null;
+      case 'MFA_DEVICE_PAIRING_METHOD_FAILED':
+        return state.displayErrorScreen === false ? 'cancelDevicePairing' : null;
+      case 'PUSH_CONFIRMATION_REJECTED':
+        return state.displayErrorScreen === false ? 'cancelAuthentication' : null;
+      case 'PUSH_CONFIRMATION_TIMED_OUT':
+        return state.displayTimeoutScreen === false ? 'cancelAuthentication' : null;
+      case 'MFA_COMPLETED':
+        return state.displaySuccessScreen === false ? 'continueAuthentication' : null;
+      default:
+        return null;
     }
   }
 

@@ -436,4 +436,123 @@ describe('MFA IK 4.2 support', () => {
       expect(derive(undefined, undefined).isPingIdMobile).toBe(false);
     });
   });
+
+  describe('Issue #154 screen-display flags', () => {
+    // The IK surfaces its "Show Error / Success / Timeout Screens" settings on the
+    // state models; when a screen is disabled the widget skips it and dispatches the
+    // action the user would have taken, letting PF advance the policy chain.
+    const getScreenSkipAction = AuthnWidget.getScreenSkipAction;
+
+    describe('getScreenSkipAction mapping', () => {
+      test('MFA_FAILED with displayErrorScreen false maps to cancelAuthentication', () => {
+        expect(getScreenSkipAction({ status: 'MFA_FAILED', displayErrorScreen: false }))
+          .toBe('cancelAuthentication');
+      });
+
+      test('MFA_FAILED with displayErrorScreen true (or absent) maps to null', () => {
+        expect(getScreenSkipAction({ status: 'MFA_FAILED', displayErrorScreen: true })).toBeNull();
+        expect(getScreenSkipAction({ status: 'MFA_FAILED' })).toBeNull();
+      });
+
+      test('MFA_DENIED follows the error-screen flag', () => {
+        expect(getScreenSkipAction({ status: 'MFA_DENIED', displayErrorScreen: false }))
+          .toBe('cancelAuthentication');
+        expect(getScreenSkipAction({ status: 'MFA_DENIED', displayErrorScreen: true })).toBeNull();
+      });
+
+      test('MFA_DEVICE_PAIRING_METHOD_FAILED maps to cancelDevicePairing', () => {
+        expect(getScreenSkipAction({ status: 'MFA_DEVICE_PAIRING_METHOD_FAILED', displayErrorScreen: false }))
+          .toBe('cancelDevicePairing');
+        expect(getScreenSkipAction({ status: 'MFA_DEVICE_PAIRING_METHOD_FAILED', displayErrorScreen: true }))
+          .toBeNull();
+      });
+
+      test('PUSH_CONFIRMATION_REJECTED follows the error-screen flag', () => {
+        expect(getScreenSkipAction({ status: 'PUSH_CONFIRMATION_REJECTED', displayErrorScreen: false }))
+          .toBe('cancelAuthentication');
+        expect(getScreenSkipAction({ status: 'PUSH_CONFIRMATION_REJECTED' })).toBeNull();
+      });
+
+      test('PUSH_CONFIRMATION_TIMED_OUT follows the timeout-screen flag', () => {
+        expect(getScreenSkipAction({ status: 'PUSH_CONFIRMATION_TIMED_OUT', displayTimeoutScreen: false }))
+          .toBe('cancelAuthentication');
+        expect(getScreenSkipAction({ status: 'PUSH_CONFIRMATION_TIMED_OUT', displayErrorScreen: false }))
+          .toBeNull();
+      });
+
+      test('MFA_COMPLETED with displaySuccessScreen false maps to continueAuthentication', () => {
+        expect(getScreenSkipAction({ status: 'MFA_COMPLETED', displaySuccessScreen: false }))
+          .toBe('continueAuthentication');
+        expect(getScreenSkipAction({ status: 'MFA_COMPLETED', displaySuccessScreen: true })).toBeNull();
+        expect(getScreenSkipAction({ status: 'MFA_COMPLETED' })).toBeNull();
+      });
+
+      test('other states and falsy input never skip', () => {
+        expect(getScreenSkipAction({ status: 'OTP_REQUIRED', displayErrorScreen: false })).toBeNull();
+        expect(getScreenSkipAction({})).toBeNull();
+        expect(getScreenSkipAction(null)).toBeNull();
+        expect(getScreenSkipAction(undefined)).toBeNull();
+      });
+    });
+
+    describe('maybeSkipScreenPerAdapterSetting', () => {
+      const originalDispatch = Store.prototype.dispatch;
+
+      afterEach(() => {
+        Store.prototype.dispatch = originalDispatch;
+        jest.clearAllMocks();
+      });
+
+      test('dispatches the skip action when the flag disables the screen', async () => {
+        const authn = new AuthnWidget('https://localhost:9031');
+        authn.renderSpinnerTemplate = jest.fn().mockName('renderSpinnerTemplate');
+        Store.prototype.dispatch = jest.fn().mockName('dispatch').mockResolvedValue('42');
+
+        authn.maybeSkipScreenPerAdapterSetting({ status: 'MFA_FAILED', displayErrorScreen: false });
+
+        expect(Store.prototype.dispatch).toBeCalledWith('POST_FLOW', 'cancelAuthentication', '{}');
+      });
+
+      test('does nothing when the flag allows the screen', () => {
+        const authn = new AuthnWidget('https://localhost:9031');
+        authn.renderSpinnerTemplate = jest.fn().mockName('renderSpinnerTemplate');
+        Store.prototype.dispatch = jest.fn().mockName('dispatch').mockResolvedValue('42');
+
+        authn.maybeSkipScreenPerAdapterSetting({ status: 'MFA_FAILED', displayErrorScreen: true });
+
+        expect(Store.prototype.dispatch).not.toBeCalled();
+        expect(authn.renderSpinnerTemplate).not.toBeCalled();
+      });
+
+      test('a second skip for the same state object is a no-op (loop guard)', () => {
+        const authn = new AuthnWidget('https://localhost:9031');
+        authn.renderSpinnerTemplate = jest.fn().mockName('renderSpinnerTemplate');
+        Store.prototype.dispatch = jest.fn().mockName('dispatch').mockResolvedValue('42');
+        const state = { status: 'MFA_COMPLETED', displaySuccessScreen: false };
+
+        authn.maybeSkipScreenPerAdapterSetting(state);
+        authn.maybeSkipScreenPerAdapterSetting(state);
+
+        expect(Store.prototype.dispatch).toHaveBeenCalledTimes(1);
+      });
+
+      test('skipping MFA_COMPLETED cancels the pending auto-continue timer', () => {
+        jest.useFakeTimers();
+        const authn = new AuthnWidget('https://localhost:9031');
+        authn.renderSpinnerTemplate = jest.fn().mockName('renderSpinnerTemplate');
+        Store.prototype.dispatch = jest.fn().mockName('dispatch').mockResolvedValue('42');
+        // the normal MFA_COMPLETED post-render auto-continue
+        authn.postContinueAuthentication();
+        expect(Store.prototype.dispatch).not.toBeCalled(); // still on the 1s timer
+
+        authn.maybeSkipScreenPerAdapterSetting({ status: 'MFA_COMPLETED', displaySuccessScreen: false });
+        expect(Store.prototype.dispatch).toHaveBeenCalledTimes(1); // the immediate skip
+
+        jest.advanceTimersByTime(2000);
+        // the cancelled auto-continue timer must NOT have fired a second dispatch
+        expect(Store.prototype.dispatch).toHaveBeenCalledTimes(1);
+        jest.useRealTimers();
+      });
+    });
+  });
 });
