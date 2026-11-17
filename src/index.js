@@ -187,6 +187,8 @@ export default class AuthnWidget {
     this.handleAgentlessSignOn = this.handleAgentlessSignOn.bind(this);
     this.postEmptyAuthentication = this.postEmptyAuthentication.bind(this);
     this.handleMfaDeviceSelection = this.handleMfaDeviceSelection.bind(this);
+    this.handleRetryDeviceSelection = this.handleRetryDeviceSelection.bind(this);
+    this.registerRetryDeviceSelectionHandler = this.registerRetryDeviceSelectionHandler.bind(this);
     this.handleCASChallengeMethodSelection = this.handleCASChallengeMethodSelection.bind(this);
     this.handleMfaOneTimeDeviceSelection = this.handleMfaOneTimeDeviceSelection.bind(this);
     this.handleMfaSetDefaultDeviceSelection = this.handleMfaSetDefaultDeviceSelection.bind(this);
@@ -339,6 +341,14 @@ export default class AuthnWidget {
     this.addEventHandler('ASSERTION_REQUIRED', this.registerForgotDeviceHandler);
     this.addEventHandler('PUSH_CONFIRMATION_WAITING', this.registerForgotDeviceHandler);
     this.addEventHandler('PUSH_CONFIRMATION_TIMED_OUT', this.registerForgotDeviceHandler);
+    // Issue #154 follow-up: the rejected screen's Retry button (number-matching
+    // reason) and the Change Method link (#changeDevice) both need click
+    // handlers; previously neither was registered, so Change Method rendered
+    // but did nothing when clicked. Retry uses its own handler (immediate
+    // spinner) instead of the shared device-tile one, which must stay
+    // spinner-free to avoid a double repaint on the selection screen.
+    this.addEventHandler('PUSH_CONFIRMATION_REJECTED', this.registerRetryDeviceSelectionHandler);
+    this.addEventHandler('PUSH_CONFIRMATION_REJECTED', this.registerMfaChangeDeviceEventHandler);
     this.addEventHandler('PUSH_CONFIRMATION_REJECTED', this.registerForgotDeviceHandler);
     this.addEventHandler('PINGID_DESKTOP_GEN2_ASSERTION_REQUIRED', this.registerMfaEventHandler);
     this.addEventHandler('PINGID_DESKTOP_GEN2_ASSERTION_REQUIRED', this.registerMfaChangeDeviceEventHandler);
@@ -1217,6 +1227,13 @@ export default class AuthnWidget {
 
   handleMfaDeviceSelection(evt) {
     evt.preventDefault();
+    // The device tiles nest data-mfa-selection on the tile AND on its children
+    // (icon container, content container), and registerMfaEventHandler attaches
+    // this listener to every match — without stopping propagation a click on a
+    // child fires the child's listener and then bubbles to the tile's, POSTing
+    // selectDevice TWICE (the second POST lands in the state the first response
+    // already moved the flow to). Same bubble-guard as dispatch().
+    evt.stopPropagation();
     let source = evt.currentTarget;
     if (source) {
       let deviceId = source.dataset['mfaSelection'];
@@ -1225,9 +1242,37 @@ export default class AuthnWidget {
           "id": deviceId
         }
       };
+      // Full-page spinner: the device list must be hidden while the
+      // selectDevice round-trip runs. The store hides the spinner again after
+      // the response, so this matches every other action screen.
+      this.renderSpinnerTemplate();
       this.store.dispatch('POST_FLOW', "selectDevice", JSON.stringify(data));
     } else {
       console.log("ERROR - Unable to dispatch device selection as the target was null");
+    }
+  }
+
+  handleRetryDeviceSelection(evt) {
+    evt.preventDefault();
+    let source = evt.currentTarget;
+    if (source) {
+      // Retry from the push-rejected screen (number-matching reason):
+      // re-select the same device the way the IK templates' retry() does.
+      // The spinner renders synchronously, like the cancel/Change-Method
+      // handlers, so the click gives immediate feedback while the
+      // selectDevice round-trip runs. Scoped to this button — the shared
+      // device-tile handler must NOT replace the page with a spinner (it
+      // caused a double repaint before the push screen appeared).
+      let deviceId = source.dataset['retrySelection'];
+      let data = {
+        "deviceRef": {
+          "id": deviceId
+        }
+      };
+      this.renderSpinnerTemplate();
+      this.store.dispatch('POST_FLOW', "selectDevice", JSON.stringify(data));
+    } else {
+      console.log("ERROR - Unable to dispatch retry selection as the target was null");
     }
   }
 
@@ -1447,6 +1492,16 @@ export default class AuthnWidget {
     if (changeDevice) {
       changeDevice.addEventListener('click', this.handleMfaDeviceChange);
     }
+  }
+
+  registerRetryDeviceSelectionHandler() {
+    // Push-rejected Retry button (number-matching reason): unlike the device
+    // tiles, this click must show the spinner immediately — scoped here so the
+    // shared tile handler keeps its original no-spinner behavior.
+    // The selector matches the hyphenated attribute (data-retry-selection);
+    // dataset retrySelection is its camelCase form.
+    Array.from(document.querySelectorAll('[data-retry-selection]'))
+      .forEach(element => element.addEventListener('click', this.handleRetryDeviceSelection));
   }
 
   registerMfaOneTimeDeviceChangeEventHandler() {

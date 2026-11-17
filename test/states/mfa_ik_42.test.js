@@ -29,6 +29,40 @@ describe('MFA IK 4.2 support', () => {
       expect(authn.eventHandler.get('PINGID_DESKTOP_GEN2_ACTIVATION_REQUIRED')).toBeTruthy();
       expect(authn.eventHandler.get('DEVICE_SELECTION_REQUIRED')).toContain(authn.registerForgotDeviceHandler);
     });
+
+    test('PUSH_CONFIRMATION_REJECTED registers retry + change-method handlers', () => {
+      // Issue #154 follow-up: the rejected screen renders the Retry button
+      // (number-matching) and the Change Method link; both need click handlers
+      // registered for the state — previously neither was, so Change Method
+      // rendered but did nothing when clicked. Retry uses its dedicated
+      // handler (immediate spinner); the shared device-tile handler must NOT
+      // be registered here or the selection screen regresses.
+      const authn = new AuthnWidget('https://localhost:9031');
+      const handlers = authn.eventHandler.get('PUSH_CONFIRMATION_REJECTED');
+      expect(handlers).toContain(authn.registerRetryDeviceSelectionHandler);
+      expect(handlers).toContain(authn.registerMfaChangeDeviceEventHandler);
+      expect(handlers).toContain(authn.registerForgotDeviceHandler);
+      expect(handlers).not.toContain(authn.registerMfaEventHandler);
+    });
+
+    test('registerRetryDeviceSelectionHandler is bound and wires the retry button', () => {
+      // The registration method runs via forEach(fn => fn()) — an unbound
+      // method gets `this === undefined` and the render crashes with the
+      // generic "Unable to start the authentication flow" error. It must be
+      // bound in the constructor AND find the hyphenated attribute.
+      document.body.innerHTML =
+        '<button id="retryBtn" data-retry-selection="dev-9">Retry</button>';
+      const authn = new AuthnWidget('https://localhost:9031');
+
+      authn.registerRetryDeviceSelectionHandler(); // must not throw
+
+      const dispatched = [];
+      Store.prototype.dispatch = jest.fn().mockName('dispatch').mockResolvedValue('42');
+      authn.renderSpinnerTemplate = jest.fn().mockName('renderSpinnerTemplate');
+      document.getElementById('retryBtn').click();
+      expect(Store.prototype.dispatch).toBeCalledWith('POST_FLOW', 'selectDevice',
+        JSON.stringify({ deviceRef: { id: 'dev-9' } }));
+    });
   });
 
   describe('actionModels', () => {
@@ -553,6 +587,155 @@ describe('MFA IK 4.2 support', () => {
         expect(Store.prototype.dispatch).toHaveBeenCalledTimes(1);
         jest.useRealTimers();
       });
+    });
+  });
+
+  describe('PUSH_CONFIRMATION_REJECTED message per rejection reason', () => {
+    // The IK's HTML UI picks the message from the language pack by rejectionReason
+    // (pingone.mfa.push.confirmation.*.message keys); the widget partial mirrors that:
+    // NUMBER_MATCHING_FAILED → "You chose the wrong number",
+    // USER_FRAUD_DENIED → "Push notification reported as fraud",
+    // PUSH_BIOMETRICS_REJECTED → "Biometric authentication rejected",
+    // anything else → "Push notification denied".
+    const handlebars = require('handlebars');
+    const fs = require('fs');
+    const path = require('path');
+
+    const renderRejected = (state) => {
+      const hbs = handlebars.create();
+      hbs.registerHelper('ifEq', require('../../src/helpers/ifEq'));
+      const partialsDir = path.join(__dirname, '../../src/partials');
+      hbs.registerPartial('error', fs.readFileSync(path.join(partialsDir, 'error.hbs'), 'utf8'));
+      hbs.registerPartial('change_device_link', fs.readFileSync(path.join(partialsDir, 'change_device_link.hbs'), 'utf8'));
+      hbs.registerPartial('forgot_device_link', fs.readFileSync(path.join(partialsDir, 'forgot_device_link.hbs'), 'utf8'));
+      hbs.registerPartial('admin_message', fs.readFileSync(path.join(partialsDir, 'admin_message.hbs'), 'utf8'));
+      const template = hbs.compile(fs.readFileSync(path.join(partialsDir, 'push_confirmation_rejected.hbs'), 'utf8'));
+      return template(Object.assign({ logo: 'logo.png' }, state));
+    };
+
+    test('NUMBER_MATCHING_FAILED renders the wrong-number message', () => {
+      const html = renderRejected({ reason: 'NUMBER_MATCHING_FAILED' });
+      expect(html).toContain('You chose the wrong number');
+      expect(html).not.toContain('Push notification denied');
+    });
+
+    test('USER_FRAUD_DENIED renders the fraud message', () => {
+      const html = renderRejected({ reason: 'USER_FRAUD_DENIED' });
+      expect(html).toContain('Push notification reported as fraud');
+      expect(html).not.toContain('Push notification denied');
+    });
+
+    test('PUSH_BIOMETRICS_REJECTED renders the biometrics message', () => {
+      const html = renderRejected({ reason: 'PUSH_BIOMETRICS_REJECTED' });
+      expect(html).toContain('Biometric authentication rejected');
+      expect(html).not.toContain('Push notification denied');
+    });
+
+    test('default reason (DENIED_BY_USER / absent) renders the generic denied message', () => {
+      expect(renderRejected({ reason: 'DENIED_BY_USER' })).toContain('Push notification denied');
+      expect(renderRejected({})).toContain('Push notification denied');
+    });
+
+    test('NUMBER_MATCHING_FAILED renders the Retry button bound to the selected device', () => {
+      // IK business requirement: retry re-initiates the number-matching push by
+      // re-selecting the same device (retry() → selectDevice with the device id).
+      // The attribute is hyphenated data-retry-selection (the HTML parser
+      // lowercases attribute names; a camelCase one would lose the id) and maps
+      // to dataset.retrySelection in the dedicated spinner handler.
+      const html = renderRejected({ reason: 'NUMBER_MATCHING_FAILED', selectedDeviceRef: { id: 'dev-1' } });
+      expect(html).toContain('Retry');
+      expect(html).toContain('data-retry-selection="dev-1"');
+      expect(html).not.toContain('data-mfa-selection');
+    });
+
+    test('Retry button is omitted when the rejected state has no selected device', () => {
+      // IK template guards the retry button on $selectedDevice as well.
+      const html = renderRejected({ reason: 'NUMBER_MATCHING_FAILED' });
+      expect(html).not.toContain('Retry');
+    });
+
+    test('non-number-matching reasons never render the Retry button', () => {
+      ['USER_FRAUD_DENIED', 'PUSH_BIOMETRICS_REJECTED', 'DENIED_BY_USER'].forEach(reason => {
+        expect(renderRejected({ reason, selectedDeviceRef: { id: 'dev-1' } })).not.toContain('Retry');
+      });
+    });
+
+    test('every variant still offers Cancel', () => {
+      ['NUMBER_MATCHING_FAILED', 'USER_FRAUD_DENIED', 'PUSH_BIOMETRICS_REJECTED', 'DENIED_BY_USER']
+        .forEach(reason => {
+          expect(renderRejected({ reason })).toContain('cancelAuthentication');
+        });
+    });
+  });
+
+  describe('Retry click gives immediate spinner feedback', () => {
+    // The retry button uses its dedicated handler via the hyphenated attribute
+    // data-retry-selection (the HTML parser lowercases attribute names, so a
+    // camelCase data-retrySelection lands in the DOM as data-retryselection and
+    // dataset.retrySelection reads undefined — the id was being dropped and the
+    // retry POSTed an empty deviceRef). The shared device-tile handler shows the
+    // IN-PLACE spinner (no DOM replacement, which read as a second page refresh).
+    test('parsing data-retry-selection through real HTML yields the device id in dataset', () => {
+      document.body.innerHTML =
+        '<button id="retryBtn" data-retry-selection="dev-1">Retry</button>';
+      const btn = document.getElementById('retryBtn');
+      expect(btn.dataset.retrySelection).toBe('dev-1');
+    });
+
+    test('handleRetryDeviceSelection renders spinner then POSTs selectDevice with the device id', () => {
+      const authn = new AuthnWidget('https://localhost:9031');
+      authn.renderSpinnerTemplate = jest.fn().mockName('renderSpinnerTemplate');
+      Store.prototype.dispatch = jest.fn().mockName('dispatch').mockResolvedValue('42');
+      const button = { dataset: { retrySelection: 'dev-1' } };
+      const evt = {
+        preventDefault: jest.fn().mockName('preventDefault'),
+        currentTarget: button
+      };
+
+      authn.handleRetryDeviceSelection(evt);
+
+      expect(evt.preventDefault).toHaveBeenCalledTimes(1);
+      expect(authn.renderSpinnerTemplate).toHaveBeenCalledTimes(1);
+      expect(Store.prototype.dispatch).toBeCalledWith('POST_FLOW', 'selectDevice',
+        JSON.stringify({ deviceRef: { id: 'dev-1' } }));
+    });
+
+    test('handleMfaDeviceSelection replaces the page with the spinner and stops propagation', () => {
+      // Device tiles nest data-mfa-selection on the tile AND its children, so a
+      // child click would bubble to the tile listener and POST selectDevice
+      // twice — the second POST lands in the state the first response already
+      // reached (the "double refresh"). stopPropagation guards it. The spinner
+      // is a full-page swap: the device list must be hidden during the round-trip.
+      const authn = new AuthnWidget('https://localhost:9031');
+      authn.renderSpinnerTemplate = jest.fn().mockName('renderSpinnerTemplate');
+      Store.prototype.dispatch = jest.fn().mockName('dispatch').mockResolvedValue('42');
+      const evt = {
+        preventDefault: jest.fn().mockName('preventDefault'),
+        stopPropagation: jest.fn().mockName('stopPropagation'),
+        currentTarget: { dataset: { mfaSelection: 'dev-1' } }
+      };
+
+      authn.handleMfaDeviceSelection(evt);
+
+      expect(evt.stopPropagation).toHaveBeenCalledTimes(1);
+      expect(authn.renderSpinnerTemplate).toHaveBeenCalledTimes(1);
+      expect(Store.prototype.dispatch).toBeCalledWith('POST_FLOW', 'selectDevice',
+        JSON.stringify({ deviceRef: { id: 'dev-1' } }));
+    });
+
+    test('null target still dispatches nothing (error path unchanged)', () => {
+      const authn = new AuthnWidget('https://localhost:9031');
+      authn.renderSpinnerTemplate = jest.fn().mockName('renderSpinnerTemplate');
+      Store.prototype.dispatch = jest.fn().mockName('dispatch').mockResolvedValue('42');
+      const evt = {
+        preventDefault: jest.fn().mockName('preventDefault'),
+        currentTarget: null
+      };
+
+      authn.handleRetryDeviceSelection(evt);
+
+      expect(authn.renderSpinnerTemplate).not.toBeCalled();
+      expect(Store.prototype.dispatch).not.toBeCalled();
     });
   });
 });

@@ -2,18 +2,47 @@
   <div class="org-logo">
     <img class="org-logo__image" src="{{logo}}" alt="Company Logo"/>
   </div>
-  {{> error msg=" " errorHeader="Blocked"}}
-  {{#ifEq reason "NUMBER_MATCHING_FAILED"}}
-    {{> change_device_link}}
-  {{/ifEq}}
-  {{> forgot_device_link}}
-  <form class="form form--margin-small" id="AuthnWidgetForm">
-    <div class="text-block" data-id="textblock">
-      <div class="text-block--overflow-wrap">
-        <a tabindex="0" data-actionId="cancelAuthentication" target="_self" class="anchor">
-          Cancel</a>
+  {{!-- tile-selector--stacked wraps the error + actions exactly like the other
+        Blocked screens (mfa_failed, mfa_denied, mfa_device_pairing_method_failed);
+        the PF end-user CSS gives it the bottom margin, otherwise the message
+        prints flush against the Cancel link. --}}
+  <div class="tile-selector tile-selector--stacked">
+    {{!-- Message text mirrors the MFA IK UI (pingone.mfa.push.confirmation.*.message
+          language-pack keys): the reason reported by PingOne selects the message,
+          matching the IK's pingone-mfa-push-confirmation-rejected.html template. --}}
+    {{#ifEq reason "NUMBER_MATCHING_FAILED"}}
+      {{> error msg="You chose the wrong number" errorHeader="Blocked"}}
+    {{else ifEq reason "USER_FRAUD_DENIED"}}
+      {{> error msg="Push notification reported as fraud" errorHeader="Blocked"}}
+    {{else ifEq reason "PUSH_BIOMETRICS_REJECTED"}}
+      {{> error msg="Biometric authentication rejected" errorHeader="Blocked"}}
+    {{else}}
+      {{> error msg="Push notification denied" errorHeader="Blocked"}}
+    {{/ifEq}}
+    {{#ifEq reason "NUMBER_MATCHING_FAILED"}}
+      {{!-- Retry re-selects the same device (IK retry(): selectDevice with the
+            selected device id), re-triggering the number-matching push. Uses
+            data-retry-selection (NOT data-mfa-selection) so the click gets the
+            immediate-spinner handler. NOTE: the attribute must be hyphenated —
+            the HTML parser lowercases attribute names, so data-retrySelection
+            would become dataset.retryselection and the device id would be lost. --}}
+      {{#if selectedDeviceRef.id}}
+      <button class="button button--primary brand-primary-bg" type="button"
+              data-retry-selection="{{selectedDeviceRef.id}}">
+        Retry
+      </button>
+      {{/if}}
+      {{> change_device_link}}
+    {{/ifEq}}
+    {{> forgot_device_link}}
+    <form class="form form--margin-small" id="AuthnWidgetForm">
+      <div class="text-block" data-id="textblock">
+        <div class="text-block--overflow-wrap">
+          <a tabindex="0" data-actionId="cancelAuthentication" target="_self" class="anchor">
+            Cancel</a>
+        </div>
       </div>
-    </div>
-  </form>
+    </form>
+  </div>
   {{> admin_message}}
 </div>
