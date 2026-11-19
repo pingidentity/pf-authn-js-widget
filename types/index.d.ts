@@ -19,6 +19,16 @@ export interface IOptions {
   deviceProfileScript?: string
 }
 
+/**
+ * Fields added to the authentication API state when a client side authenticator
+ * is configured on the adapter.
+ */
+export interface IClientSideAuthenticatorState {
+  authenticatorEnabled?: boolean,
+  javascriptFilenames?: string[],
+  clientSideAuthenticatorAttributes?: Record<string, any>
+}
+
 export interface IAuthnWidget {
   init(): void;
   initRedirectless(redirectlessConfig: IRedirectlessConfig): void;
