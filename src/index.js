@@ -13,6 +13,7 @@ import {isValidEmail, isValidPhone} from "./validators/inputs";
 import {isValidFlowId} from "./validators/flowId";
 import captchaPostRenderCallback from './utils/callbacks/riskPostRenderCallback';
 import RiskUtils from './utils/riskUtils';
+import clientSideAuthenticatorPostRenderCallback from './utils/clientSideAuthenticatorPostRenderCallback';
 //uncomment to add your personal branding
 // import './scss/branding.scss';
 
@@ -347,6 +348,8 @@ export default class AuthnWidget {
     this.addEventHandler('SMS_PAIRING_TARGET_REQUIRED', this.registerCountryCodePickerHandler);
     this.addEventHandler('VOICE_PAIRING_TARGET_REQUIRED', this.registerCountryCodePickerHandler);
     this.addEventHandler('WHATSAPP_PAIRING_TARGET_REQUIRED', this.registerCountryCodePickerHandler);
+    this.addPostRenderCallback('USERNAME_PASSWORD_REQUIRED', clientSideAuthenticatorPostRenderCallback);
+    this.addPostRenderCallback('IDENTIFIER_REQUIRED', clientSideAuthenticatorPostRenderCallback);
 
     this.actionModels.set('checkUsernamePassword', { required: ['username', 'password'], properties: ['username', 'password', 'rememberMyUsername', 'thisIsMyDevice', 'captchaResponse'] });
     this.actionModels.set('initiateAccountRecovery', { properties: ['usernameHint'] });
@@ -395,6 +398,7 @@ export default class AuthnWidget {
     this.actionModels.set('submitOathTokenTarget', {required: ['serialNumber']});
     this.actionModels.set('activateOathTokenDevice', {required: ['otp']});
     this.actionModels.set('resyncOathToken', {required: ['id', 'otp']});
+    this.actionModels.set('useClientSideAuthenticator', {});
   }
 
   init() {

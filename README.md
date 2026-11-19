@@ -17,6 +17,7 @@
   - [Customizing the Widget](#customizing-the-widget)
   - [Using Protect-Based Authentication Adapters with the Widget](/docs/protectAuthentication.md)
   - [Using Risk-Based Authentication With the Widget](/docs/riskAuthentication.md)
+  - [Using Client Side Authenticators With the Widget](/docs/clientSideAuthenticator.md)
   - [Redirectless Support](/docs/redirectless.md)
 - [Browser Compatibility](#browser-compatibility)
 - [Bug Reports](#bug-reports)
@@ -252,6 +253,10 @@ Please refer to the [guide for using Protect-based authentication adapters with 
 ## Using Risk-Based Authentication With the Widget
 
 Please refer to the [guide for using risk-based authentication with the widget](/docs/riskAuthentication.md) for more infomation on how to set up the widget with risk-based authentication adapters.
+
+## Using Client Side Authenticators With the Widget
+
+Please refer to the [guide for using client side authenticators with the widget](/docs/clientSideAuthenticator.md) for more information on how the widget works with the HTML Form and Identifier First adapters configured with a client side authenticator, such as passkeys.
 
 ## Redirectless Support
 

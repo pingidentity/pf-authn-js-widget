@@ -42,4 +42,10 @@
   {{#unless previouslySubmittedIdentifiers.length}}
   {{> identifier_signon}}
   {{/unless}}
+  {{#if authenticatorEnabled}}
+  <div class="identifier-first__cancel">
+    <button id="authenticator-field" class="button" type="button"
+      data-id="authenticator-button">Sign on with Passkey</button>
+  </div>
+  {{/if}}
 </div>
