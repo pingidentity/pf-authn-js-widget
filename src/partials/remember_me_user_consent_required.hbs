@@ -1,0 +1,32 @@
+<div class="card">
+  <div class="org-logo">
+    <img class="org-logo__image" src="{{logo}}" alt="Company Logo"/>
+  </div>
+  {{> errors}}
+  <h1 class="heading">Remember This Device?</h1>
+  {{!-- Mirror of the IK's pingone-mfa-remember-me-user-consent.html: Yes / No
+        buttons plus the "don't ask again" link. The button text follows the IK
+        language pack (pingone.mfa.remember.me.user.consent.*). The choice POSTs
+        submitRememberMeUserConsent { userConsent: remember | doNotRemember |
+        doNotAskAgain } — doNotAskAgain sets a cookie in the adapter so this
+        prompt is skipped for future sessions on this browser. --}}
+  <div class="text-block">
+    <div class="text-block__text">Skip authentication steps on this device. Use this only on a personal browser.</div>
+  </div>
+  <form class="form form--margin-small" id="AuthnWidgetForm">
+    <div class="stack" data-id="stack">
+      <div>
+        <button type="button" class="button button--primary brand-primary-bg"
+                data-remember-me-consent="remember">Remember Device</button>
+      </div>
+      <div>
+        <button type="button" class="button"
+                data-remember-me-consent="doNotRemember">Don't Remember</button>
+      </div>
+      <div class="text-block">
+        <a tabindex="0" target="_self" class="anchor"
+           data-remember-me-consent="doNotAskAgain">Don't ask again on this device</a>
+      </div>
+    </div>
+  </form>
+</div>

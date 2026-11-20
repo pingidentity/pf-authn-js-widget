@@ -1,4 +1,5 @@
 import { isScriptLoaded } from "../uiUtils";
+import { whenSignalsSdkReady, signalsSdkUrl, SIGNALS_SDK_VERSIONS } from "../signalsSdkUtil";
 
 const LOG_PREFIX = '[PingOne Protect Provider] ';
 
@@ -15,7 +16,7 @@ export default class Signals {
 
   getScriptHeader() {
     const script = document.createElement('script');
-    script.src = `https://apps.pingone.com/signals/web-sdk/5.2.7/signals-sdk.js`;
+    script.src = signalsSdkUrl(SIGNALS_SDK_VERSIONS.LEGACY);
     script.onload = () => {
       console.log(LOG_PREFIX + 'triggering onload event');
       window.signalsSDK_loaded = true;
@@ -30,7 +31,7 @@ export default class Signals {
 
   render() {
     // initialize the signals sdk when it's ready
-    this.onSignalsSdkReady().then(() => window._pingOneSignals.init());
+    whenSignalsSdkReady().then(() => window._pingOneSignals.init());
 
     // just render the captcha if script tag is loaded
     if (this.isLoaded()) {
@@ -45,7 +46,7 @@ export default class Signals {
   }
 
   execute(actionId, formData) {
-    this.onSignalsSdkReady()
+    whenSignalsSdkReady()
       .then(() => window._pingOneSignals.init())
       .then(() => window._pingOneSignals.getData())
       .then(data => {
@@ -53,15 +54,5 @@ export default class Signals {
         formData['captchaResponse'] = data;
         this.store.dispatch('POST_FLOW', actionId, JSON.stringify(formData));
       });
-  }
-
-  onSignalsSdkReady() {
-    return new Promise(resolve => {
-      if (window['_pingOneSignalsReady']) {
-        resolve()
-      } else {
-        document.addEventListener('PingOneSignalsReadyEvent', resolve)
-      }
-    })
   }
 }

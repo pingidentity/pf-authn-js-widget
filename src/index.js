@@ -13,6 +13,7 @@ import {isValidEmail, isValidPhone} from "./validators/inputs";
 import {isValidFlowId} from "./validators/flowId";
 import captchaPostRenderCallback from './utils/callbacks/riskPostRenderCallback';
 import RiskUtils from './utils/riskUtils';
+import { loadSignalsSdkScript, signalsSdkUrl, findSignalsSdkScript } from './utils/signalsSdkUtil';
 //uncomment to add your personal branding
 // import './scss/branding.scss';
 
@@ -97,7 +98,10 @@ export default class AuthnWidget {
       'VIP_ENROLLMENT', 'VIP_CREDENTIAL_REQUIRED', 'VIP_AUTHENTICATION_REQUIRED', 'VIP_CREDENTIAL_RESET_REQUIRED',
       'USER_ID_REQUIRED', 'AUTHENTICATOR_SELECTION_REQUIRED', 'INPUT_REQUIRED', 'ENTRUST_FAILED', 'FRAUD_EVALUATION_CHECK_REQUIRED',
       'AUTHENTICATION_CODE_RESPONSE_REQUIRED', 'BIOMETRIC_DEVICE_AUTHENTICATION_INFO_REQUIRED', 'FIDO2_ACTIVATION_REQUIRED',
-      'UPDATE_NICKNAME', 'OATH_TOKEN_PAIRING_TARGET_REQUIRED', 'OATH_TOKEN_ACTIVATION_REQUIRED'
+      'UPDATE_NICKNAME', 'OATH_TOKEN_PAIRING_TARGET_REQUIRED', 'OATH_TOKEN_ACTIVATION_REQUIRED',
+      // PingOne MFA IK 4.2 Remember Me (P14C-82959): the remember-me verifier and
+      // manager adapters expose these three Authn API states.
+      'EVALUATE_REMEMBER_ME_DEVICE', 'REMEMBER_ME_USER_CONSENT_REQUIRED', 'MANAGE_REMEMBER_ME_DEVICE'
     ]
     .concat(oauthUserAuthorizationStates)
     .concat(oneTimeDeviceOtpStates)
@@ -178,6 +182,9 @@ export default class AuthnWidget {
     this.handleRegisterUser = this.handleRegisterUser.bind(this);
     this.verifyRegistrationPassword = this.verifyRegistrationPassword.bind(this);
     this.postDeviceProfileAction = this.postDeviceProfileAction.bind(this);
+    this.postEvaluateRememberMeDevice = this.postEvaluateRememberMeDevice.bind(this);
+    this.handleRememberMeConsent = this.handleRememberMeConsent.bind(this);
+    this.registerRememberMeConsentHandler = this.registerRememberMeConsentHandler.bind(this);
     this.postFraudSessionInfoAction = this.postFraudSessionInfoAction.bind(this);
     this.postContinueBiometricDeviceAuthentication = this.postContinueBiometricDeviceAuthentication.bind(this);
     this.registerAgentlessHandler = this.registerAgentlessHandler.bind(this);
@@ -286,6 +293,13 @@ export default class AuthnWidget {
     this.addPostRenderCallback('EXTERNAL_AUTHENTICATION_REQUIRED', this.openExternalAuthnPopup);
     this.addPostRenderCallback('EXTERNAL_AUTHENTICATION_FAILED', this.externalAuthnFailure);
     this.addEventHandler('DEVICE_PROFILE_REQUIRED', this.postDeviceProfileAction);
+    // Remember Me (P14C-82959): the verifier/manager adapters park the flow on a
+    // profiling spinner, and the manager may first ask for consent. The handlers
+    // fire on render (postRenderCallback) like DEVICE_PROFILE_REQUIRED's —
+    // there is nothing for the user to click on these screens.
+    this.addPostRenderCallback('EVALUATE_REMEMBER_ME_DEVICE', this.postEvaluateRememberMeDevice);
+    this.addPostRenderCallback('MANAGE_REMEMBER_ME_DEVICE', this.postEvaluateRememberMeDevice);
+    this.addEventHandler('REMEMBER_ME_USER_CONSENT_REQUIRED', this.registerRememberMeConsentHandler);
     this.addEventHandler('FRAUD_EVALUATION_CHECK_REQUIRED', this.postFraudSessionInfoAction);
     this.addPostRenderCallback('BIOMETRIC_DEVICE_AUTHENTICATION_INFO_REQUIRED', this.postContinueBiometricDeviceAuthentication);
     this.addEventHandler('REFERENCE_ID_REQUIRED', this.registerAgentlessHandler);
@@ -924,6 +938,203 @@ export default class AuthnWidget {
         }, parseInt(data.deviceProfilingTimeoutMillis));
         break;
       }
+    }
+  }
+
+  /*
+   * Remember Me (P14C-82959): the IK's remember-me verifier and manager adapters
+   * park the flow on EVALUATE_REMEMBER_ME_DEVICE / MANAGE_REMEMBER_ME_DEVICE and
+   * expect the browser to profile itself via the PingOne Signals SDK, then POST
+   * the fingerprint with submitDeviceInformation. Mirrors the IK's
+   * pingone-mfa-remember-me-spinner.html template: load the SDK (the configured
+   * deviceProfileScript, or the PingOne-hosted build when none is set), init it
+   * with universalDeviceIdentification (the identifier the IK's device matching
+   * requires), getData() → submitDeviceInformation { browserFingerprint }.
+   * The deviceProfileTimeoutMillis from the state (IK default 5000ms) bounds the
+   * wait; the timeout and SDK-failure fallbacks both submit an empty payload so
+   * the adapter answers with VALIDATION_ERROR (BROWSER_FINGERPRINT_REQUIRED)
+   * instead of hanging on the spinner.
+   */
+  postEvaluateRememberMeDevice() {
+    const state = this.store.getStore();
+    const timeout = parseInt(state.deviceProfileTimeoutMillis) > 0
+      ? parseInt(state.deviceProfileTimeoutMillis)
+      : 5000;
+    let dispatched = false;
+
+    const submitFingerprint = (data) => {
+      if (dispatched) {
+        return;
+      }
+      dispatched = true;
+      this.store.dispatch('POST_FLOW', 'submitDeviceInformation', JSON.stringify(data))
+        .then(() => {
+          // QA diagnostics for P14C-82959: what the adapter sent back. The
+          // verifier's API flow fails SILENTLY (no error response) when the
+          // RMT cookie or the username can't be resolved — PF just advances
+          // to the next policy fragment (usually the MFA adapter). Logging
+          // the returned status makes that branch visible in the console.
+          const after = this.store.getStore();
+          if (after && after.status) {
+            console.log('Remember Me: after submitDeviceInformation the flow status is ' + after.status);
+          } else {
+            console.log('Remember Me: after submitDeviceInformation the response carried no state status ' +
+              '(error response — check the network tab for the JSON body)');
+          }
+        });
+    };
+
+    const onCompletion = (profile) => {
+      // The IK templates send the raw signals payload as browserFingerprint.
+      // The payload is a string (base64.gzip-encoded signals data — the SDK's
+      // toString()); it must reach the adapter verbatim, so never stringify a
+      // string here. Console note helps QA tell a real profile from a fallback.
+      if (typeof profile === 'string' && profile.length > 0) {
+        console.log('Remember Me: submitDeviceInformation with browser fingerprint (' +
+          profile.length + ' chars)');
+        submitFingerprint({ browserFingerprint: profile });
+      } else {
+        console.warn('Remember Me: Signals SDK returned an empty/non-string payload; ' +
+          'submitting without a fingerprint (adapter answers VALIDATION_ERROR)');
+        submitFingerprint({});
+      }
+    };
+
+    const submitError = (reason) => {
+      // No fingerprint → the verifier adapter's API flow treats a blank
+      // fingerprint as failure (the browser flow's timeout/script-error flag
+      // submission maps to the same adapter outcome) and PF continues to the
+      // next policy fragment — usually the MFA adapter.
+      console.warn('Remember Me: submitting without a fingerprint (' + reason + ')');
+      submitFingerprint({});
+    };
+
+    const profileDevice = () => {
+      if (!window._pingOneSignals) {
+        submitError('Signals SDK not available after script load');
+        return;
+      }
+      try {
+        const initPromise = window._pingOneSignals.init({
+          universalDeviceIdentification: true
+        });
+        if (initPromise && typeof initPromise.then === 'function') {
+          initPromise.then(() => {}, () => submitError('Signals SDK init failed'));
+        }
+        window._pingOneSignals.getData()
+          .then(onCompletion)
+          .catch(() => submitError('Signals SDK getData() failed'));
+      } catch (e) {
+        // A half-initialized SDK can throw synchronously.
+        submitError('Signals SDK threw synchronously: ' + e.message);
+      }
+    };
+
+    const onSdkScriptLoaded = () => {
+      // The script element's load event fires only after the SDK file has
+      // been evaluated in full. The CDN builds assign window._pingOneSignals
+      // on their LAST statement and set _pingOneSignalsReady (dispatching
+      // PingOneSignalsReadyEvent) mid-file, so by "load" the flag is already
+      // true and the global is assigned. The ready-event branch stays as a
+      // defensive fallback for an SDK build that defers its ready signal
+      // past evaluation. See signalsSdkUtil.js for the full history: gating
+      // on the ready event alone profiled a window whose SDK global was
+      // still undefined and submitted the empty fingerprint the adapter
+      // received as a null browserFingerprint (QA, P14C-82959).
+      if (window['_pingOneSignalsReady'] || window._pingOneSignals) {
+        profileDevice();
+      } else {
+        document.addEventListener('PingOneSignalsReadyEvent', profileDevice, { once: true });
+      }
+    };
+
+    const startDeviceProfiling = () => {
+      const src = this.deviceProfileScript || signalsSdkUrl();
+      const existing = findSignalsSdkScript(src);
+      if (existing) {
+        // The SDK script for this src is already in the document (the host
+        // page loaded a build itself, or this flow's EARLIER profiling
+        // state already injected it — a first Remember Me login renders
+        // EVALUATE_REMEMBER_ME_DEVICE and MANAGE_REMEMBER_ME_DEVICE in one
+        // session). Do NOT inject again: the SDK builds declare top-level
+        // const bindings (e.g. `const Browser`) outside any IIFE, so a
+        // second evaluation throws "Identifier 'Browser' has already been
+        // declared" — the error page QA saw between the two Remember Me
+        // profiling states.
+        if (window._pingOneSignals) {
+          // Fully evaluated and usable (the global is the SDK's LAST
+          // statement) — profile right away.
+          profileDevice();
+        } else {
+          // Still downloading: wait for THIS tag's load event, which fires
+          // only after the whole file (global assignment included) has been
+          // evaluated. Deliberately NOT a ready-event listener here — the
+          // SDK fires that event mid-file, before the global assignment,
+          // and a listener attached now would reproduce the round-3
+          // null-fingerprint bug. If the tag turns out to be a broken
+          // build whose load already fired, the profiling-timeout fallback
+          // below still submits.
+          existing.addEventListener('load', onSdkScriptLoaded, { once: true });
+        }
+        return;
+      }
+      if (this.deviceProfileScript) {
+        // Customer-provided SDK script (same option Protect flows use) —
+        // for environments that cannot reach apps.pingone.com.
+        loadSignalsSdkScript(this.deviceProfileScript, onSdkScriptLoaded,
+          () => submitError('failed to load ' + this.deviceProfileScript));
+      } else {
+        // PingOne-hosted SDK build, version picked per browser (the legacy
+        // 5.2.7 build for IE11-class engines and browsers without
+        // crypto.getRandomValues / indexedDB, the modern 5.6.11 build
+        // otherwise). universalDeviceIdentification (required for the
+        // remember-me device match) only exists in 5.6.11 — the legacy
+        // build makes the PingOne API fail with "Failed to parse empty SDK
+        // payload jwt". Same hosted-URL pattern the Protect risk-provider
+        // (utils/risk-providers/signals.js) has always used.
+        loadSignalsSdkScript(src, onSdkScriptLoaded, () => submitError('failed to load ' + src));
+      }
+    };
+
+    /*
+     * Wait for the window load event BEFORE injecting the SDK script,
+     * exactly like the IK's pingone-mfa-remember-me-spinner.html, which
+     * loads the SDK from <head> and profiles from window.onload. The SDK's
+     * start() awaits the load event internally (waitForWindowLoad defaults
+     * true), so profiling started before "load" makes the load wait eat
+     * into the adapter's deviceProfileTimeoutMillis budget — on pages where
+     * "load" fires after the timeout, getData() never resolved and the
+     * fallback submitted an empty fingerprint, which the verifier treats as
+     * failure (silently falling through to MFA — the observed bug). By the
+     * time "load" has fired, the SDK's internal loadEventPromise resolves
+     * immediately and profiling starts within the budget.
+     */
+    if (document.readyState === 'complete') {
+      startDeviceProfiling();
+    } else {
+      window.addEventListener('load', startDeviceProfiling, { once: true });
+    }
+
+    setTimeout(() => submitError('device profiling timed out after ' + timeout + 'ms'), timeout);
+  }
+
+  registerRememberMeConsentHandler() {
+    Array.from(document.querySelectorAll('[data-remember-me-consent]'))
+      .forEach(element => element.addEventListener('click', this.handleRememberMeConsent));
+  }
+
+  handleRememberMeConsent(evt) {
+    evt.preventDefault();
+    let source = evt.currentTarget;
+    if (source) {
+      // userConsent: remember | doNotRemember | doNotAskAgain — the values the
+      // IK's SubmitRememberMeUserConsentRequest enum accepts.
+      let consent = source.dataset['rememberMeConsent'];
+      this.renderSpinnerTemplate();
+      this.store.dispatch('POST_FLOW', 'submitRememberMeUserConsent',
+        JSON.stringify({ userConsent: consent }));
+    } else {
+      console.log('ERROR - Unable to dispatch remember me consent as the target was null');
     }
   }
 

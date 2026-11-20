@@ -16,6 +16,7 @@
   - [Creating the index.html File](#creating-the-indexhtml-file)
   - [Customizing the Widget](#customizing-the-widget)
   - [Using Protect-Based Authentication Adapters with the Widget](/docs/protectAuthentication.md)
+  - [Using Remember Me with the PingOne MFA Integration Kit](#using-remember-me-with-the-pingone-mfa-integration-kit)
   - [Using Risk-Based Authentication With the Widget](/docs/riskAuthentication.md)
   - [Redirectless Support](/docs/redirectless.md)
 - [Browser Compatibility](#browser-compatibility)
@@ -248,6 +249,15 @@ Note: Some items cannot be customized:
 ## Using Protect-Based Authentication Adapters with the Widget
 
 Please refer to the [guide for using Protect-based authentication adapters with the widget](/docs/protectAuthentication.md) for more information on how to set up the widget with Protect-based authentication adapters.
+
+## Using Remember Me with the PingOne MFA Integration Kit
+
+PingOne MFA Integration Kit 4.2 or later supports [Remember Me](https://docs.pingidentity.com/integrations/pingone/pingone_mfa_integration_kit/pf_p1_mfa_ik.html) through two dedicated adapters (Remember Me Verifier and Remember Me Manager) that work alongside the MFA adapter in an authentication policy. The widget renders all three remember-me screens natively:
+
+- **Remember This Device?** — the consent prompt shown when the Remember Me Manager adapter's device mode is *User Managed* (Yes / No / Don't ask again)
+- **Profiling Device** — the spinner shown while the browser is profiled for device evaluation and creation
+
+Device profiling uses the PingOne Signals SDK. When `deviceProfileScript` is not configured, the widget loads the PingOne-hosted Signals SDK automatically (`https://apps.pingone.com/signals/web-sdk/<version>/signals-sdk.js`), selecting the version the browser supports (5.6.11 for modern browsers, 5.2.7 for IE11-class engines). If the host application cannot reach `apps.pingone.com` (for example an air-gapped deployment), host the SDK script locally and configure it with the widget's `deviceProfileScript` option — the same option used for Protect-based adapters (see [the Protect guide](/docs/protectAuthentication.md)).
 
 ## Using Risk-Based Authentication With the Widget
 
