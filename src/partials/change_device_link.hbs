@@ -1,0 +1,31 @@
+{{!-- P14C-85737: "Change Method" link, replacing the back-arrow button on
+     authentication screens. Rendered when canChangeDevice is true (paired
+     devices > 1, or paired == 1 with manualPairing) — computed at render time
+     on the root state.
+
+     Default form: a self-contained text-block on its own line, used by the
+     screens where the IK renders the link standalone (assertion-required,
+     pingid-desktop-gen2-assertion, push-confirmation-rejected, and the
+     push-confirmation-timed-out retry branch).
+
+     Inline form (inline=true): a bare anchor with margin-left, for placing on
+     the same line as the device target/nickname — matching the IK templates
+     that render the anchor inside the nickname text-block with
+     margin-left: 8px (otp-required, push-confirmation-waiting,
+     push-confirmation-timed-out OTP branch). --}}
+{{#if @root.canChangeDevice}}
+{{#if inline}}
+<a tabindex="0" id="changeDevice" data-id="change-method-link" target="_self" class="anchor"
+   style="margin-left: 8px;">
+  Change Method
+</a>
+{{else}}
+<div class="text-block" data-id="textblock">
+  <div class="text-block--overflow-wrap">
+    <a tabindex="0" id="changeDevice" data-id="change-method-link" target="_self" class="anchor">
+      Change Method
+    </a>
+  </div>
+</div>
+{{/if}}
+{{/if}}

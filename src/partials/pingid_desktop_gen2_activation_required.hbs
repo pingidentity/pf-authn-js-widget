@@ -1,0 +1,27 @@
+<div class="card">
+  <div class="org-logo">
+    <img class="org-logo__image" src="{{logo}}" alt="Company Logo"/>
+  </div>
+  {{> errors}}
+  <div class="stack stack--small" data-id="stack">
+    <h1 class="heading-text centered-text icon-heading" data-id="heading">
+      <svg viewBox="0 0 24 24" role="presentation" style="width: 32px; height: 32px;">
+        <path d="M21,16H3V4H21M21,2H3C1.89,2 1,2.89 1,4V16A2,2 0 0,0 3,18H10V20H8V22H16V20H14V18H21A2,2 0 0,0 23,16V4C23,2.89 22.1,2 21,2Z" style="fill: rgb(61, 69, 77);"></path>
+      </svg><span style="margin-left: .5em">PingId Desktop</span>
+    </h1>
+  </div>
+  {{> spinner_small_bot_margins}}
+  <div class="text-block">
+    <div class="text-block--overflow-wrap">
+      Follow the directions your browser provides to finish biometrics pairing.
+    </div>
+  </div>
+  <form class="form form--margin-small" id="AuthnWidgetForm">
+    <div class="text-block" data-id="textblock">
+      <div class="text-block--overflow-wrap">
+        <a tabindex="0" data-actionId="cancelDevicePairing" target="_self" class="anchor">
+          Cancel</a>
+      </div>
+    </div>
+  </form>
+</div>

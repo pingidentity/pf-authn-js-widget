@@ -1,28 +1,68 @@
 <div class="card">
-  {{> back_button}}
   <div class="org-logo">
     <img class="org-logo__image" src="{{logo}}" alt="Company Logo"/>
   </div>
   <div class="stack stack--small" data-id="stack"> <h1 class="heading-text centered-text icon-heading">
     <svg viewBox="0 0 24 24" role="presentation">
       <path d="M16,18H7V4H16M11.5,22A1.5,1.5 0 0,1 10,20.5A1.5,1.5 0 0,1 11.5,19A1.5,1.5 0 0,1 13,20.5A1.5,1.5 0 0,1 11.5,22M15.5,1H7.5A2.5,2.5 0 0,0 5,3.5V20.5A2.5,2.5 0 0,0 7.5,23H15.5A2.5,2.5 0 0,0 18,20.5V3.5A2.5,2.5 0 0,0 15.5,1Z"/>
-    </svg><span>PingOne Authenticator</span></h1>
+    </svg><span>{{#if targetApplicationName}}{{targetApplicationName}}{{else if isPingIdMobile}}PingID Mobile{{else}}PingOne Authenticator{{/if}}</span></h1>
   </div>
   {{> errors}}
+  {{#if numberMatching}}
+  <div class="text-block" data-id="textblock">
+    <div class="text-block--overflow-wrap">
+      {{#if isPingIdMobile}}
+        {{#ifEq numberMatching.type "ENTER_MANUALLY"}}
+          Enter the number displayed in your PingID mobile app.
+        {{else}}
+          Select the number displayed in your PingID mobile app.
+        {{/ifEq}}
+      {{else}}
+        {{#ifEq numberMatching.type "ENTER_MANUALLY"}}
+          Enter the number displayed in your PingOne Authenticator mobile app
+        {{else}}
+          Select the number displayed in your PingOne Authenticator mobile app
+        {{/ifEq}}
+      {{/if}}
+    </div>
+  </div>
+  <div style="position: relative; display: flex; align-items: center; justify-content: center; margin-bottom: 15px;">
+    <svg width="85" height="164" viewBox="0 0 85 164" fill="none" role="presentation">
+      <path fill-rule="evenodd" clip-rule="evenodd" d="M35.7145 11.9032H47.9363C49.0328 11.9032 49.9206 11.0151 49.9206 9.91935C49.9206 8.82364 49.0328 7.93548 47.9363 7.93548H35.7145C34.6175 7.93548 33.7302 8.82364 33.7302 9.91935C33.7302 11.0151 34.6175 11.9032 35.7145 11.9032Z" fill="#515960"></path>
+      <path fill-rule="evenodd" clip-rule="evenodd" d="M29.6825 10.5806C30.4277 10.5806 31.0317 9.98842 31.0317 9.25831C31.0317 8.52771 30.4277 7.93548 29.6825 7.93548C28.9373 7.93548 28.3333 8.52771 28.3333 9.25831C28.3333 9.98842 28.9373 10.5806 29.6825 10.5806Z" fill="#515960"></path>
+      <mask id="numberMatchingPhoneMask" maskUnits="userSpaceOnUse" x="0" y="0" width="85" height="164">
+        <path fill-rule="evenodd" clip-rule="evenodd" d="M0 4.95911e-05H84.9934V164H0V4.95911e-05Z" fill="white"></path>
+      </mask>
+      <g mask="url(#numberMatchingPhoneMask)">
+        <path fill-rule="evenodd" clip-rule="evenodd" d="M77.0454 160.095H7.95494C5.76944 160.095 3.98094 158.338 3.98094 156.19V140.246H81.0194V156.19C81.0194 158.338 79.2314 160.095 77.0454 160.095ZM3.98044 136.341H81.0194V20.5H3.98044V136.341ZM7.95494 3.90462H77.0454C79.2314 3.90462 81.0194 5.66198 81.0194 7.80969V16.5955H3.98094V7.80969C3.98094 5.66198 5.76944 3.90462 7.95494 3.90462ZM77.0454 4.95911e-05H7.95494C3.57244 4.95911e-05 0.00643896 3.50297 0.00643896 7.80969V18.482C0.00593896 18.5046 -6.10352e-05 18.5252 -6.10352e-05 18.5478V138.294C-6.10352e-05 138.316 0.00593896 138.337 0.00643896 138.359V156.19C0.00643896 160.497 3.57244 164 7.95494 164H77.0454C81.4279 164 84.9934 160.497 84.9934 156.19V138.294V18.5478V7.80969C84.9934 3.50297 81.4279 4.95911e-05 77.0454 4.95911e-05Z" fill="#515960"></path>
+      </g>
+      <path fill-rule="evenodd" clip-rule="evenodd" d="M43.1754 153.335C40.9914 153.335 39.2132 151.594 39.2132 149.453C39.2132 147.312 40.9914 145.568 43.1754 145.568C45.3593 145.568 47.1355 147.312 47.1355 149.453C47.1355 151.594 45.3593 153.335 43.1754 153.335ZM43.1754 141.516C38.7107 141.516 35.0793 145.076 35.0793 149.453C35.0793 153.828 38.7107 157.387 43.1754 157.387C47.6384 157.387 51.2698 153.828 51.2698 149.453C51.2698 145.076 47.6384 141.516 43.1754 141.516Z" fill="#515960"></path>
+    </svg>
+    <div data-id="number" style="position: absolute; font-size: 44px; font-weight: 400; color: rgb(81, 89, 96); top: 50%; left: 50%; transform: translate(-50%, -50%);">{{numberMatching.number}}</div>
+  </div>
+  {{else}}
   {{> spinner_small_bot_margins}}
+  {{/if}}
   <div class="icon-feedback icon-feedback--success" style="margin-bottom: 30px;">
     <p class="icon-feedback__label">Authenticating</p>
   </div>
-  {{> device_selection_body bodyText='Request sent to:'}}
+  {{> device_selection_body bodyText='Request sent to:' changeDeviceInline=true}}
   {{#each devices as |device|}}
     {{#ifEq device.id ../selectedDeviceRef.id}}
       {{#if device.otpEnabled}}
         <div class="text-block" data-id="textblock" style="margin-top: 25px">
           <div class="text-block--overflow-wrap">
-            <a id="usePasscode" data-id="change-button">Use passcode</a>
+            {{#if @root.canChangeDevice}}
+              <button id="usePasscode" data-id="change-button" type="button"
+                      class="button file-input--button button--tertiary">Use passcode</button>
+            {{else}}
+              <a id="usePasscode" data-id="change-button">Use passcode</a>
+            {{/if}}
           </div>
         </div>
       {{/if}}
     {{/ifEq}}
   {{/each}}
+  {{> forgot_device_link}}
+  {{> admin_message}}
 </div>

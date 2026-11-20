@@ -1,5 +1,4 @@
 <div class="card">
-  {{> back_button}}
   <div class="org-logo">
     <img class="org-logo__image" src="{{logo}}" alt="Company Logo"/>
   </div>
@@ -13,7 +12,7 @@
       {{/each}}
     </div>
     <div class="text-input__icon">
-      <input id="otp" name="otp" type="text" class="text-input text-input--primary input--otp required" maxlength="{{otpLength}}" value=""/>
+      <input id="otp" name="otp" type="text" class="text-input text-input--primary input--otp {{#if (gt otpLength 20)}}input--otp-wide{{/if}} required" maxlength="{{otpLength}}" value=""/>
     </div>
     {{#each devices as |device|}}
       {{#ifEq device.id ../selectedDeviceRef.id}}
@@ -23,11 +22,13 @@
     <button id="submit" data-actionId="checkOtp" type="submit" class="button button--primary brand-primary-bg" disabled>
       Sign On
     </button>
+    {{> forgot_device_link}}
     <div class="text-block" data-id="textblock">
       <div class="text-block--overflow-wrap">
         <a tabindex="0" data-actionId="cancelAuthentication" target="_self" class="anchor">
           Cancel</a>
       </div>
     </div>
+    {{> admin_message}}
   </form>
 </div>

@@ -15,7 +15,8 @@
     <form class="form" id="AuthnWidgetForm">
       <div class="stack stack--small" data-id="stack">
         <div class="text-input__icon">
-          <input id="email" type="email" name="email" class="text-input text-input required" value=""/>
+          <input id="email" type="email" name="email" class="text-input text-input required" value="{{allowedValue}}"
+                 {{#if readOnly}}readonly="readonly" style="background-color: #f0f0f0; cursor: not-allowed;"{{/if}}/>
         </div>
       </div>
       <div class="text-block" data-id="textblock">

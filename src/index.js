@@ -5,6 +5,7 @@ import 'regenerator-runtime/runtime'; //for async await
 import Store from './store';
 import redirectlessConfigValidator from './validators/redirectless';
 import { getCompatibility, doWebAuthn, doRegisterWebAuthn } from './utils/fidoFlowUtil';
+import { callPingIdDesktopConnector, authenticateViaSSOExtension, checkSSOCallback, isSafari, getGen2ErrorMessage } from './utils/pingIdDesktopGen2Util';
 import { completeStateCallback, failedStateCallback, FLOW_TYPE_USER_AUTHZ, FLOW_TYPE_AUTHZ } from './utils/redirectless';
 import paOnAuthorizationRequest from './utils/paOnAuthorizationRequest';
 import paOnAuthorizationSuccess from './utils/paOnAuthorizationSuccess';
@@ -97,7 +98,9 @@ export default class AuthnWidget {
       'VIP_ENROLLMENT', 'VIP_CREDENTIAL_REQUIRED', 'VIP_AUTHENTICATION_REQUIRED', 'VIP_CREDENTIAL_RESET_REQUIRED',
       'USER_ID_REQUIRED', 'AUTHENTICATOR_SELECTION_REQUIRED', 'INPUT_REQUIRED', 'ENTRUST_FAILED', 'FRAUD_EVALUATION_CHECK_REQUIRED',
       'AUTHENTICATION_CODE_RESPONSE_REQUIRED', 'BIOMETRIC_DEVICE_AUTHENTICATION_INFO_REQUIRED', 'FIDO2_ACTIVATION_REQUIRED',
-      'UPDATE_NICKNAME', 'OATH_TOKEN_PAIRING_TARGET_REQUIRED', 'OATH_TOKEN_ACTIVATION_REQUIRED'
+      'UPDATE_NICKNAME', 'OATH_TOKEN_PAIRING_TARGET_REQUIRED', 'OATH_TOKEN_ACTIVATION_REQUIRED',
+      'MFA_DENIED', 'YUBIKEY_ACTIVATION_REQUIRED', 'MOBILE_PAIRING_REQUIRED',
+      'PINGID_DESKTOP_ACTIVATION_REQUIRED', 'PINGID_DESKTOP_GEN2_ACTIVATION_REQUIRED', 'PINGID_DESKTOP_GEN2_ASSERTION_REQUIRED'
     ]
     .concat(oauthUserAuthorizationStates)
     .concat(oneTimeDeviceOtpStates)
@@ -184,6 +187,8 @@ export default class AuthnWidget {
     this.handleAgentlessSignOn = this.handleAgentlessSignOn.bind(this);
     this.postEmptyAuthentication = this.postEmptyAuthentication.bind(this);
     this.handleMfaDeviceSelection = this.handleMfaDeviceSelection.bind(this);
+    this.handleRetryDeviceSelection = this.handleRetryDeviceSelection.bind(this);
+    this.registerRetryDeviceSelectionHandler = this.registerRetryDeviceSelectionHandler.bind(this);
     this.handleCASChallengeMethodSelection = this.handleCASChallengeMethodSelection.bind(this);
     this.handleMfaOneTimeDeviceSelection = this.handleMfaOneTimeDeviceSelection.bind(this);
     this.handleMfaSetDefaultDeviceSelection = this.handleMfaSetDefaultDeviceSelection.bind(this);
@@ -258,13 +263,23 @@ export default class AuthnWidget {
     this.transitionFromResyncOathTokenMode = this.transitionFromResyncOathTokenMode.bind(this);
     this.resyncOathToken = this.resyncOathToken.bind(this);
     this.registerCountryCodePickerHandler = this.registerCountryCodePickerHandler.bind(this);
+    this.postPairingTargetRequired = this.postPairingTargetRequired.bind(this);
     this.registerOneTimeDeviceChangeEventHandler = this.registerOneTimeDeviceChangeEventHandler.bind(this);
     this.handleOneTimeDeviceChange = this.handleOneTimeDeviceChange.bind(this);
+    this.registerForgotDeviceHandler = this.registerForgotDeviceHandler.bind(this);
+    this.handleForgotDevice = this.handleForgotDevice.bind(this);
+    this.postPingIdDesktopGen2AssertionRequired = this.postPingIdDesktopGen2AssertionRequired.bind(this);
+    this.postPingIdDesktopGen2ActivationRequired = this.postPingIdDesktopGen2ActivationRequired.bind(this);
+    this.postPingIdDesktopActivationRequired = this.postPingIdDesktopActivationRequired.bind(this);
     this.stateTemplates = new Map();  //state -> handlebar templates
     this.eventHandler = new Map();  //state -> eventHandlers
     this.postRenderCallbacks = new Map();
     this.actionModels = new Map();
     this.redirectlessEnabled = false;
+    // Incremented whenever the user takes an explicit action (e.g. Forgot Your
+    // Device). In-flight polling loops and pending connector callbacks compare
+    // against it and abort instead of re-rendering stale state.
+    this.mfaPollToken = 0;
     this.store = new Store(flowId, baseUrl, options);
     this.store.registerListener(this.render);
     AuthnWidget.CORE_STATES.forEach(state => this.registerState(state), this);
@@ -320,6 +335,28 @@ export default class AuthnWidget {
     this.addEventHandler('PUSH_CONFIRMATION_TIMED_OUT', this.registerMfaEventHandler);
     this.addEventHandler('PUSH_CONFIRMATION_TIMED_OUT', this.registerMfaChangeDeviceEventHandler);
     this.addPostRenderCallback('MOBILE_PAIRING_REQUIRED', this.postContinueAuthentication);
+    this.addEventHandler('YUBIKEY_ACTIVATION_REQUIRED', this.registerMfaEventHandler);
+    this.addEventHandler('DEVICE_SELECTION_REQUIRED', this.registerForgotDeviceHandler);
+    this.addEventHandler('OTP_REQUIRED', this.registerForgotDeviceHandler);
+    this.addEventHandler('ASSERTION_REQUIRED', this.registerForgotDeviceHandler);
+    this.addEventHandler('PUSH_CONFIRMATION_WAITING', this.registerForgotDeviceHandler);
+    this.addEventHandler('PUSH_CONFIRMATION_TIMED_OUT', this.registerForgotDeviceHandler);
+    // Issue #154 follow-up: the rejected screen's Retry button (number-matching
+    // reason) and the Change Method link (#changeDevice) both need click
+    // handlers; previously neither was registered, so Change Method rendered
+    // but did nothing when clicked. Retry uses its own handler (immediate
+    // spinner) instead of the shared device-tile one, which must stay
+    // spinner-free to avoid a double repaint on the selection screen.
+    this.addEventHandler('PUSH_CONFIRMATION_REJECTED', this.registerRetryDeviceSelectionHandler);
+    this.addEventHandler('PUSH_CONFIRMATION_REJECTED', this.registerMfaChangeDeviceEventHandler);
+    this.addEventHandler('PUSH_CONFIRMATION_REJECTED', this.registerForgotDeviceHandler);
+    this.addEventHandler('PINGID_DESKTOP_GEN2_ASSERTION_REQUIRED', this.registerMfaEventHandler);
+    this.addEventHandler('PINGID_DESKTOP_GEN2_ASSERTION_REQUIRED', this.registerMfaChangeDeviceEventHandler);
+    this.addEventHandler('PINGID_DESKTOP_GEN2_ASSERTION_REQUIRED', this.registerForgotDeviceHandler);
+    this.addPostRenderCallback('PINGID_DESKTOP_GEN2_ASSERTION_REQUIRED', this.postPingIdDesktopGen2AssertionRequired);
+    this.addEventHandler('PINGID_DESKTOP_GEN2_ACTIVATION_REQUIRED', this.registerMfaEventHandler);
+    this.addPostRenderCallback('PINGID_DESKTOP_GEN2_ACTIVATION_REQUIRED', this.postPingIdDesktopGen2ActivationRequired);
+    this.addPostRenderCallback('PINGID_DESKTOP_ACTIVATION_REQUIRED', this.postPingIdDesktopActivationRequired);
     this.addEventHandler('ID_VERIFICATION_REQUIRED', this.registerIdVerificationRequiredEventHandler);
     this.addPostRenderCallback('ID_VERIFICATION_REQUIRED', this.postIdVerificationRequired);
     this.addPostRenderCallback('ID_VERIFICATION_IN_PROGRESS', this.handleIdVerificationInProgress);
@@ -347,6 +384,13 @@ export default class AuthnWidget {
     this.addEventHandler('SMS_PAIRING_TARGET_REQUIRED', this.registerCountryCodePickerHandler);
     this.addEventHandler('VOICE_PAIRING_TARGET_REQUIRED', this.registerCountryCodePickerHandler);
     this.addEventHandler('WHATSAPP_PAIRING_TARGET_REQUIRED', this.registerCountryCodePickerHandler);
+    // Pre-populate / Pre-Populate and Restrict: the email/phone field arrives
+    // filled (and possibly read-only) from allowedValue, so enable submit up
+    // front instead of waiting for an input event that never fires.
+    this.addPostRenderCallback('EMAIL_PAIRING_TARGET_REQUIRED', this.postPairingTargetRequired);
+    this.addPostRenderCallback('SMS_PAIRING_TARGET_REQUIRED', this.postPairingTargetRequired);
+    this.addPostRenderCallback('VOICE_PAIRING_TARGET_REQUIRED', this.postPairingTargetRequired);
+    this.addPostRenderCallback('WHATSAPP_PAIRING_TARGET_REQUIRED', this.postPairingTargetRequired);
 
     this.actionModels.set('checkUsernamePassword', { required: ['username', 'password'], properties: ['username', 'password', 'rememberMyUsername', 'thisIsMyDevice', 'captchaResponse'] });
     this.actionModels.set('initiateAccountRecovery', { properties: ['usernameHint'] });
@@ -395,6 +439,9 @@ export default class AuthnWidget {
     this.actionModels.set('submitOathTokenTarget', {required: ['serialNumber']});
     this.actionModels.set('activateOathTokenDevice', {required: ['otp']});
     this.actionModels.set('resyncOathToken', {required: ['id', 'otp']});
+    this.actionModels.set('activateYubikeyDevice', {required: ['otp']});
+    this.actionModels.set('activatePingIdDesktopGen2Device', {required: ['origin', 'attestation']});
+    this.actionModels.set('pingIdDesktopGen2CheckAssertion', {required: ['assertion', 'origin']});
   }
 
   init() {
@@ -573,7 +620,10 @@ export default class AuthnWidget {
     if (document.querySelector("#spinnerId")) {
       document.querySelector('#spinnerId').style.display = 'block';
     }
-    setTimeout(() => {
+    // The handle is kept so the screen-skip path (maybeSkipScreenPerAdapterSetting)
+    // can cancel the delayed continue when it advances immediately instead.
+    clearTimeout(this.continueAuthenticationTimer);
+    this.continueAuthenticationTimer = setTimeout(() => {
       this.store.dispatch('POST_FLOW', 'continueAuthentication', '{}');
     }, 1000)
   }
@@ -623,7 +673,10 @@ export default class AuthnWidget {
   async postMobileActivationRequired() {
     let data = this.store.getStore();
     let QRCode = require('qrcode');
-    QRCode.toCanvas(document.getElementById('qrcode'), data.pairingKey, error => {
+    // Match the IK mobile-activation template: encode the pairing URI when the
+    // state provides one (PingID Mobile), otherwise the plain pairing key.
+    const qrCodeText = data.pairingUrl || data.pairingKey;
+    QRCode.toCanvas(document.getElementById('qrcode'), qrCodeText, error => {
       if (error) {
         document.getElementById("pairing-message").innerText =
           `Enter the pairing key using ${data.applicationName} to finish pairing.`;
@@ -634,7 +687,11 @@ export default class AuthnWidget {
   }
 
   async pollMobileActivationState() {
+    const pollToken = this.mfaPollToken;
     let pollState = await this.store.getState();
+    if (pollToken !== this.mfaPollToken) {
+      return; // user took an explicit action; drop the stale poll
+    }
     if (pollState.status === 'MOBILE_ACTIVATION_REQUIRED') {
       // continue waiting
       clearTimeout(this.pollMobileActivationStateHandler);
@@ -682,13 +739,14 @@ export default class AuthnWidget {
 
   postOTPRequired() {
     let data = this.store.getStore();
-    if (data.changeDevicePermitted === false) {
+    if (data.changeDevicePermitted === false && document.querySelector('#changeDevice')) {
       document.querySelector('#changeDevice').style.display = 'none';
     }
   }
 
   async postAuthenticationCodeResponseRequired()
   {
+    const pollToken = this.mfaPollToken;
     let data = this.store.getStore();
     let QRCode = require('qrcode');
     QRCode.toCanvas(document.getElementById('qrcode'), data.uri, { 'width': 128, 'height': 128 },
@@ -700,6 +758,9 @@ export default class AuthnWidget {
         }
       });
     let pollState = await this.store.getState();
+    if (pollToken !== this.mfaPollToken) {
+      return; // user took an explicit action; drop the stale poll
+    }
     if (pollState.status === 'AUTHENTICATION_CODE_RESPONSE_REQUIRED') {
       // continue waiting
       clearTimeout(this.pollPushNoticationState);
@@ -761,10 +822,172 @@ export default class AuthnWidget {
     });
   }
 
+  registerForgotDeviceHandler() {
+    if (document.getElementById('forgotDevice') !== null) {
+      document.getElementById('forgotDevice')
+        .addEventListener('click', this.handleForgotDevice);
+    }
+  }
+
+  handleForgotDevice(evt) {
+    evt.preventDefault();
+    // The link lives inside forms that carry their own data-actionId (assertion
+    // and Gen2 assertion flows). Without stopping propagation the click bubbles
+    // to the form's dispatch handler, which would read the anchor as the target
+    // and re-post the outer action (e.g. checkAssertion), replaying the request.
+    evt.stopPropagation();
+    // Invalidate any in-flight polling loop or pending connector callback so it
+    // cannot re-render or re-post stale state after this dispatch starts.
+    this.mfaPollToken++;
+    clearTimeout(this.pollPushNoticationState);
+    clearTimeout(this.pollPingIdDesktopActivationStateHandler);
+    this.renderSpinnerTemplate();
+    this.store.dispatch('POST_FLOW', 'forgotYourDevice', '{}');
+  }
+
+  postPingIdDesktopGen2AssertionRequired() {
+    let data = this.store.getStore();
+    if (data.changeDevicePermitted === false && document.querySelector('#changeDevice')) {
+      document.querySelector('#changeDevice').style.display = 'none';
+    }
+    // Handle an SSO extension callback (Safari redirect back with the assertion)
+    const ssoResult = checkSSOCallback();
+    if (ssoResult && ssoResult.error) {
+      this.showPingIdDesktopGen2Error(ssoResult.error);
+      return;
+    }
+    if (ssoResult && ssoResult.token) {
+      this.submitPingIdDesktopGen2Assertion(ssoResult.token);
+      return;
+    }
+    if (isSafari()) {
+      authenticateViaSSOExtension(data.publicKeyCredentialRequestOptions, 'authenticate');
+      return;
+    }
+    // Standard flow: send the request JWT to the local PingID Desktop connector
+    const pollToken = this.mfaPollToken;
+    callPingIdDesktopConnector(data.port, data.publicKeyCredentialRequestOptions, 'authenticate')
+      .then((assertion) => {
+        if (pollToken !== this.mfaPollToken) {
+          return; // user took an explicit action; drop the stale connector response
+        }
+        this.submitPingIdDesktopGen2Assertion(assertion);
+      })
+      .catch((err) => {
+        if (pollToken !== this.mfaPollToken) {
+          return;
+        }
+        this.showPingIdDesktopGen2Error(err.message);
+      });
+  }
+
+  submitPingIdDesktopGen2Assertion(assertion) {
+    if (document.querySelector('#pingIdDesktopGen2SpinnerId')) {
+      document.querySelector('#pingIdDesktopGen2SpinnerId').style.display = 'block';
+    }
+    let formData = {
+      assertion: assertion,
+      origin: window.location.origin
+    };
+    this.store.dispatch('POST_FLOW', 'pingIdDesktopGen2CheckAssertion', JSON.stringify(formData));
+  }
+
+  showPingIdDesktopGen2Error(errorCode) {
+    if (document.querySelector('#pingIdDesktopGen2SpinnerId')) {
+      document.querySelector('#pingIdDesktopGen2SpinnerId').style.display = 'none';
+    }
+    if (document.querySelector('#pingIdDesktopGen2AuthenticatingId')) {
+      document.querySelector('#pingIdDesktopGen2AuthenticatingId').style.display = 'none';
+    }
+    if (document.querySelector('#pingIdDesktopGen2UnsupportedId')) {
+      document.querySelector('#pingIdDesktopGen2UnsupportedId').style.display = 'block';
+    }
+    if (document.querySelector('#pingIdDesktopGen2ErrorText')) {
+      const message = getGen2ErrorMessage(errorCode);
+      if (message) {
+        document.querySelector('#pingIdDesktopGen2ErrorText').innerText = message;
+      }
+    }
+    console.log('PingID Desktop Gen2 authentication failed: ' + errorCode);
+  }
+
+  postPingIdDesktopGen2ActivationRequired() {
+    let data = this.store.getStore();
+    // Handle an SSO extension callback (Safari redirect back with the registration token)
+    const ssoResult = checkSSOCallback();
+    if (ssoResult && ssoResult.error) {
+      this.showPingIdDesktopGen2ActivationError(ssoResult.error);
+      return;
+    }
+    if (ssoResult && ssoResult.token) {
+      this.submitPingIdDesktopGen2Attestation(ssoResult.token);
+      return;
+    }
+    if (isSafari()) {
+      authenticateViaSSOExtension(data.pingIdDesktopCredentialCreationOptions, 'register');
+      return;
+    }
+    // Standard flow: send the creation JWT to the local PingID Desktop connector
+    const pollToken = this.mfaPollToken;
+    callPingIdDesktopConnector(data.port, data.pingIdDesktopCredentialCreationOptions, 'register')
+      .then((attestation) => {
+        if (pollToken !== this.mfaPollToken) {
+          return; // user took an explicit action; drop the stale connector response
+        }
+        this.submitPingIdDesktopGen2Attestation(attestation);
+      })
+      .catch((err) => {
+        if (pollToken !== this.mfaPollToken) {
+          return;
+        }
+        this.showPingIdDesktopGen2ActivationError(err.message);
+      });
+  }
+
+  submitPingIdDesktopGen2Attestation(attestation) {
+    let formData = {
+      attestation: attestation,
+      origin: window.location.origin
+    };
+    this.renderSpinnerTemplate();
+    this.store.dispatch('POST_FLOW', 'activatePingIdDesktopGen2Device', JSON.stringify(formData));
+  }
+
+  showPingIdDesktopGen2ActivationError(errorCode) {
+    // Cancel the pairing and surface the error through the flow's error handling
+    console.log('PingID Desktop Gen2 activation failed: ' + errorCode);
+    this.store.dispatch('POST_FLOW', 'cancelDevicePairing', '{}');
+  }
+
+  postPingIdDesktopActivationRequired() {
+    // The IK treats a GET on the flow in this state as a pairing-status poll
+    this.pollPingIdDesktopActivationState();
+  }
+
+  async pollPingIdDesktopActivationState() {
+    const pollToken = this.mfaPollToken;
+    let pollState = await this.store.getState();
+    if (pollToken !== this.mfaPollToken) {
+      return; // user took an explicit action; drop the stale poll
+    }
+    if (pollState.status === 'PINGID_DESKTOP_ACTIVATION_REQUIRED') {
+      // continue waiting
+      clearTimeout(this.pollPingIdDesktopActivationStateHandler);
+      this.pollPingIdDesktopActivationStateHandler = setTimeout(() => {
+        this.pollPingIdDesktopActivationState();
+      }, 2000);
+    } else {
+      clearTimeout(this.pollPingIdDesktopActivationStateHandler);
+      this.store
+        .dispatch('GET_FLOW')
+        .catch(() => this.generalErrorRenderer(AuthnWidget.COMMUNICATION_ERROR_MSG));
+    }
+  }
+
   postAssertionRequired() {
     let data = this.store.getStore();
     var selectedDevice = data.devices.filter(device => {return device.id === data.selectedDeviceRef.id;});
-    if (data.changeDevicePermitted === false) {
+    if (data.changeDevicePermitted === false && document.querySelector('#changeDevice')) {
       document.querySelector('#changeDevice').style.display = 'none';
     }
     getCompatibility().then(value => {
@@ -785,7 +1008,9 @@ export default class AuthnWidget {
           document.querySelector('#assertionRequiredSpinnerId').style.display = 'none';
           document.querySelector('#assertionRequiredAuthenticatingId').style.display = 'none';
           document.querySelector('#unsupportedDeviceId').style.display = 'block';
-          document.querySelector('#changeDevice').style.display = 'none';
+          if (document.querySelector('#changeDevice')) {
+            document.querySelector('#changeDevice').style.display = 'none';
+          }
           document.querySelector('#deviceInfoBlockId').style.display = 'none';
         } else {
           // Hide spinner and info section, show error so user can go back to device selection if required or cancel
@@ -1002,6 +1227,13 @@ export default class AuthnWidget {
 
   handleMfaDeviceSelection(evt) {
     evt.preventDefault();
+    // The device tiles nest data-mfa-selection on the tile AND on its children
+    // (icon container, content container), and registerMfaEventHandler attaches
+    // this listener to every match — without stopping propagation a click on a
+    // child fires the child's listener and then bubbles to the tile's, POSTing
+    // selectDevice TWICE (the second POST lands in the state the first response
+    // already moved the flow to). Same bubble-guard as dispatch().
+    evt.stopPropagation();
     let source = evt.currentTarget;
     if (source) {
       let deviceId = source.dataset['mfaSelection'];
@@ -1010,9 +1242,37 @@ export default class AuthnWidget {
           "id": deviceId
         }
       };
+      // Full-page spinner: the device list must be hidden while the
+      // selectDevice round-trip runs. The store hides the spinner again after
+      // the response, so this matches every other action screen.
+      this.renderSpinnerTemplate();
       this.store.dispatch('POST_FLOW', "selectDevice", JSON.stringify(data));
     } else {
       console.log("ERROR - Unable to dispatch device selection as the target was null");
+    }
+  }
+
+  handleRetryDeviceSelection(evt) {
+    evt.preventDefault();
+    let source = evt.currentTarget;
+    if (source) {
+      // Retry from the push-rejected screen (number-matching reason):
+      // re-select the same device the way the IK templates' retry() does.
+      // The spinner renders synchronously, like the cancel/Change-Method
+      // handlers, so the click gives immediate feedback while the
+      // selectDevice round-trip runs. Scoped to this button — the shared
+      // device-tile handler must NOT replace the page with a spinner (it
+      // caused a double repaint before the push screen appeared).
+      let deviceId = source.dataset['retrySelection'];
+      let data = {
+        "deviceRef": {
+          "id": deviceId
+        }
+      };
+      this.renderSpinnerTemplate();
+      this.store.dispatch('POST_FLOW', "selectDevice", JSON.stringify(data));
+    } else {
+      console.log("ERROR - Unable to dispatch retry selection as the target was null");
     }
   }
 
@@ -1226,8 +1486,22 @@ export default class AuthnWidget {
   }
 
   registerMfaChangeDeviceEventHandler() {
-    document.getElementById('changeDevice')
-            .addEventListener('click', this.handleMfaDeviceChange);
+    // P14C-85737: the Change Method link is rendered conditionally
+    // (canChangeDevice), so guard the lookup.
+    const changeDevice = document.getElementById('changeDevice');
+    if (changeDevice) {
+      changeDevice.addEventListener('click', this.handleMfaDeviceChange);
+    }
+  }
+
+  registerRetryDeviceSelectionHandler() {
+    // Push-rejected Retry button (number-matching reason): unlike the device
+    // tiles, this click must show the spinner immediately — scoped here so the
+    // shared tile handler keeps its original no-spinner behavior.
+    // The selector matches the hyphenated attribute (data-retry-selection);
+    // dataset retrySelection is its camelCase form.
+    Array.from(document.querySelectorAll('[data-retry-selection]'))
+      .forEach(element => element.addEventListener('click', this.handleRetryDeviceSelection));
   }
 
   registerMfaOneTimeDeviceChangeEventHandler() {
@@ -1254,14 +1528,24 @@ export default class AuthnWidget {
     this.render(this.store.getPreviousStore(), state);
   }
 
-  async handleMfaDeviceChange(evt) {
+  handleMfaDeviceChange(evt) {
     evt.preventDefault();
-    let state = await this.store.getState();
     if (this.pollPushNoticationState) {
       clearTimeout(this.pollPushNoticationState);
     }
-    state.status = 'DEVICE_SELECTION_REQUIRED';
-    this.render(this.store.getPreviousStore(), state);
+    // Invalidate any in-flight poller or pending connector callback so it
+    // cannot re-render stale state after the device-selection screen shows.
+    this.mfaPollToken++;
+    clearTimeout(this.pollPingIdDesktopActivationStateHandler);
+    // Deselect the current device the way the IK templates' unselectDevice()
+    // does: POST selectDevice with a blank device id. A GET of the flow would
+    // not work from every state (e.g. PINGID_DESKTOP_GEN2_ASSERTION_REQUIRED
+    // has no resume branch in the IK's status handler), while the blank
+    // selectDevice is explicitly supported server-side from any auth state.
+    // The spinner renders synchronously first so the link cannot be clicked
+    // again while the round-trip completes (same pattern as other buttons).
+    this.renderSpinnerTemplate();
+    this.store.dispatch('POST_FLOW', 'selectDevice', JSON.stringify({ deviceRef: { id: '' } }));
   }
 
   registerMfaUsePasscodeEventHandler() {
@@ -1280,9 +1564,10 @@ export default class AuthnWidget {
   }
 
   async postPushNotificationWait() {
+    const pollToken = this.mfaPollToken;
     let storeState = this.store.getStore();
     let data = this.store.getStore();
-    if (data.changeDevicePermitted === false) {
+    if (data.changeDevicePermitted === false && document.querySelector('#changeDevice')) {
       document.querySelector('#changeDevice').style.display = 'none';
     }
     if (storeState.status === 'OTP_REQUIRED') {
@@ -1302,14 +1587,23 @@ export default class AuthnWidget {
 
     let pollState = await this.store.getState();
     if (pollState.status === 'PUSH_CONFIRMATION_WAITING') {
-      // continue waiting
+      // continue waiting (abort if the user took an explicit action meanwhile)
+      if (pollToken !== this.mfaPollToken) {
+        return;
+      }
       clearTimeout(this.pollPushNoticationState);
       this.pollPushNoticationState = setTimeout(() => {
         this.postPushNotificationWait();
       }, 1000);
     } else if (pollState.status === 'DEVICE_MANAGEMENT') {
+      if (pollToken !== this.mfaPollToken) {
+        return;
+      }
       this.render(this.store.getPreviousStore(), pollState);
     } else {
+      if (pollToken !== this.mfaPollToken) {
+        return;
+      }
       clearTimeout(this.pollPushNoticationState);
       this.store
         .dispatch('GET_FLOW')
@@ -1362,10 +1656,16 @@ export default class AuthnWidget {
           }
         }
         if (input.type === 'text' && input.id === 'otp') {
-          const tooShortOrTooLong = (input.value.length < 6 || input.value.length > input.maxLength);
-          const isNumeric = /^\d+$/.test(input.value);
+          // YubiKey OTPs are 44-character alphanumeric (modhex) strings; other OTPs are numeric.
+          // The input's maxlength comes from the state's otpLength, so derive the expected length
+          // from it instead of assuming a fixed numeric length.
+          const expectedLength = input.maxLength > 0 ? input.maxLength : 6;
+          const isYubikey = expectedLength > 20;
+          const tooShortOrTooLong = input.value.length < (isYubikey ? expectedLength : 6) ||
+            input.value.length > expectedLength;
+          const isAllowedChars = isYubikey ? /^[a-zA-Z0-9]+$/.test(input.value) : /^\d+$/.test(input.value);
 
-          if (tooShortOrTooLong || !isNumeric) {
+          if (tooShortOrTooLong || !isAllowedChars) {
             disabled = true;
           }
         }
@@ -1781,7 +2081,19 @@ export default class AuthnWidget {
 
   dispatch(evt) {
     evt.preventDefault();
+    // The handler is registered on every [data-actionId] element, including
+    // forms (e.g. the assertion form). Handle the innermost action and stop the
+    // event from reaching the outer container's listener, which would otherwise
+    // POST the outer action a second time (replaying checkAssertion etc.).
+    evt.stopPropagation();
     let source = evt.target || evt.srcElement;
+    // A click on a child that is not itself an action element (e.g. the
+    // Forgot Your Device link) bubbles here; only POST when the click actually
+    // started on an action element or the form itself.
+    if (source !== evt.currentTarget && !source.dataset['actionid']) {
+      console.log('ignoring bubbled click without an actionId target');
+      return;
+    }
     console.log('source: ' + source.dataset['actionid']);
     let actionId = source.dataset['actionid'];
     let formData = this.getFormData();
@@ -1880,6 +2192,42 @@ export default class AuthnWidget {
     return count > 1;
   }
 
+  // P14C-85737: derive the Change Device / Forgot Device gating flags the IK
+  // templates compute. Paired devices exclude one-time (backup) devices;
+  // Change Method needs a choice to change to (paired > 1, or a single paired
+  // device in a manual-pairing flow); Forgot Your Device on auth screens
+  // applies to the single-paired-device-with-one-time-backup case, and on
+  // device selection the loose gate only needs one-time backup devices.
+  static deriveDeviceGatingFlags(devices, changeDevicePermitted, manualPairing, backupAuthEnabled) {
+    const list = Array.isArray(devices) ? devices : [];
+    const pairedDevices = list.filter(device => device.isOneTimeDevice !== true);
+    const oneTimeDevices = list.filter(device => device.isOneTimeDevice === true);
+    return {
+      pairedDeviceCount: pairedDevices.length,
+      oneTimeDeviceCount: oneTimeDevices.length,
+      canChangeDevice: changeDevicePermitted === true &&
+        (pairedDevices.length > 1 || (pairedDevices.length === 1 && manualPairing === true)),
+      canForgotDevice: backupAuthEnabled === true &&
+        pairedDevices.length === 1 && oneTimeDevices.length > 0,
+      canForgotDeviceLoose: backupAuthEnabled === true && oneTimeDevices.length > 0,
+    };
+  }
+
+  // Flags for the SELECTED device, for templates that render outside a device
+  // loop (e.g. push_confirmation_waiting's heading and number-matching text).
+  // The IK templates differentiate a PingID Mobile device from the native
+  // PingOne Authenticator via sourceDeviceType == "PINGID_MOBILE" (the mapped
+  // device.type is Android/iPhone for both).
+  static deriveSelectedDeviceFlags(devices, selectedDeviceRef) {
+    const list = Array.isArray(devices) ? devices : [];
+    const selected = selectedDeviceRef && selectedDeviceRef.id !== undefined
+      ? list.find(device => device.id === selectedDeviceRef.id)
+      : null;
+    return {
+      isPingIdMobile: !!(selected && selected.sourceDeviceType === 'PINGID_MOBILE'),
+    };
+  }
+
   render(prevState, state) {
     let currentState = state.status;
     let templateName = currentState;
@@ -1900,7 +2248,10 @@ export default class AuthnWidget {
     }
     let widgetDiv = document.getElementById(this.divId);
     const store = {store: this.store};
-    var params = Object.assign(state, this.assets.toTemplateParams(), store);
+    const derivedFlags = AuthnWidget.deriveDeviceGatingFlags(
+      state.devices, state.changeDevicePermitted, state.manualPairing, state.backupAuthEnabled);
+    const selectedDeviceFlags = AuthnWidget.deriveSelectedDeviceFlags(state.devices, state.selectedDeviceRef);
+    var params = Object.assign(state, derivedFlags, selectedDeviceFlags, this.assets.toTemplateParams(), store);
     widgetDiv.innerHTML = template(params);
     this.registerEventListeners(currentState);
     // execute all post render callbacks
@@ -1914,6 +2265,71 @@ export default class AuthnWidget {
       if (firstInput) {
         firstInput.focus();
       }
+    }
+
+    // Issue #154: the adapter surfaces its "Show Error / Success / Timeout Screens"
+    // settings on the state models. When the screen is disabled, skip rendering it
+    // and take the action the user would have taken (Cancel on error states,
+    // Continue on completion) so PF advances the policy chain.
+    this.maybeSkipScreenPerAdapterSetting(state);
+  }
+
+  /*
+   * Issue #154: the MFA IK adapter surfaces its "Show Error Screens" /
+   * "Show Success Screens" / "Show Timeout Screens" settings as boolean fields on the
+   * state models (displayErrorScreen / displaySuccessScreen / displayTimeoutScreen).
+   * When a screen is disabled the widget must not render it — instead it dispatches
+   * the action the user would have taken, letting PingFederate advance to the next
+   * adapter in the policy chain (whose state arrives in the same response).
+   * States without the flag (older IK versions, non-adapter states) render normally.
+   */
+  maybeSkipScreenPerAdapterSetting(state) {
+    const skipAction = AuthnWidget.getScreenSkipAction(state);
+    if (!skipAction) {
+      return;
+    }
+    // Guard against loops: a skip dispatch must never trigger another skip from the
+    // same state (e.g. the next adapter also parks us on a screen-flagged state).
+    // Bump the token so in-flight pollers drop their stale renders too.
+    if (state.__screenSkipAttempted) {
+      console.log('screen already skipped for this state; rendering as-is');
+      return;
+    }
+    state.__screenSkipAttempted = true;
+    this.mfaPollToken++;
+    // MFA_COMPLETED normally auto-continues on a 1s timer (postContinueAuthentication);
+    // the skip advances immediately, so cancel the pending timer to avoid a double POST.
+    clearTimeout(this.continueAuthenticationTimer);
+    console.log(`screen disabled by adapter setting; dispatching ${skipAction}`);
+    this.renderSpinnerTemplate();
+    this.store.dispatch('POST_FLOW', skipAction, '{}');
+  }
+
+  /*
+   * Issue #154: map a state to the action that advances past its disabled screen,
+   * or null when the screen should be shown. The flag names mirror the IK's
+   * Custom* state models (CustomMfaFailed, CustomPushConfirmationRejected,
+   * CustomPushConfirmationTimedOut, CustomDevicePairingMethodFailed,
+   * CustomMfaCompleted).
+   */
+  static getScreenSkipAction(state) {
+    if (!state || !state.status) {
+      return null;
+    }
+    switch (state.status) {
+      case 'MFA_FAILED':
+      case 'MFA_DENIED':
+        return state.displayErrorScreen === false ? 'cancelAuthentication' : null;
+      case 'MFA_DEVICE_PAIRING_METHOD_FAILED':
+        return state.displayErrorScreen === false ? 'cancelDevicePairing' : null;
+      case 'PUSH_CONFIRMATION_REJECTED':
+        return state.displayErrorScreen === false ? 'cancelAuthentication' : null;
+      case 'PUSH_CONFIRMATION_TIMED_OUT':
+        return state.displayTimeoutScreen === false ? 'cancelAuthentication' : null;
+      case 'MFA_COMPLETED':
+        return state.displaySuccessScreen === false ? 'continueAuthentication' : null;
+      default:
+        return null;
     }
   }
 
@@ -2318,6 +2734,18 @@ export default class AuthnWidget {
   handleResumeAuthentication() {
     this.renderSpinnerTemplate();
     this.store.dispatch('POST_FLOW', 'resumeAuthentication', null);
+  }
+
+  // Pre-populate / Pre-Populate and Restrict modes for the email/phone pairing
+  // target screens: when the state carries allowedValue the field is already
+  // filled (and with readOnly, not editable), so enable the submit button up
+  // front — the normal input-event path never fires for a read-only field.
+  postPairingTargetRequired() {
+    const input = document.getElementById('email') || document.getElementById('phone');
+    const submit = document.getElementById('submit');
+    if (input && input.value && submit && submit.disabled) {
+      submit.disabled = false;
+    }
   }
 
   registerCountryCodePickerHandler() {

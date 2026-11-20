@@ -5,9 +5,14 @@
   {{> errors}}
   <h1 class="heading">Setup MFA</h1>
   <div class="text-block">
-    <div class="text-block--overflow-wrap">To enhance the security of your account, you will need to enroll in multi-factor
-      authentication (MFA). You will receive security codes via email or text message that you will use to authenticate
-      with.
+    <div class="text-block--overflow-wrap">
+      {{#if specialInlineRegistration}}
+        Your current MFA devices can't be used to sign in to this app. To continue, verify your identity with an existing device, then register a new MFA device that meets this app's sign-in requirements. Select Setup to begin.
+      {{else}}
+        To enhance the security of your account, you will need to enroll in multi-factor
+        authentication (MFA). You will receive security codes via email or text message that you will use to authenticate
+        with.
+      {{/if}}
     </div>
   </div>
   <div class="tile-selector tile-selector--stacked">

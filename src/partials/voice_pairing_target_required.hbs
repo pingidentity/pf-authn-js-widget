@@ -92,6 +92,7 @@
     <form class="form" id="AuthnWidgetForm">
       <div class="stack stack--small" data-id="stack">
         <div class="phone-input-wrapper">
+          {{#unless allowedValue}}
           <div class="dropdown-container">
             <div class="dropdown-input-container">
               <input type="text" id="countryCodeInput" name="countryCodeInput" class="dropdown-input" value="+1"
@@ -101,8 +102,10 @@
             <div id="dropdownList" class="dropdown-list expanded-dropdown">
             </div>
           </div>
+          {{/unless}}
           <div class="text-input__icon">
-            <input id="phone" type="tel" name="phone" class="text-input text-input required" value=""/>
+            <input id="phone" type="tel" name="phone" class="text-input text-input required" value="{{allowedValue}}"
+                   {{#if readOnly}}readonly="readonly" style="background-color: #f0f0f0; cursor: not-allowed;"{{/if}}/>
           </div>
         </div>
       </div>

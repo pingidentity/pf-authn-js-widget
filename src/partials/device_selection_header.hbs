@@ -2,32 +2,32 @@
   <h1 class="heading-text centered-text icon-heading">
     <svg viewBox="0 0 24 24" role="presentation">
       <path d="M16,18H7V4H16M11.5,22A1.5,1.5 0 0,1 10,20.5A1.5,1.5 0 0,1 11.5,19A1.5,1.5 0 0,1 13,20.5A1.5,1.5 0 0,1 11.5,22M15.5,1H7.5A2.5,2.5 0 0,0 5,3.5V20.5A2.5,2.5 0 0,0 7.5,23H15.5A2.5,2.5 0 0,0 18,20.5V3.5A2.5,2.5 0 0,0 15.5,1Z"/>
-    </svg><span>PingOne Authenticator</span></h1>
+    </svg><span>{{#if @root.targetApplicationName}}{{@root.targetApplicationName}}{{else if @root.isPingIdMobile}}PingID Mobile{{else}}PingOne Authenticator{{/if}}</span></h1>
 {{else ifEq device.type "iPhone"}}
   <h1 class="heading-text centered-text icon-heading">
     <svg viewBox="0 0 24 24" role="presentation">
       <path d="M16,18H7V4H16M11.5,22A1.5,1.5 0 0,1 10,20.5A1.5,1.5 0 0,1 11.5,19A1.5,1.5 0 0,1 13,20.5A1.5,1.5 0 0,1 11.5,22M15.5,1H7.5A2.5,2.5 0 0,0 5,3.5V20.5A2.5,2.5 0 0,0 7.5,23H15.5A2.5,2.5 0 0,0 18,20.5V3.5A2.5,2.5 0 0,0 15.5,1Z"/>
-    </svg><span class="inline-icon">PingOne Authenticator</span></h1>
+    </svg><span class="inline-icon">{{#if @root.targetApplicationName}}{{@root.targetApplicationName}}{{else if @root.isPingIdMobile}}PingID Mobile{{else}}PingOne Authenticator{{/if}}</span></h1>
 {{else ifEq device.type "TOTP"}}
   <h1 class="heading-text centered-text icon-heading">
     <svg viewBox="0 0 24 24" role="presentation">
       <path d="M16,18H7V4H16M11.5,22A1.5,1.5 0 0,1 10,20.5A1.5,1.5 0 0,1 11.5,19A1.5,1.5 0 0,1 13,20.5A1.5,1.5 0 0,1 11.5,22M15.5,1H7.5A2.5,2.5 0 0,0 5,3.5V20.5A2.5,2.5 0 0,0 7.5,23H15.5A2.5,2.5 0 0,0 18,20.5V3.5A2.5,2.5 0 0,0 15.5,1Z"/>
-    </svg><span class="inline-icon">Authenticator App</span></h1>
+    </svg><span class="inline-icon">{{coalesce @root.targetApplicationName "Authenticator App"}}</span></h1>
 {{else ifEq device.type "SMS"}}
   <h1 class="heading-text centered-text icon-heading">
     <svg viewBox="0 0 24 24" role="presentation">
       <path d="M20,2A2,2 0 0,1 22,4V16A2,2 0 0,1 20,18H6L2,22V4C2,2.89 2.9,2 4,2H20M4,4V17.17L5.17,16H20V4H4M6,7H18V9H6V7M6,11H15V13H6V11Z"></path>
-    </svg><span class="inline-icon">Text Message</span></h1>
+    </svg><span class="inline-icon">{{coalesce @root.targetApplicationName "Text Message"}}</span></h1>
 {{else ifEq device.type "Voice"}}
   <h1 class="heading-text centered-text icon-heading">
     <svg viewBox="0 0 24 24" role="presentation">
       <path d="M20,15.5C18.8,15.5 17.5,15.3 16.4,14.9C16.3,14.9 16.2,14.9 16.1,14.9C15.8,14.9 15.6,15 15.4,15.2L13.2,17.4C10.4,15.9 8,13.6 6.6,10.8L8.8,8.6C9.1,8.3 9.2,7.9 9,7.6C8.7,6.5 8.5,5.2 8.5,4C8.5,3.5 8,3 7.5,3H4C3.5,3 3,3.5 3,4C3,13.4 10.6,21 20,21C20.5,21 21,20.5 21,20V16.5C21,16 20.5,15.5 20,15.5M5,5H6.5C6.6,5.9 6.8,6.8 7,7.6L5.8,8.8C5.4,7.6 5.1,6.3 5,5M19,19C17.7,18.9 16.4,18.6 15.2,18.2L16.4,17C17.2,17.2 18.1,17.4 19,17.4V19Z"/>
-    </svg><span class="inline-icon">Voice</span></h1>
+    </svg><span class="inline-icon">{{coalesce @root.targetApplicationName "Voice"}}</span></h1>
 {{else ifEq device.type "Email"}}
   <h1 class="heading-text centered-text icon-heading">
     <svg viewBox="0 0 24 24" role="presentation">
       <path d="M22 6C22 4.9 21.1 4 20 4H4C2.9 4 2 4.9 2 6V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6M20 6L12 11L4 6H20M20 18H4V8L12 13L20 8V18Z"/>
-    </svg><span class="inline-icon">Email</span></h1>
+    </svg><span class="inline-icon">{{coalesce @root.targetApplicationName "Email"}}</span></h1>
 {{else ifEq device.type "WHATSAPP"}}
   <h1 class="heading-text centered-text icon-heading">
     <svg viewBox="0 0 24 24" role="presentation" style="width: 32px; height: 32px;">
@@ -35,7 +35,7 @@
             style="fill: rgb(61, 69, 77);">
       </path>
     </svg>
-    <span class="inline-icon">Whatsapp</span></h1>
+    <span class="inline-icon">{{coalesce @root.targetApplicationName "Whatsapp"}}</span></h1>
 {{else ifEq device.type "OATH_TOKEN"}}
   <h1 class="heading-text centered-text icon-heading">
     <svg width="27" height="27" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 27 27" fill="none">
@@ -44,7 +44,32 @@
       <path fill-rule="evenodd" clip-rule="evenodd" d="M20.7589 8.82056L12.4942 17.0852L9.92236 14.5147L18.1884 6.25006L20.7589 8.82056Z" fill="#3D454D"></path>
       <path fill-rule="evenodd" clip-rule="evenodd" d="M22.9782 4.74667C22.5254 4.74667 22.1593 4.37926 22.1593 3.9278C22.1593 3.47498 22.5254 3.10757 22.9782 3.10757C23.4297 3.10757 23.7971 3.47498 23.7971 3.9278C23.7971 4.37926 23.4297 4.74667 22.9782 4.74667ZM22.9782 1.81689C21.8136 1.81689 20.8687 2.76185 20.8687 3.92779C20.8687 5.09238 21.8136 6.03598 22.9782 6.03598C24.1428 6.03598 25.0877 5.09238 25.0877 3.92779C25.0877 2.76185 24.1428 1.81689 22.9782 1.81689Z" fill="#3D454D"></path>
     </svg>
-    <span class="inline-icon">Hardware Token</span></h1>
+    <span class="inline-icon">{{coalesce @root.targetApplicationName "Hardware Token"}}</span></h1>
+{{else ifEq device.type "YUBIKEY"}}
+  <h1 class="heading-text centered-text icon-heading">
+    <svg viewBox="0 0 24 24" role="presentation">
+      <path d="M8 15C8.55 15 9 15.45 9 16C9 16.55 8.55 17 8 17C7.45 17 7 16.55 7 16C7 15.45 7.45 15 8 15M15.07 4.69L16.5 6.1L15.07 7.5L13.66 6.1L15.07 4.69M17.9 7.5L19.31 8.93L17.9 10.34L16.5 8.93L17.9 7.5M8 13C6.34 13 5 14.34 5 16C5 17.66 6.34 19 8 19C9.66 19 11 17.66 11 16C11 14.34 9.66 13 8 13M9.77 4.33L10.5 5.08L14.29 1.29C14.47 1.11 14.72 1 15 1C15.28 1 15.53 1.11 15.71 1.29L22.78 8.36L22.78 8.37C22.92 8.54 23 8.76 23 9C23 9.3 22.87 9.57 22.66 9.76L22.66 9.76L18.93 13.5L19.67 14.23L12.95 20.95C11.68 22.22 9.93 23 8 23C4.13 23 1 19.87 1 16C1 14.07 1.78 12.32 3.05 11.05L9.77 4.33M20.59 9L15 3.41L11.93 6.5L17.5 12.08L20.59 9Z"
+            style="fill: rgb(61, 69, 77);"></path>
+    </svg><span class="inline-icon">{{coalesce @root.targetApplicationName "YubiKey"}}</span></h1>
+{{else ifEq device.type "PINGID_DESKTOP"}}
+  <h1 class="heading-text centered-text icon-heading">
+    <svg viewBox="0 0 24 24" role="presentation">
+      <path d="M21,16H3V4H21M21,2H3C1.89,2 1,2.89 1,4V16A2,2 0 0,0 3,18H10V20H8V22H16V20H14V18H21A2,2 0 0,0 23,16V4C23,2.89 22.1,2 21,2Z"
+            style="fill: rgb(61, 69, 77);"></path>
+    </svg><span class="inline-icon">{{coalesce @root.targetApplicationName "PingID Desktop"}}</span></h1>
+{{else ifEq device.type "PINGID_DESKTOP_GEN2"}}
+  <h1 class="heading-text centered-text icon-heading">
+    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M4.73169 5.30223V21.6983C4.73169 21.9334 4.87533 22.124 5.05252 22.124H26.9475C27.1247 22.124 27.2683 21.9334 27.2683 21.6983V5.30223C27.2683 5.06708 27.1247 4.87646 26.9475 4.87646H5.05252C4.87533 4.87646 4.73169 5.06708 4.73169 5.30223Z" fill="white" stroke="#3D454D" stroke-width="2" stroke-miterlimit="10"></path>
+      <path d="M26.9408 22.2556L30.9433 26.8057C31.0464 26.899 30.9997 27.124 30.877 27.124H1.12297C1.00027 27.124 0.953582 26.899 1.05673 26.8057L5.56949 22.2526C5.65202 22.1699 5.75626 22.124 5.86484 22.124H26.6563C26.7616 22.124 26.8637 22.1715 26.9408 22.2556Z" fill="white" stroke="#3D454D" stroke-width="2" stroke-miterlimit="10"></path>
+      <path fill-rule="evenodd" clip-rule="evenodd" d="M20.0953 15.653C18.9668 15.653 17.8233 14.8858 17.8233 13.42C17.8233 12.4991 17.1117 12.016 16.4097 12.016C16.07 12.0093 15.7414 12.1371 15.4952 12.3715C15.2209 12.646 15.0742 13.0577 15.0742 13.5682C15.0742 16.0757 16.3658 17.5484 19.141 18.2167C19.256 18.2434 19.3573 18.3116 19.4253 18.4082C19.4933 18.5048 19.5233 18.6233 19.5095 18.7407C19.4958 18.8581 19.4392 18.9664 19.3507 19.0446C19.2623 19.123 19.148 19.1658 19.0299 19.1651C18.992 19.1653 18.9542 19.1606 18.9175 19.1514C15.7296 18.3883 14.1186 16.5094 14.1186 13.5682C14.1186 12.5883 14.5038 12.0036 14.8261 11.6852C15.2508 11.2753 15.8197 11.049 16.4097 11.0553C17.9508 11.0553 18.7831 12.274 18.7831 13.42C18.7831 14.2998 19.4426 14.6923 20.0953 14.6923C20.4593 14.696 20.8124 14.5678 21.0893 14.3313C21.238 14.1911 21.3546 14.0205 21.4313 13.8309C21.5079 13.6414 21.5428 13.4376 21.5336 13.2334C21.5336 10.2826 18.8475 8.46134 16.359 8.46134C14.7136 8.46134 13.311 9.17913 12.4047 10.4802C11.3489 11.9982 11.1706 14.1104 11.911 16.1292C11.9443 16.246 11.9321 16.3711 11.8769 16.4792C11.8217 16.5872 11.7277 16.6705 11.6138 16.7121C11.4998 16.7536 11.3743 16.7504 11.2626 16.7032C11.1509 16.6559 11.0612 16.568 11.0116 16.4573C10.156 14.1433 10.3836 11.7017 11.619 9.92575C12.1513 9.16498 12.8616 8.54622 13.6879 8.12349C14.5141 7.70076 15.4312 7.48692 16.359 7.50062C18.1113 7.50062 19.7072 8.14842 20.8535 9.32324C21.8872 10.3663 22.4769 11.7698 22.4988 13.2389C22.5095 13.5784 22.4462 13.9162 22.3133 14.2288C22.1806 14.5413 21.9814 14.8213 21.7296 15.0491C21.2776 15.4448 20.6957 15.6599 20.0953 15.653ZM16.263 9.23266C18.3868 9.10365 20.5916 10.7547 20.5916 13.3006C20.5916 13.428 20.541 13.5501 20.4511 13.6403C20.361 13.7303 20.239 13.781 20.1117 13.781C19.9845 13.781 19.8624 13.7303 19.7724 13.6403C19.6824 13.5501 19.6318 13.428 19.6318 13.3006C19.6349 12.8688 19.5477 12.4412 19.3759 12.0452C19.2041 11.6491 18.9515 11.2934 18.6343 11.0008C18.3171 10.7082 17.9423 10.4853 17.5339 10.3462C17.1255 10.2072 16.6926 10.1551 16.263 10.1934C14.7643 10.3306 13.2753 11.3394 13.2081 13.4873C13.1327 15.8753 14.0171 17.5072 15.7529 18.6148C15.8405 18.6708 15.9075 18.7537 15.944 18.851C15.9805 18.9484 15.9844 19.0549 15.9552 19.1547C15.926 19.2545 15.8652 19.3422 15.782 19.4043C15.6988 19.4666 15.5977 19.5001 15.4938 19.5C15.4028 19.5005 15.3136 19.4742 15.2374 19.4245C13.226 18.1413 12.1757 16.1979 12.2483 13.4873C12.3224 10.7012 14.3119 9.35206 16.263 9.23266ZM16.008 13.4873C16.008 13.3599 16.0585 13.2376 16.1485 13.1476C16.2385 13.0576 16.3606 13.0069 16.4878 13.0069C16.6151 13.0069 16.7372 13.0576 16.8272 13.1476C16.9172 13.2376 16.9677 13.3599 16.9677 13.4873C16.9677 14.4013 17.279 15.1548 17.8672 15.6654C18.5939 16.2967 19.7114 16.5245 21.0989 16.3269C21.1613 16.3178 21.2249 16.3212 21.2859 16.3368C21.3471 16.3524 21.4044 16.3799 21.455 16.4176C21.5055 16.4555 21.548 16.5028 21.5802 16.557C21.6124 16.6112 21.6335 16.6714 21.6426 16.7338C21.6516 16.7963 21.6482 16.8599 21.6327 16.921C21.6171 16.9822 21.5897 17.0396 21.5519 17.0902C21.5141 17.1407 21.4668 17.1833 21.4126 17.2155C21.3585 17.2478 21.2984 17.2689 21.236 17.278C20.8841 17.3289 20.529 17.355 20.1734 17.3562C18.9764 17.3562 17.9796 17.0296 17.2392 16.3955C16.444 15.7038 16.008 14.6717 16.008 13.4886V13.4873Z" fill="#3D454D" stroke="#3D454D" stroke-width="0.2"></path>
+    </svg><span class="inline-icon">{{coalesce @root.targetApplicationName "PingId Desktop"}}</span></h1>
+{{else ifEq device.type "PINGID_MOBILE"}}
+  <h1 class="heading-text centered-text icon-heading">
+    <svg viewBox="0 0 24 24" role="presentation">
+      <path d="M16,18H7V4H16M11.5,22A1.5,1.5 0 0,1 10,20.5A1.5,1.5 0 0,1 11.5,19A1.5,1.5 0 0,1 13,20.5A1.5,1.5 0 0,1 11.5,22M15.5,1H7.5A2.5,2.5 0 0,0 5,3.5V20.5A2.5,2.5 0 0,0 7.5,23H15.5A2.5,2.5 0 0,0 18,20.5V3.5A2.5,2.5 0 0,0 15.5,1Z"
+            style="fill: rgb(61, 69, 77);"></path>
+    </svg><span class="inline-icon">{{coalesce @root.targetApplicationName "PingID Mobile"}}</span></h1>
 {{else}}
   <h1 class="heading">{{device.type}} {{headerEnd}}</h1>
 {{/ifEq}}
@@ -57,24 +82,42 @@
 {{else ifEq device.type "Android"}}
   <div class="text-block" data-id="textblock">
     <div class="text-block--overflow-wrap">
-      Enter the passcode displayed in your app
-      {{#if device.pushEnabled}}
-        or
-        <a data-mfa-selection="{{device.id}}" data-id="anchor">retry authentication</a>
+      {{#if @root.isPingIdMobile}}
+        {{#if device.pushEnabled}}
+          Enter the passcode displayed in your PingID Mobile app to authenticate.
+          <a data-mfa-selection="{{device.id}}" data-id="anchor">Retry Mobile</a>
+        {{else}}
+          Use the PingID Mobile app to get a one-time passcode and enter it here to authenticate.
+        {{/if}}
       {{else}}
-        to complete authentication.
+        Enter the passcode displayed in your app
+        {{#if device.pushEnabled}}
+          or
+          <a data-mfa-selection="{{device.id}}" data-id="anchor">retry authentication</a>
+        {{else}}
+          to complete authentication.
+        {{/if}}
       {{/if}}
     </div>
   </div>
 {{else ifEq device.type "iPhone"}}
   <div class="text-block" data-id="textblock">
     <div class="text-block--overflow-wrap">
-      Enter the passcode displayed in your app
-      {{#if device.pushEnabled}}
-        or
-        <a data-mfa-selection="{{device.id}}" data-id="anchor">retry authentication</a>
+      {{#if @root.isPingIdMobile}}
+        {{#if device.pushEnabled}}
+          Enter the passcode displayed in your PingID Mobile app to authenticate.
+          <a data-mfa-selection="{{device.id}}" data-id="anchor">Retry Mobile</a>
+        {{else}}
+          Use the PingID Mobile app to get a one-time passcode and enter it here to authenticate.
+        {{/if}}
       {{else}}
-        to complete authentication.
+        Enter the passcode displayed in your app
+        {{#if device.pushEnabled}}
+          or
+          <a data-mfa-selection="{{device.id}}" data-id="anchor">retry authentication</a>
+        {{else}}
+          to complete authentication.
+        {{/if}}
       {{/if}}
     </div>
   </div>
